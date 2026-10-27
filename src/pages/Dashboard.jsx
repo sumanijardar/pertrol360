@@ -39,7 +39,7 @@ export default function Dashboard({ stationFilter = 'ALL' }) {
   const [selectedVehicleId, setSelectedVehicleId] = useState(POLICE_VEHICLES[0].vehicle_id);
   const [selectedIncident, setSelectedIncident] = useState(null);
   const [activeAlertNotification, setActiveAlertNotification] = useState(
-    'CRITICAL INTERCEPT: Stolen Hyundai Creta (GJ01AB1234) detected by PATROL_VAN_01 at Navrangpura Cross Roads'
+    // 'CRITICAL INTERCEPT: Stolen Hyundai Creta (GJ01AB1234) detected by PATROL_VAN_01 at Navrangpura Cross Roads'
   );
 
   // Filtered vehicles
@@ -55,11 +55,11 @@ export default function Dashboard({ stationFilter = 'ALL' }) {
   };
 
   return (
-    <div className="container-fluid px-3 py-2 overflow-x-hidden">
+    <div className="container-fluid px-3 py-5 overflow-x-hidden ">
 
       {/* Live Threat Strobe Banner (Bootstrap 5 Alert) */}
       {activeAlertNotification && (
-        <div className="alert alert-danger d-flex align-items-center justify-content-between py-1.5 px-3 mb-2 shadow-sm border border-danger-subtle" role="alert">
+        <div className="alert alert-danger d-flex align-items-center justify-content-between py-1.5 px-3 mb-2 mt-5 shadow-sm border border-danger-subtle" role="alert">
           <div className="d-flex align-items-center gap-2">
             <span className="spinner-grow spinner-grow-sm text-danger" role="status" style={{ width: '8px', height: '8px' }}></span>
             <strong className="text-danger small">{activeAlertNotification}</strong>
@@ -85,7 +85,7 @@ export default function Dashboard({ stationFilter = 'ALL' }) {
       {/* ============================================================ */}
       {/* ROW 1: KEY PERFORMANCE INDICATORS (Balanced Responsive Grid) */}
       {/* ============================================================ */}
-      <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-5 g-2 mb-2">
+      <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-5 g-2 mb-5">
         {/* Card 1: Active Fleet */}
         <div className="col">
           <div className="card shadow-sm border-0 border-top border-3 border-primary h-100 p-2.5 bg-white kpi-count-card">
@@ -195,7 +195,7 @@ export default function Dashboard({ stationFilter = 'ALL' }) {
       {/* ============================================================ */}
       {/* ROW 2: TACTICAL GPS MAP & 4-CAMERA LIVE STREAM HUB          */}
       {/* ============================================================ */}
-      <div className="row g-2 mb-2 align-items-stretch">
+      <div className="row g-2 mb-5 align-items-stretch">
         {/* Tactical GPS Radar Grid */}
         <div className="col-12 col-xl-8 d-flex flex-column">
           <div className="card shadow-sm border-0 flex-grow-1 d-flex flex-column" style={{ height: '360px', minHeight: '360px' }}>
@@ -251,7 +251,7 @@ export default function Dashboard({ stationFilter = 'ALL' }) {
       {/* ============================================================ */}
       {/* ROW 3: TIMELINE & THREAT RATIO                               */}
       {/* ============================================================ */}
-      <div className="row g-3 mb-3 align-items-stretch">
+      <div className="row g-3 mb-5 align-items-stretch">
         {/* Chart 1: 24h Activity Timeline */}
         <div className="col-12 col-xl-8 d-flex flex-column">
           <div className="card shadow-sm border-0 flex-grow-1 d-flex flex-column">

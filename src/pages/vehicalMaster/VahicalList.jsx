@@ -450,7 +450,7 @@ export default function VahicalList() {
   };
 
   return (
-    <div className="container-fluid px-3 py-3">
+    <div className="container-fluid px-3 py-5">
 
       {/* Page Title & Breadcrumb (Bootstrap 5 Header) */}
       <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">

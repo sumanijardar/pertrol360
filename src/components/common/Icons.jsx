@@ -148,3 +148,44 @@ export const IconDownload = ({ size = 18, color = 'currentColor', className = ''
     <line x1="12" x2="12" y1="15" y2="3" />
   </svg>
 );
+
+export const IconZoomIn = ({ size = 18, color = 'currentColor', className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <circle cx="11" cy="11" r="8" />
+    <line x1="21" x2="16.65" y1="21" y2="16.65" />
+    <line x1="11" x2="11" y1="8" y2="14" />
+    <line x1="8" x2="14" y1="11" y2="11" />
+  </svg>
+);
+
+export const IconZoomOut = ({ size = 18, color = 'currentColor', className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <circle cx="11" cy="11" r="8" />
+    <line x1="21" x2="16.65" y1="21" y2="16.65" />
+    <line x1="8" x2="14" y1="11" y2="11" />
+  </svg>
+);
+
+export const IconMaximize2 = ({ size = 18, color = 'currentColor', className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <polyline points="15 3 21 3 21 9" />
+    <polyline points="9 21 3 21 3 15" />
+    <line x1="21" x2="14" y1="3" y2="10" />
+    <line x1="3" x2="10" y1="21" y2="14" />
+  </svg>
+);
+
+export const IconRotateCcw = ({ size = 18, color = 'currentColor', className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+    <path d="M3 3v5h5" />
+  </svg>
+);
+
+export const IconX = ({ size = 18, color = 'currentColor', className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <line x1="18" x2="6" y1="6" y2="18" />
+    <line x1="6" x2="18" y1="6" y2="18" />
+  </svg>
+);
+
