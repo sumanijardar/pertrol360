@@ -4,12 +4,14 @@ import VahicalList from '../pages/vehicalMaster/VahicalList';
 import PoliceMaster from '../pages/policeMaster/PoliceMaster';
 import VehicleCameras from '../pages/cameraMaster/VehicleCameras';
 import AnprWatchlist from '../pages/anpr/AnprWatchlist';
+import WantedSuspectList from '../pages/reports/WantedSuspectList';
 import {
   IconDashboard,
   IconCar,
   IconUsers,
   IconVideo,
-  IconShieldAlert
+  IconShieldAlert,
+  IconAlertTriangle
 } from '../components/common/Icons';
 
 /**
@@ -58,13 +60,21 @@ export const NAV_SECTIONS = [
   {
     title: 'Reports',
     items: [
+      // {
+      //   path: '/anpr-watchlist',
+      //   label: 'ANPR Watchlist',
+      //   icon: <IconShieldAlert size={17} />,
+      //   count: '7 Hits',
+      //   badgeClass: 'bg-danger',
+      //   element: AnprWatchlist
+      // },
       {
-        path: '/anpr-watchlist',
-        label: 'ANPR Watchlist',
-        icon: <IconShieldAlert size={17} />,
-        count: '7 Hits',
+        path: '/reports/wanted-suspects',
+        label: 'Wanted Suspects',
+        icon: <IconAlertTriangle size={17} />,
+        count: 'WANTED',
         badgeClass: 'bg-danger',
-        element: AnprWatchlist
+        element: WantedSuspectList
       }
     ]
   }

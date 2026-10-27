@@ -798,3 +798,112 @@ export const VEHICLE_CAMERA_MAPPINGS = [
   }
 ];
 
+// Wanted Suspects & Criminal Registry Dataset
+export const WANTED_SUSPECTS = [
+  {
+    suspect_id: 'SUS-2026-001',
+    full_name: 'Devendra K. Sharma',
+    alias: 'Deva Shooter',
+    fir_number: 'FIR-2026-NAV-00492',
+    crime_category: 'Armed Carjacking & Robbery',
+    threat_level: 'CRITICAL',
+    wanted_by_station: 'Navrangpura Police Station',
+    bounty_reward: '₹1,00,000',
+    associated_vehicle: 'GJ01AB1234',
+    associated_vehicle_desc: 'Hyundai Creta (White)',
+    last_seen: 'SG Highway Junction',
+    status: 'WANTED',
+    reported_date: '2026-10-18'
+  },
+  {
+    suspect_id: 'SUS-2026-002',
+    full_name: 'Rameshwar "Bhaiya" Yadav',
+    alias: 'Bhaiya Ji',
+    fir_number: 'FIR-2026-CRIME-8812',
+    crime_category: 'Interstate Syndicate & Arms Trafficking',
+    threat_level: 'CRITICAL',
+    wanted_by_station: 'Crime Branch HQ',
+    bounty_reward: '₹2,50,000',
+    associated_vehicle: 'MH02EK4455',
+    associated_vehicle_desc: 'Toyota Fortuner (Black)',
+    last_seen: 'SP Ring Road Toll Plaza',
+    status: 'WANTED',
+    reported_date: '2026-10-12'
+  },
+  {
+    suspect_id: 'SUS-2026-003',
+    full_name: 'Ketan M. Vaghela',
+    alias: 'Kittu Chopper',
+    fir_number: 'FIR-2026-VAS-01120',
+    crime_category: 'Motorcycle Theft & Snatching',
+    threat_level: 'HIGH',
+    wanted_by_station: 'Vastrapur Police Station',
+    bounty_reward: '₹25,000',
+    associated_vehicle: 'GJ27BH9090',
+    associated_vehicle_desc: 'KTM RC 390 (Orange/Black)',
+    last_seen: 'Vastrapur Lake Circle',
+    status: 'WANTED',
+    reported_date: '2026-10-24'
+  },
+  {
+    suspect_id: 'SUS-2026-004',
+    full_name: 'Aslam Pathan',
+    alias: 'Chhota Aslam',
+    fir_number: 'FIR-2026-EB-00381',
+    crime_category: 'Commercial Extortion & Assault',
+    threat_level: 'HIGH',
+    wanted_by_station: 'Ellis Bridge Police Station',
+    bounty_reward: '₹50,000',
+    associated_vehicle: 'GJ01DF7781',
+    associated_vehicle_desc: 'Eicher Pro Truck',
+    last_seen: 'Riverfront West Promenade',
+    status: 'WANTED',
+    reported_date: '2026-10-21'
+  },
+  {
+    suspect_id: 'SUS-2026-005',
+    full_name: 'Dharmesh "Chikna" Chauhan',
+    alias: 'Chikna',
+    fir_number: 'FIR-2026-SAT-00742',
+    crime_category: 'Cyber Financial Fraud & SIM Swap',
+    threat_level: 'MODERATE',
+    wanted_by_station: 'Satellite Police Station',
+    bounty_reward: 'None',
+    associated_vehicle: 'GJ01KB8823',
+    associated_vehicle_desc: 'Honda City (Silver)',
+    last_seen: 'Prahlad Nagar Corporate Road',
+    status: 'WANTED',
+    reported_date: '2026-10-15'
+  },
+  {
+    suspect_id: 'SUS-2026-006',
+    full_name: 'Prakash S. Marwadi',
+    alias: 'Pakiya',
+    fir_number: 'FIR-2026-NAV-00109',
+    crime_category: 'Liquor Smuggling & Bootlegging',
+    threat_level: 'MODERATE',
+    wanted_by_station: 'Navrangpura Police Station',
+    bounty_reward: '₹10,000',
+    associated_vehicle: 'GJ01XX9981',
+    associated_vehicle_desc: 'Mahindra Bolero',
+    last_seen: 'Sarkhej Toll Naka',
+    status: 'APPREHENDED',
+    reported_date: '2026-09-30'
+  },
+  {
+    suspect_id: 'SUS-2026-007',
+    full_name: 'Suraj "Billa" Thakor',
+    alias: 'Billa',
+    fir_number: 'FIR-2026-SGH-01402',
+    crime_category: 'Highway Robbery & Hijacking',
+    threat_level: 'CRITICAL',
+    wanted_by_station: 'SG Highway Police Station',
+    bounty_reward: '₹1,50,000',
+    associated_vehicle: 'GJ01G7712',
+    associated_vehicle_desc: 'Scorpio Classic',
+    last_seen: 'Gota Flyover Underpass',
+    status: 'WANTED',
+    reported_date: '2026-10-25'
+  }
+];
+
