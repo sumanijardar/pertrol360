@@ -5,13 +5,15 @@ import PoliceMaster from '../pages/policeMaster/PoliceMaster';
 import VehicleCameras from '../pages/cameraMaster/VehicleCameras';
 import AnprWatchlist from '../pages/anpr/AnprWatchlist';
 import WantedSuspectList from '../pages/reports/WantedSuspectList';
+import WeaponsDetectionList from '../pages/reports/WeaponsDetectionList';
 import {
   IconDashboard,
   IconCar,
   IconUsers,
   IconVideo,
   IconShieldAlert,
-  IconAlertTriangle
+  IconAlertTriangle,
+  IconCrosshair
 } from '../components/common/Icons';
 
 /**
@@ -75,6 +77,14 @@ export const NAV_SECTIONS = [
         count: 'WANTED',
         badgeClass: 'bg-danger',
         element: WantedSuspectList
+      },
+      {
+        path: '/reports/weapons-detection',
+        label: 'Weapons Detection',
+        icon: <IconCrosshair size={17} />,
+        // count: 'THREAT',
+        // badgeClass: 'bg-danger',
+        element: WeaponsDetectionList
       }
     ]
   }
