@@ -1,10 +1,17 @@
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import Footer from './Footer';
 
 export default function Layout({ children, onStationChange, currentStation = 'ALL' }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const location = useLocation();
+
+  // If on Login page, render clean full-screen view without admin shell
+  if (location.pathname === '/login') {
+    return <main className="w-100 min-vh-100">{children}</main>;
+  }
 
   return (
     <div

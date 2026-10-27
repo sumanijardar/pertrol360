@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 import { IconBell, IconAlertTriangle } from './common/Icons';
 
 export default function Header({ onToggleSidebar, isSidebarCollapsed, onSelectStation, currentStation = 'ALL' }) {
@@ -7,6 +8,25 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onSelectSt
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(3);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleSignOut = () => {
+    Swal.fire({
+      title: 'Sign Out of Command Session?',
+      text: 'Are you sure you want to end your active surveillance session?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#dc3545',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Yes, Sign Out'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        localStorage.removeItem('patrol360_authenticated');
+        localStorage.removeItem('patrol360_user');
+        navigate('/login');
+      }
+    });
+  };
 
   // Dynamic breadcrumb label from route
   const getPageTitle = (path) => {
@@ -141,6 +161,31 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onSelectSt
             </div>
           )}
         </div>
+
+        {/* Officer Profile & Sign Out Button */}
+        <div className="d-flex align-items-center gap-2 ps-2 border-start">
+          <div
+            className="rounded-circle d-flex align-items-center justify-content-center bg-primary text-white fw-bold shadow-sm"
+            style={{ width: '32px', height: '32px', fontSize: '11.5px', cursor: 'default' }}
+            title="Active Officer: ACP Vikram Solanki (Sector Commander)"
+          >
+            VS
+          </div>
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="btn btn-outline-danger btn-sm p-1 d-flex align-items-center justify-content-center"
+            title="Sign Out of Command Session"
+            style={{ width: '32px', height: '32px', borderRadius: '6px' }}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+          </button>
+        </div>
+
       </div>
     </header>
   );

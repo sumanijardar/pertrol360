@@ -9,6 +9,7 @@ import VehicleCameras from '../pages/cameraMaster/VehicleCameras';
 import WeaponsDetectionList from '../pages/reports/WeaponsDetectionList';
 import WantedSuspectList from '../pages/reports/WantedSuspectList';
 import SuspectDetail from '../pages/reports/SuspectDetail';
+import Login from '../pages/auth/Login';
 import {
   IconDashboard,
   IconCar,
@@ -115,6 +116,11 @@ export const NAV_SECTIONS = [
 
 // Any routes not shown directly in sidebar (e.g. details, legacy aliases)
 export const EXTRA_ROUTES = [
+  {
+    path: '/login',
+    label: 'Command Center Login',
+    element: Login
+  },
   {
     path: '/patrolling/:vehicleId',
     label: 'Vehicle Dedicated Surveillance',
