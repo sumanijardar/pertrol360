@@ -135,20 +135,6 @@ export const CAMERA_COLUMNS = [
     )
   },
   {
-    key: 'rtsp_url',
-    label: 'RTSP Stream URL',
-    align: 'left',
-    render: (row) => (
-      <div
-        className="font-mono text-muted text-truncate px-2 py-1 rounded bg-light border"
-        style={{ fontSize: '10.5px', maxWidth: '210px' }}
-        title={row.rtsp_url}
-      >
-        {row.rtsp_url}
-      </div>
-    )
-  },
-  {
     key: 'is_streaming',
     label: 'Stream Status',
     width: '120px',
@@ -932,18 +918,18 @@ export default function VehicleCameras() {
                     </div>
                   </div>
 
-                  {/* Section 3: AI Pipeline & RTSP Network */}
+                  {/* Section 3: AI Pipeline Engine */}
                   <div className="mb-4">
                     <div className="d-flex align-items-center gap-2 pb-2 mb-3 border-bottom">
                       <span className="text-primary d-inline-flex"><IconActivity size={16} /></span>
                       <span className="fw-bold small text-uppercase text-secondary" style={{ letterSpacing: '0.04em', fontSize: '11.5px' }}>
-                        3. AI Pipeline Engine & RTSP Network Stream
+                        3. AI Pipeline Engine
                       </span>
                     </div>
 
                     <div className="row g-3">
                       {/* AI Pipeline */}
-                      <div className="col-12 col-md-6">
+                      <div className="col-12">
                         <label className="form-label small fw-bold text-dark mb-1">Jetson Edge AI Model</label>
                         <select
                           className="form-select form-select-sm fw-semibold text-dark"
@@ -958,20 +944,6 @@ export default function VehicleCameras() {
                           <option value="Driver Drowsiness Alert">Driver Attention & Cabin Dashcam</option>
                           <option value="Multi-Object AI">Multi-Object Vehicle Classifier</option>
                         </select>
-                      </div>
-
-                      {/* RTSP Stream URL */}
-                      <div className="col-12 col-md-6">
-                        <label className="form-label small fw-bold text-dark mb-1">RTSP Stream Endpoint <span className="text-danger">*</span></label>
-                        <input
-                          type="text"
-                          className="form-control form-control-sm font-mono"
-                          required
-                          placeholder="e.g. rtsp://10.0.1.11:8554/channel_01"
-                          value={formData.rtsp_url}
-                          onChange={(e) => setFormData({ ...formData, rtsp_url: e.target.value })}
-                          style={{ borderColor: '#cbd5e1', fontSize: '12px' }}
-                        />
                       </div>
                     </div>
                   </div>

@@ -1,32 +1,73 @@
 import React from 'react';
 import Dashboard from '../pages/Dashboard';
+import PatrollingList from '../pages/patrolling/PatrollingList';
+import VehicleDetail from '../pages/patrolling/VehicleDetail';
 import VahicalList from '../pages/vehicalMaster/VahicalList';
 import PoliceMaster from '../pages/policeMaster/PoliceMaster';
+import CameraList from '../pages/cameraMaster/CameraList';
 import VehicleCameras from '../pages/cameraMaster/VehicleCameras';
-import AnprWatchlist from '../pages/anpr/AnprWatchlist';
-import WantedSuspectList from '../pages/reports/WantedSuspectList';
 import WeaponsDetectionList from '../pages/reports/WeaponsDetectionList';
+import WantedSuspectList from '../pages/reports/WantedSuspectList';
+import SuspectDetail from '../pages/reports/SuspectDetail';
 import {
   IconDashboard,
   IconCar,
   IconUsers,
+  IconCamera,
   IconVideo,
-  IconShieldAlert,
+  IconCrosshair,
   IconAlertTriangle,
-  IconCrosshair
+  IconSettings
 } from '../components/common/Icons';
 
 /**
  * =========================================================================
  * CENTRALIZED ROUTES & NAVIGATION CONFIGURATION
  * =========================================================================
- * To add a new page to the app:
- * 1. Create your component in src/pages/...
- * 2. Add an entry into `NAV_SECTIONS` below (or `EXTRA_ROUTES`).
- * That's it! It will automatically register the route and appear in Sidebar.
+ * Strictly ordered as requested:
+ * 1. Admin (Master Menu)
+ *    - User
+ *    - Vehicles
+ *    - Camera
+ *    - Camera Mapping [Vehicle + Camera (Multiple)]
+ * 2. Dashboard
+ * 3. Patrolling (5-grid column layout -> Dedicated Vehicle Live Cameras & Alerts)
+ * 4. Weapon Detection
  */
 
 export const NAV_SECTIONS = [
+  {
+    title: 'Admin',
+    isMasterMenu: true,
+    icon: <IconSettings size={16} />,
+    items: [
+      {
+        path: '/admin/users',
+        label: 'User',
+        icon: <IconUsers size={16} />,
+        element: PoliceMaster
+      },
+      {
+        path: '/admin/vehicles',
+        label: 'Vehicles',
+        icon: <IconCar size={16} />,
+        element: VahicalList
+      },
+      {
+        path: '/admin/cameras',
+        label: 'Camera',
+        icon: <IconCamera size={16} />,
+        element: CameraList
+      },
+      {
+        path: '/admin/camera-mapping',
+        label: 'Camera Mapping',
+        sublabel: 'Vehicle + Camera (Multiple)',
+        icon: <IconVideo size={16} />,
+        element: VehicleCameras
+      }
+    ]
+  },
   {
     title: 'Operations',
     items: [
@@ -36,68 +77,82 @@ export const NAV_SECTIONS = [
         icon: <IconDashboard size={17} />,
         element: Dashboard,
         badge: 'LIVE',
-        badgeClass: 'bg-success',
-        isDefault: true // Redirect / to /dashboard
+        badgeClass: 'bg-success-subtle text-success border border-success-subtle',
+        isDefault: true
       },
       {
-        path: '/vehicles',
-        label: 'Vehicle Master',
+        path: '/patrolling',
+        label: 'Patrolling',
         icon: <IconCar size={17} />,
-        element: VahicalList
-      },
-      {
-        path: '/vehicle-cameras',
-        label: 'Vehicle Cameras',
-        icon: <IconVideo size={17} />,
-        element: VehicleCameras
-      },
-      {
-        path: '/police-master',
-        label: 'Police Master',
-        icon: <IconUsers size={17} />,
-        element: PoliceMaster
+        element: PatrollingList,
+        badge: '5-GRID',
+        badgeClass: 'bg-primary-subtle text-primary border border-primary-subtle'
       }
     ]
   },
   {
-    title: 'Reports',
+    title: 'Intelligence Reports',
     items: [
-      // {
-      //   path: '/anpr-watchlist',
-      //   label: 'ANPR Watchlist',
-      //   icon: <IconShieldAlert size={17} />,
-      //   count: '7 Hits',
-      //   badgeClass: 'bg-danger',
-      //   element: AnprWatchlist
-      // },
       {
         path: '/reports/wanted-suspects',
         label: 'Wanted Suspects',
-        icon: <IconAlertTriangle size={17} />,
-        count: 'WANTED',
-        badgeClass: 'bg-danger',
+        icon: <IconAlertTriangle size={16} />,
+        badge: 'WANTED',
+        badgeClass: 'bg-danger-subtle text-danger border border-danger-subtle',
         element: WantedSuspectList
       },
       {
-        path: '/reports/weapons-detection',
-        label: 'Weapons Detection',
+        path: '/weapon-detection',
+        label: 'Weapon Detection',
         icon: <IconCrosshair size={17} />,
-        // count: 'THREAT',
-        // badgeClass: 'bg-danger',
-        element: WeaponsDetectionList
+        element: WeaponsDetectionList,
+        badge: 'THREAT',
+        badgeClass: 'bg-danger-subtle text-danger border border-danger-subtle'
       }
     ]
   }
 ];
 
-// Any routes not shown in sidebar (e.g. details, settings, auth)
-export const EXTRA_ROUTES = [];
+// Any routes not shown directly in sidebar (e.g. details, legacy aliases)
+export const EXTRA_ROUTES = [
+  {
+    path: '/patrolling/:vehicleId',
+    label: 'Vehicle Dedicated Surveillance',
+    element: VehicleDetail
+  },
+  {
+    path: '/reports/wanted-suspects/:suspectId',
+    label: 'Suspect Details & Dossier',
+    element: SuspectDetail
+  },
+  // Legacy aliases for backward compatibility
+  {
+    path: '/vehicles',
+    label: 'Vehicles Master',
+    element: VahicalList
+  },
+  {
+    path: '/police-master',
+    label: 'Police Master',
+    element: PoliceMaster
+  },
+  {
+    path: '/vehicle-cameras',
+    label: 'Vehicle Cameras',
+    element: VehicleCameras
+  },
+  {
+    path: '/reports/weapons-detection',
+    label: 'Weapons Detection',
+    element: WeaponsDetectionList
+  }
+];
 
 // Helper to flatten all routes for the router
 export const getAllRoutes = () => {
   const routes = [];
-  NAV_SECTIONS.forEach(section => {
-    section.items.forEach(item => {
+  NAV_SECTIONS.forEach((section) => {
+    section.items.forEach((item) => {
       routes.push(item);
     });
   });

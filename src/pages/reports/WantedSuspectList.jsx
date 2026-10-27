@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { WANTED_SUSPECTS } from '../../data/mockData';
 import {
@@ -24,7 +25,7 @@ export const SUSPECT_COLUMNS = [
     {
         key: 'index',
         label: '#',
-        width: '48px',
+        width: '44px',
         align: 'center',
         render: (_row, _idx, rowIndex) => (
             <span className="text-muted fw-semibold" style={{ fontSize: '12.5px' }}>
@@ -33,13 +34,47 @@ export const SUSPECT_COLUMNS = [
         )
     },
     {
-        key: 'suspect_id',
-        label: 'Suspect ID',
-        align: 'left',
+        key: 'photo_url',
+        label: 'Images',
+        width: '68px',
+        align: 'center',
         render: (row) => (
-            <span className="badge bg-danger-subtle text-danger border border-danger-subtle font-mono fw-bold" style={{ fontSize: '11px' }}>
-                {row.suspect_id}
-            </span>
+            <Link
+                to={`/reports/wanted-suspects/${row.suspect_id}`}
+                className="d-inline-block text-decoration-none"
+                title={`Click to view ${row.full_name}'s full profile dossier & address`}
+            >
+                <div
+                    className="position-relative rounded-circle overflow-hidden shadow-sm"
+                    style={{
+                        width: '42px',
+                        height: '42px',
+                        border: '2px solid #ef4444',
+                        backgroundColor: '#f1f5f9',
+                        transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+                        cursor: 'pointer'
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'scale(1.12)';
+                        e.currentTarget.style.boxShadow = '0 0 10px rgba(239, 68, 68, 0.45)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'scale(1)';
+                        e.currentTarget.style.boxShadow = '';
+                    }}
+                >
+                    <img
+                        src={row.photo_url}
+                        alt={row.full_name}
+                        className="w-100 h-100"
+                        style={{ objectFit: 'cover' }}
+                        onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=80';
+                        }}
+                    />
+                </div>
+            </Link>
         )
     },
     {
@@ -48,14 +83,24 @@ export const SUSPECT_COLUMNS = [
         align: 'left',
         render: (row) => (
             <div>
-                <div className="fw-bold text-dark" style={{ fontSize: '13px' }}>
+                <Link
+                    to={`/reports/wanted-suspects/${row.suspect_id}`}
+                    className="fw-bold text-dark text-decoration-none"
+                    style={{ fontSize: '13px' }}
+                    title="Click to view full criminal dossier"
+                >
                     {row.full_name}
+                </Link>
+                <div className="d-flex align-items-center gap-1.5 mt-0.5">
+                    <span className="badge bg-danger-subtle text-danger border border-danger-subtle font-mono fw-bold" style={{ fontSize: '10px', padding: '1px 5px' }}>
+                        {row.suspect_id}
+                    </span>
+                    {row.alias && (
+                        <span className="text-muted small" style={{ fontSize: '11px' }}>
+                            Alias: <strong className="text-secondary">{row.alias}</strong>
+                        </span>
+                    )}
                 </div>
-                {row.alias && (
-                    <div className="text-muted small" style={{ fontSize: '11px' }}>
-                        Alias: <strong className="text-secondary">{row.alias}</strong>
-                    </div>
-                )}
             </div>
         )
     },
@@ -214,40 +259,63 @@ export const SUSPECT_COLUMNS = [
             </button>
         )
     },
-    {
-        key: 'actions',
-        label: 'Dossier',
-        width: '90px',
-        align: 'center',
-        render: (row, _idx, _rowIndex, actions) => (
-            <div className="d-inline-flex align-items-center justify-content-center">
-                {/* View Dossier Button */}
-                <button
-                    type="button"
-                    className="btn btn-sm p-0 shadow-sm"
-                    title="View Criminal Dossier & Warrant"
-                    onClick={() => actions.onView(row)}
-                    style={{
-                        width: '28px',
-                        height: '28px',
-                        borderRadius: '6px',
-                        backgroundColor: '#0284c7',
-                        color: '#ffffff',
-                        border: 'none',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        transition: 'transform 0.15s ease'
-                    }}
-                >
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                        <circle cx="12" cy="12" r="3" />
-                    </svg>
-                </button>
-            </div>
-        )
-    }
+    // {
+    //     key: 'actions',
+    //     label: 'Actions',
+    //     width: '95px',
+    //     align: 'center',
+    //     render: (row, _idx, _rowIndex, actions) => (
+    //         <div className="d-inline-flex align-items-center justify-content-center gap-1.5">
+    //             {/* Open Dedicated Profile Page Link */}
+    //             {/* <Link
+    //                 to={`/reports/wanted-suspects/${row.suspect_id}`}
+    //                 className="btn btn-sm p-0 shadow-sm"
+    //                 title="Open Dedicated Suspect Page"
+    //                 style={{
+    //                     width: '28px',
+    //                     height: '28px',
+    //                     borderRadius: '6px',
+    //                     backgroundColor: '#dc3545',
+    //                     color: '#ffffff',
+    //                     display: 'inline-flex',
+    //                     alignItems: 'center',
+    //                     justifyContent: 'center',
+    //                     textDecoration: 'none'
+    //                 }}
+    //             >
+    //                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    //                     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+    //                     <polyline points="15 3 21 3 21 9" />
+    //                     <line x1="10" y1="14" x2="21" y2="3" />
+    //                 </svg>
+    //             </Link> */}
+
+    //             {/* View Dossier Modal Button */}
+    //             {/* <button
+    //                 type="button"
+    //                 className="btn btn-sm p-0 shadow-sm"
+    //                 title="Quick Dossier Preview"
+    //                 onClick={() => (actions && actions.onView ? actions.onView(row) : null)}
+    //                 style={{
+    //                     width: '28px',
+    //                     height: '28px',
+    //                     borderRadius: '6px',
+    //                     backgroundColor: '#0284c7',
+    //                     color: '#ffffff',
+    //                     border: 'none',
+    //                     display: 'inline-flex',
+    //                     alignItems: 'center',
+    //                     justifyContent: 'center'
+    //                 }}
+    //             >
+    //                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    //                     <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+    //                     <circle cx="12" cy="12" r="3" />
+    //                 </svg>
+    //             </button> */}
+    //         </div>
+    //     )
+    // }
 ];
 
 export default function WantedSuspectList() {
@@ -300,10 +368,22 @@ export default function WantedSuspectList() {
         setCurrentPage(1);
     }, [searchQuery, stationFilter, threatFilter, statusFilter]);
 
-    // Excel Columns Config - Automatically mapped from SUSPECT_COLUMNS
-    const suspectExcelColumns = SUSPECT_COLUMNS
-        .filter(c => c.key !== 'index' && c.key !== 'actions')
-        .map(c => ({ key: c.key, label: c.label }));
+    // Excel Columns Config - Explicitly defined with complete address & identity
+    const suspectExcelColumns = [
+        { key: 'suspect_id', label: 'Suspect ID' },
+        { key: 'full_name', label: 'Full Name' },
+        { key: 'alias', label: 'Alias' },
+        { key: 'crime_category', label: 'Offense' },
+        { key: 'fir_number', label: 'FIR Number' },
+        { key: 'threat_level', label: 'Threat Level' },
+        { key: 'wanted_by_station', label: 'Wanted By Station' },
+        { key: 'bounty_reward', label: 'Bounty' },
+        { key: 'associated_vehicle', label: 'Vehicle Plate' },
+        { key: 'permanent_address', label: 'Permanent Address' },
+        { key: 'current_address', label: 'Current Address' },
+        { key: 'last_seen', label: 'Last Known Location' },
+        { key: 'status', label: 'Status' }
+    ];
 
     // -------------------------------------------------------------------------
     // EXCEL / CSV IMPORT HANDLER
@@ -773,10 +853,19 @@ export default function WantedSuspectList() {
                                     <div className="d-flex align-items-center justify-content-between flex-wrap gap-3">
                                         <div className="d-flex align-items-center gap-3">
                                             <div
-                                                className="rounded-circle d-flex align-items-center justify-content-center bg-danger text-white fw-bold shadow-sm"
-                                                style={{ width: '52px', height: '52px', fontSize: '20px' }}
+                                                className="rounded-circle overflow-hidden d-flex align-items-center justify-content-center bg-danger text-white fw-bold shadow-sm"
+                                                style={{ width: '56px', height: '56px', border: '2px solid #ef4444', flexShrink: 0 }}
                                             >
-                                                {selectedSuspect.full_name.charAt(0)}
+                                                {selectedSuspect.photo_url ? (
+                                                    <img
+                                                        src={selectedSuspect.photo_url}
+                                                        alt={selectedSuspect.full_name}
+                                                        className="w-100 h-100"
+                                                        style={{ objectFit: 'cover' }}
+                                                    />
+                                                ) : (
+                                                    selectedSuspect.full_name.charAt(0)
+                                                )}
                                             </div>
                                             <div>
                                                 <div className="fw-bold text-white fs-5 mb-0.5">{selectedSuspect.full_name}</div>
@@ -886,6 +975,24 @@ export default function WantedSuspectList() {
                                     </div>
                                 </div>
 
+                                {/* Residential Address Section */}
+                                <div className="p-3 rounded-3 border mb-3" style={{ backgroundColor: '#f8fafc', borderColor: '#e2e8f0' }}>
+                                    <div className="d-flex align-items-center gap-1.5 mb-1.5 text-danger">
+                                        <span>📍</span>
+                                        <span className="text-muted small fw-bold text-uppercase" style={{ fontSize: '11px' }}>
+                                            Residential Address & Hideout Information
+                                        </span>
+                                    </div>
+                                    <div className="fw-semibold text-dark small" style={{ lineHeight: '1.5' }}>
+                                        {selectedSuspect.permanent_address || 'No permanent address recorded in file.'}
+                                    </div>
+                                    {selectedSuspect.current_address && (
+                                        <div className="mt-1.5 text-muted small" style={{ fontSize: '11.5px' }}>
+                                            <strong>Current / Alternate:</strong> {selectedSuspect.current_address}
+                                        </div>
+                                    )}
+                                </div>
+
                                 {/* Tactical Dispatch Notice */}
                                 <div className="p-3 rounded-3 border bg-warning-subtle border-warning-subtle text-dark small">
                                     <div className="fw-bold d-flex align-items-center gap-1.5 mb-1 text-dark">
@@ -901,16 +1008,21 @@ export default function WantedSuspectList() {
 
                             {/* Modal Footer */}
                             <div className="modal-footer py-2.5 px-4 border-top d-flex justify-content-between align-items-center" style={{ backgroundColor: '#f8fafc' }}>
-                                <span className="text-muted small" style={{ fontSize: '11.5px' }}>
-                                    Central Crime Intelligence Unit & ANPR Integration
-                                </span>
                                 <button
                                     type="button"
-                                    className="btn btn-secondary btn-sm px-4 fw-semibold shadow-none"
+                                    className="btn btn-secondary btn-sm px-3 fw-semibold shadow-none"
                                     onClick={() => setIsDossierModalOpen(false)}
                                 >
-                                    Close Dossier
+                                    Close
                                 </button>
+                                <Link
+                                    to={`/reports/wanted-suspects/${selectedSuspect.suspect_id}`}
+                                    className="btn btn-danger btn-sm px-3 fw-bold d-inline-flex align-items-center gap-1.5 shadow-sm text-decoration-none"
+                                    onClick={() => setIsDossierModalOpen(false)}
+                                >
+                                    <span>Open Dedicated Suspect Page</span>
+                                    <span>→</span>
+                                </Link>
                             </div>
 
                         </div>
