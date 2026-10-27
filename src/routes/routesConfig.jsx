@@ -2,11 +2,13 @@ import React from 'react';
 import Dashboard from '../pages/Dashboard';
 import VahicalList from '../pages/vehicalMaster/VahicalList';
 import PoliceMaster from '../pages/policeMaster/PoliceMaster';
+import VehicleCameras from '../pages/cameraMaster/VehicleCameras';
 import AnprWatchlist from '../pages/anpr/AnprWatchlist';
 import {
   IconDashboard,
   IconCar,
   IconUsers,
+  IconVideo,
   IconShieldAlert
 } from '../components/common/Icons';
 
@@ -38,6 +40,12 @@ export const NAV_SECTIONS = [
         label: 'Vehicle Master',
         icon: <IconCar size={17} />,
         element: VahicalList
+      },
+      {
+        path: '/vehicle-cameras',
+        label: 'Vehicle Cameras',
+        icon: <IconVideo size={17} />,
+        element: VehicleCameras
       },
       {
         path: '/police-master',
