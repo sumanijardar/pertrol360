@@ -4,8 +4,10 @@ import { NAV_SECTIONS } from '../routes/routesConfig';
 import {
   IconChevronDown,
   IconChevronRight,
-  IconSettings
+  IconSettings,
+  IconLogout
 } from './common/Icons';
+import { logout } from '../services/api';
 
 export default function Sidebar({ isCollapsed, onToggleCollapse }) {
   const location = useLocation();
@@ -151,9 +153,8 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }) {
                 {/* Sub-items list with sleek tree guide line */}
                 {(!isCollapsed ? isAdminOpen : true) && (
                   <div
-                    className={`d-flex flex-column gap-1 ${
-                      !isCollapsed ? 'ms-2 ps-2 border-start border-2 border-secondary-subtle' : ''
-                    }`}
+                    className={`d-flex flex-column gap-1 ${!isCollapsed ? 'ms-2 ps-2 border-start border-2 border-secondary-subtle' : ''
+                      }`}
                   >
                     {sec.items.map((item) => {
                       const isActive =
@@ -167,11 +168,10 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }) {
                           key={item.path}
                           onClick={() => navigate(item.path)}
                           title={isCollapsed ? `${item.label} ${item.sublabel ? `(${item.sublabel})` : ''}` : undefined}
-                          className={`btn btn-sm d-flex align-items-center w-100 text-start border-0 ${
-                            isActive
-                              ? 'bg-primary-subtle text-primary fw-bold shadow-xs'
-                              : 'text-secondary-emphasis fw-semibold'
-                          }`}
+                          className={`btn btn-sm d-flex align-items-center w-100 text-start border-0 ${isActive
+                            ? 'bg-primary-subtle text-primary fw-bold shadow-xs'
+                            : 'text-secondary-emphasis fw-semibold'
+                            }`}
                           style={{
                             padding: isCollapsed ? '8px 0' : '6px 10px',
                             justifyContent: isCollapsed ? 'center' : 'space-between',
@@ -234,11 +234,10 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }) {
                     key={item.path}
                     onClick={() => navigate(item.path)}
                     title={isCollapsed ? item.label : undefined}
-                    className={`btn btn-sm d-flex align-items-center w-100 text-start border-0 ${
-                      isActive
-                        ? 'bg-primary-subtle text-primary fw-bold shadow-xs'
-                        : 'text-dark fw-semibold'
-                    }`}
+                    className={`btn btn-sm d-flex align-items-center w-100 text-start border-0 ${isActive
+                      ? 'bg-primary-subtle text-primary fw-bold shadow-xs'
+                      : 'text-dark fw-semibold'
+                      }`}
                     style={{
                       padding: isCollapsed ? '8px 0' : '7.5px 10px',
                       justifyContent: isCollapsed ? 'center' : 'space-between',
@@ -274,7 +273,7 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }) {
       </div>
 
       {/* 3. Officer Status Footer */}
-      <div
+      {/* <div
         className="border-top bg-light d-flex align-items-center gap-2"
         style={{
           padding: isCollapsed ? '10px 6px' : '10px 12px',
@@ -299,7 +298,41 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }) {
             </span>
           </div>
         )}
+      </div> */}
+
+      {/* 3. Logout Footer */}
+      <div
+        className="border-top bg-light d-flex align-items-center gap-2"
+        style={{
+          padding: isCollapsed ? '10px 6px' : '10px 12px',
+          justifyContent: isCollapsed ? 'center' : 'flex-start',
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => {
+            logout();
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            sessionStorage.clear();
+            navigate('/login');
+          }}
+          title="Logout"
+          className="btn btn-outline-danger btn-sm d-flex align-items-center gap-2"
+          style={{
+            width: isCollapsed ? '36px' : '100%',
+            justifyContent: 'center',
+            fontSize: '12px',
+            fontWeight: 600,
+          }}
+        >
+          <IconLogout size={16} />
+
+          {!isCollapsed && <span>Logout</span>}
+        </button>
       </div>
+
+
     </aside>
   );
 }

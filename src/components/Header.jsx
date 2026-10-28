@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import Swal from 'sweetalert2';
 import { IconBell, IconAlertTriangle } from './common/Icons';
+import { getCurrentUser } from '../services/api';
 
 export default function Header({ onToggleSidebar, isSidebarCollapsed, onSelectStation, currentStation = 'ALL' }) {
   const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString());
@@ -10,23 +10,24 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onSelectSt
   const location = useLocation();
   const navigate = useNavigate();
 
-  const handleSignOut = () => {
-    Swal.fire({
-      title: 'Sign Out of Command Session?',
-      text: 'Are you sure you want to end your active surveillance session?',
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonColor: '#dc3545',
-      cancelButtonColor: '#6c757d',
-      confirmButtonText: 'Yes, Sign Out'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        localStorage.removeItem('patrol360_authenticated');
-        localStorage.removeItem('patrol360_user');
-        navigate('/login');
-      }
-    });
-  };
+  const [user, setUser] = useState(() => getCurrentUser());
+
+  useEffect(() => {
+    setUser(getCurrentUser());
+  }, []);
+
+  const userName = user?.name || user?.officer_name || user?.email?.split('@')[0] || 'Admin Officer';
+  const userRank = user?.rank || (user?.role === 'admin' ? 'Super Admin' : 'Sector Commander');
+  const userStation = user?.police_station || '';
+  const userBadge = user?.badge_number ? `[${user.badge_number}]` : '';
+
+  // Generate 2-letter initials dynamically
+  const initials = userName
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(p => p[0]?.toUpperCase())
+    .join('') || 'AO';
 
   // Dynamic breadcrumb label from route
   const getPageTitle = (path) => {
@@ -111,7 +112,7 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onSelectSt
         </div>
 
         {/* Notifications Dropdown */}
-        <div className="dropdown position-relative">
+        {/* <div className="dropdown position-relative">
           <button
             onClick={() => {
               setShowNotifications(!showNotifications);
@@ -160,30 +161,71 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onSelectSt
               </div>
             </div>
           )}
-        </div>
+        </div> */}
 
-        {/* Officer Profile & Sign Out Button */}
-        <div className="d-flex align-items-center gap-2 ps-2 border-start">
-          <div
-            className="rounded-circle d-flex align-items-center justify-content-center bg-primary text-white fw-bold shadow-sm"
-            style={{ width: '32px', height: '32px', fontSize: '11.5px', cursor: 'default' }}
-            title="Active Officer: ACP Vikram Solanki (Sector Commander)"
-          >
-            VS
+        {/* Highlighted Officer Command Profile */}
+        <div
+          className="d-flex align-items-center gap-2 ps-2 pe-2 py-1 rounded-pill border shadow-xs"
+          style={{
+            background: 'linear-gradient(135deg, rgba(248, 250, 252, 0.95) 0%, rgba(241, 245, 249, 0.95) 100%)',
+            borderColor: '#e2e8f0',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
+            transition: 'all 0.2s ease',
+            cursor: 'default'
+          }}
+          title={`Active Officer: ${userRank} ${userName} ${userBadge} ${userStation ? `• Station: ${userStation}` : ''}`}
+        >
+          <div className="d-none d-md-flex flex-column text-end ps-1" style={{ lineHeight: 1.15 }}>
+            <div className="d-flex align-items-center justify-content-end gap-1">
+              <span className="fw-bold text-dark" style={{ fontSize: '12px', letterSpacing: '-0.2px' }}>
+                {userName}
+              </span>
+              <span
+                className="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-1.5 py-0"
+                style={{ fontSize: '9px', fontWeight: 600 }}
+              >
+                On Duty
+              </span>
+            </div>
+            <div className="d-flex align-items-center justify-content-end gap-1">
+              <span className="text-primary fw-semibold" style={{ fontSize: '10px' }}>
+                {userRank}
+              </span>
+              {userBadge && (
+                <span className="text-muted font-mono" style={{ fontSize: '9.5px' }}>
+                  {userBadge}
+                </span>
+              )}
+            </div>
           </div>
-          <button
-            type="button"
-            onClick={handleSignOut}
-            className="btn btn-outline-danger btn-sm p-1 d-flex align-items-center justify-content-center"
-            title="Sign Out of Command Session"
-            style={{ width: '32px', height: '32px', borderRadius: '6px' }}
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-              <polyline points="16 17 21 12 16 7" />
-              <line x1="21" y1="12" x2="9" y2="12" />
-            </svg>
-          </button>
+
+          <div className="position-relative">
+            <div
+              className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm"
+              style={{
+                width: '34px',
+                height: '34px',
+                fontSize: '12px',
+                background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+                border: '2px solid #ffffff',
+                boxShadow: '0 2px 6px rgba(30, 64, 175, 0.25)'
+              }}
+            >
+              {initials}
+            </div>
+            <span
+              className="position-absolute rounded-circle bg-success"
+              style={{
+                width: '9px',
+                height: '9px',
+                bottom: '0px',
+                right: '0px',
+                border: '2px solid #ffffff',
+                boxShadow: '0 0 0 1px rgba(34, 197, 94, 0.4)'
+              }}
+              title="Surveillance Session Active"
+            />
+          </div>
         </div>
 
       </div>
