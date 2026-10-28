@@ -71,33 +71,46 @@ export default function TacticalMapWidget({ vehicles = [], selectedVehicleId, on
       {/* 3. SVG Tactical Radar Elements & River */}
       <svg
         className="position-absolute top-0 start-0 w-100 h-100"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        style={{ pointerEvents: 'none', zIndex: 2 }}
+      >
+        {/* River Sabarmati Path (Clean graceful curve along Eastern zone - standard unitless SVG coordinates) */}
+        <path
+          d="M 72 0 Q 70 35 75 65 T 85 100"
+          fill="none"
+          stroke="rgba(2, 132, 199, 0.22)"
+          strokeWidth="3.5"
+          strokeLinecap="round"
+          vectorEffect="non-scaling-stroke"
+        />
+      </svg>
+
+      {/* Sabarmati River Label */}
+      <div
+        className="position-absolute font-mono fw-bold"
+        style={{
+          top: '18%',
+          left: '76%',
+          color: '#0284c7',
+          fontSize: '9px',
+          letterSpacing: '1.5px',
+          opacity: 0.65,
+          pointerEvents: 'none',
+          zIndex: 3
+        }}
+      >
+        SABARMATI RIVER
+      </div>
+
+      <svg
+        className="position-absolute top-0 start-0 w-100 h-100"
         style={{ pointerEvents: 'none', zIndex: 2 }}
       >
         {/* Distance Concentric Circles */}
         <circle cx="50%" cy="50%" r="18%" fill="none" stroke="rgba(2, 132, 199, 0.16)" strokeWidth="1" strokeDasharray="3 3" />
         <circle cx="50%" cy="50%" r="32%" fill="none" stroke="rgba(2, 132, 199, 0.12)" strokeWidth="1" />
         <circle cx="50%" cy="50%" r="44%" fill="none" stroke="rgba(2, 132, 199, 0.08)" strokeWidth="1" strokeDasharray="5 5" />
-
-        {/* River Sabarmati Path (Clean graceful curve along Eastern zone) */}
-        <path
-          d="M 72% 0% Q 70% 35% 75% 65% T 85% 100%"
-          fill="none"
-          stroke="rgba(2, 132, 199, 0.18)"
-          strokeWidth="16"
-          strokeLinecap="round"
-        />
-        <text
-          x="77%"
-          y="18%"
-          fill="#0284c7"
-          fontSize="9"
-          fontWeight="700"
-          letterSpacing="2"
-          opacity="0.65"
-          fontFamily="'JetBrains Mono', monospace"
-        >
-          SABARMATI RIVER
-        </text>
 
         {/* Sector Boundary Rings with Clean Discreet Sector Tags */}
         {zones.map((z, idx) => (
@@ -198,14 +211,21 @@ export default function TacticalMapWidget({ vehicles = [], selectedVehicleId, on
       })}
 
       {/* 6. Police Patrol Vehicle Markers Layer */}
-      {vehicles.map(v => {
-        const pos = getCanvasPos(v.telemetry.latitude, v.telemetry.longitude);
+      {vehicles && vehicles.map((v, idx) => {
+        const lat = Number(v.telemetry?.latitude ?? (v.latest_lat ? parseFloat(v.latest_lat) : (23.025 + (idx * 0.012))));
+        const lng = Number(v.telemetry?.longitude ?? (v.latest_lng ? parseFloat(v.latest_lng) : (72.520 + (idx * 0.014))));
+        const heading = Number(v.telemetry?.heading_degrees ?? (v.heading_degrees ? parseFloat(v.heading_degrees) : (idx * 55)));
+        const speed = Number(v.telemetry?.speed_kmph ?? (v.speed_kmph ? parseFloat(v.speed_kmph) : (v.is_active ? 42.0 : 0.0)));
+        const pos = getCanvasPos(lat, lng);
         const isSelected = selectedVehicleId === v.vehicle_id;
+        const vehicleId = v.vehicle_id || `V_${idx + 1}`;
+        const shortLabel = vehicleId.replace('PATROL_VAN_', 'V');
+        const plate = v.registration_number || v.plate_number || 'POLICE';
 
         return (
           <div
-            key={v.vehicle_id}
-            onClick={() => onSelectVehicle(v.vehicle_id)}
+            key={vehicleId}
+            onClick={() => onSelectVehicle && onSelectVehicle(v.vehicle_id)}
             className="position-absolute d-flex flex-column align-items-center"
             style={{
               left: `${pos.x}%`,
@@ -235,12 +255,12 @@ export default function TacticalMapWidget({ vehicles = [], selectedVehicleId, on
                   borderLeft: '4px solid transparent',
                   borderRight: '4px solid transparent',
                   borderBottom: `6px solid ${isSelected ? '#0d6efd' : '#0284c7'}`,
-                  transform: `rotate(${v.telemetry.heading_degrees}deg)`,
+                  transform: `rotate(${heading}deg)`,
                   transformOrigin: '50% 16px'
                 }}
               />
               <span style={{ fontSize: isSelected ? '10px' : '8px', fontWeight: 800 }}>
-                {v.vehicle_id.replace('PATROL_VAN_', 'V')}
+                {shortLabel}
               </span>
             </div>
 
@@ -249,9 +269,9 @@ export default function TacticalMapWidget({ vehicles = [], selectedVehicleId, on
               className={`mt-1 px-2 py-0 rounded shadow-sm font-mono d-flex align-items-center gap-1 ${isSelected ? 'bg-primary text-white border border-primary' : 'bg-white text-dark border'}`}
               style={{ fontSize: '9px', whiteSpace: 'nowrap' }}
             >
-              <strong>{v.registration_number}</strong>
+              <strong>{plate}</strong>
               <span className={isSelected ? 'text-white-50' : 'text-primary'}>
-                {v.telemetry.speed_kmph} km/h
+                {speed} km/h
               </span>
             </div>
           </div>

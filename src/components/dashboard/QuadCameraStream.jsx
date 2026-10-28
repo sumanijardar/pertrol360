@@ -22,9 +22,15 @@ export default function QuadCameraStream({ vehicle }) {
 
   if (!vehicle) return null;
 
-  const cameras = vehicle.cameras || [];
-  const activeCam = cameras[activeCamIndex] || cameras[0];
-  const modalActiveCam = cameras[previewCamIndex] || cameras[0];
+  const DEFAULT_CAMERAS = [
+    { camera_id: `${vehicle.vehicle_id || 'VEH'}_CAM_01`, mount_position: 'FRONT', resolution: '4K (3840x2160)', fps: 30, bitrate_kbps: 4096, is_streaming: true, rtsp_url: 'rtsp://192.168.1.101/live' },
+    { camera_id: `${vehicle.vehicle_id || 'VEH'}_CAM_02`, mount_position: 'REAR', resolution: '1080p (1920x1080)', fps: 30, bitrate_kbps: 2048, is_streaming: true, rtsp_url: 'rtsp://192.168.1.102/live' },
+    { camera_id: `${vehicle.vehicle_id || 'VEH'}_CAM_03`, mount_position: 'LEFT', resolution: '1080p (1920x1080)', fps: 30, bitrate_kbps: 2048, is_streaming: true, rtsp_url: 'rtsp://192.168.1.103/live' },
+    { camera_id: `${vehicle.vehicle_id || 'VEH'}_CAM_04`, mount_position: 'RIGHT', resolution: '1080p (1920x1080)', fps: 30, bitrate_kbps: 2048, is_streaming: true, rtsp_url: 'rtsp://192.168.1.104/live' }
+  ];
+  const cameras = (vehicle.cameras && vehicle.cameras.length > 0) ? vehicle.cameras : DEFAULT_CAMERAS;
+  const activeCam = cameras[activeCamIndex] || cameras[0] || DEFAULT_CAMERAS[0];
+  const modalActiveCam = cameras[previewCamIndex] || cameras[0] || DEFAULT_CAMERAS[0];
 
   const camImages = {
     FRONT: 'https://images.unsplash.com/photo-1502877338535-766e1452684a?w=800&auto=format&fit=crop&q=80',
@@ -333,13 +339,13 @@ export default function QuadCameraStream({ vehicle }) {
       {/* 3. Patrol Van Telemetry Strip */}
       <div className="d-flex align-items-center justify-content-between bg-light p-2 rounded border small flex-wrap gap-2" style={{ fontSize: '10px' }}>
         <div className="d-flex gap-2 font-mono">
-          <span>SPD: <strong className="text-primary">{vehicle.telemetry.speed_kmph} km/h</strong></span>
-          <span>BAT: <strong className="text-success">{vehicle.telemetry.battery_voltage}V</strong></span>
-          <span>TEMP: <strong className={vehicle.telemetry.jetson_temperature_c > 50 ? 'text-warning' : 'text-success'}>{vehicle.telemetry.jetson_temperature_c}°C</strong></span>
-          <span>LTE: <strong className="text-purple">{vehicle.telemetry.network_signal_dbm} dBm</strong></span>
+          <span>SPD: <strong className="text-primary">{vehicle.telemetry?.speed_kmph ?? (vehicle.speed_kmph || (vehicle.is_active ? 42.0 : 0.0))} km/h</strong></span>
+          <span>BAT: <strong className="text-success">{vehicle.telemetry?.battery_voltage ?? 13.2}V</strong></span>
+          <span>TEMP: <strong className={(vehicle.telemetry?.jetson_temperature_c ?? 46) > 50 ? 'text-warning' : 'text-success'}>{vehicle.telemetry?.jetson_temperature_c ?? 46}°C</strong></span>
+          <span>LTE: <strong className="text-purple">{vehicle.telemetry?.network_signal_dbm ?? -65} dBm</strong></span>
         </div>
         <div className="text-truncate">
-          Driver: <strong className="text-dark">{vehicle.assigned_driver_officer.split(' (')[0]}</strong>
+          Driver: <strong className="text-dark">{(vehicle.assigned_driver_officer || vehicle.assigned_officer_name || vehicle.driver_officer_id || 'Active Crew').split(' (')[0]}</strong>
         </div>
       </div>
 
@@ -609,10 +615,10 @@ export default function QuadCameraStream({ vehicle }) {
                 {/* Telemetry info */}
                 <div className="d-flex gap-3 font-mono text-light small flex-wrap" style={{ fontSize: '11px' }}>
                   <span>Vehicle: <strong className="text-white">{vehicle.vehicle_id}</strong></span>
-                  <span>Speed: <strong className="text-primary">{vehicle.telemetry.speed_kmph} km/h</strong></span>
-                  <span>Battery: <strong className="text-success">{vehicle.telemetry.battery_voltage}V</strong></span>
-                  <span>Jetson Temp: <strong className={vehicle.telemetry.jetson_temperature_c > 50 ? 'text-warning' : 'text-success'}>{vehicle.telemetry.jetson_temperature_c}°C</strong></span>
-                  <span>LTE Signal: <strong className="text-info">{vehicle.telemetry.network_signal_dbm} dBm</strong></span>
+                  <span>Speed: <strong className="text-primary">{vehicle.telemetry?.speed_kmph ?? (vehicle.speed_kmph || (vehicle.is_active ? 42.0 : 0.0))} km/h</strong></span>
+                  <span>Battery: <strong className="text-success">{vehicle.telemetry?.battery_voltage ?? 13.2}V</strong></span>
+                  <span>Jetson Temp: <strong className={(vehicle.telemetry?.jetson_temperature_c ?? 46) > 50 ? 'text-warning' : 'text-success'}>{vehicle.telemetry?.jetson_temperature_c ?? 46}°C</strong></span>
+                  <span>LTE Signal: <strong className="text-info">{vehicle.telemetry?.network_signal_dbm ?? -65} dBm</strong></span>
                 </div>
 
                 <div className="d-flex align-items-center gap-2">

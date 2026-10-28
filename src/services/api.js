@@ -358,5 +358,23 @@ export async function deleteCameraApi(id) {
   return response.data;
 }
 
+/* ==========================================================================
+   DASHBOARD STATS APIS (/api/dashboard/stats)
+   ========================================================================== */
+
+/**
+ * Fetch real-time dashboard statistics and metrics
+ * @returns {Promise<object>}
+ */
+export async function getDashboardStatsApi() {
+  try {
+    const response = await api.get('/api/dashboard/stats');
+    return response.data;
+  } catch (error) {
+    console.error('getDashboardStatsApi error:', error);
+    throw error;
+  }
+}
+
 export default api;
 
