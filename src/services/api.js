@@ -308,9 +308,55 @@ export async function deleteVehicleApi(id) {
   return response.data;
 }
 
+/* ==========================================================================
+   CAMERA MASTER APIS (/api/cameras)
+   ========================================================================== */
 
+/**
+ * Fetch list of cameras from backend (optionally filtered by vehicle_id)
+ * @param {object} params - { vehicle_id }
+ */
+export async function getCamerasApi(params = {}) {
+  const response = await api.get('/api/cameras', { params });
+  return response.data;
+}
 
+/**
+ * Fetch single camera by ID or camera_id
+ * @param {string|number} id
+ */
+export async function getCameraByIdApi(id) {
+  const response = await api.get(`/api/cameras/${id}`);
+  return response.data;
+}
 
+/**
+ * Create/Register new camera
+ * @param {object} cameraData
+ */
+export async function createCameraApi(cameraData) {
+  const response = await api.post('/api/cameras', cameraData);
+  return response.data;
+}
+
+/**
+ * Update camera details
+ * @param {string|number} id
+ * @param {object} cameraData
+ */
+export async function updateCameraApi(id, cameraData) {
+  const response = await api.put(`/api/cameras/${id}`, cameraData);
+  return response.data;
+}
+
+/**
+ * Delete/Decommission camera
+ * @param {string|number} id
+ */
+export async function deleteCameraApi(id) {
+  const response = await api.delete(`/api/cameras/${id}`);
+  return response.data;
+}
 
 export default api;
 
