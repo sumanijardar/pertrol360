@@ -1,28 +1,46 @@
 import React, { useState } from 'react';
 
-export default function CrowdHourlyChart() {
+export default function CrowdHourlyChart({ crowdAlerts = 0, threshold = 40 }) {
   const [hoveredIdx, setHoveredIdx] = useState(null);
 
-  const crowdData = [
-    { time: '08:00', count: 28, exceeded: false, location: 'Navrangpura Circle' },
-    { time: '08:30', count: 35, exceeded: false, location: 'Vastrapur Lake' },
-    { time: '09:00', count: 54, exceeded: true, location: 'SG Highway BRTS' },
-    { time: '09:30', count: 68, exceeded: true, location: 'Satellite Crossroads' },
-    { time: '10:00', count: 86, exceeded: true, location: 'University Ground' },
-    { time: '10:15', count: 124, exceeded: true, location: 'SG Highway Transit' },
-    { time: '10:30', count: 42, exceeded: true, location: 'Ellis Bridge' },
-    { time: '11:00', count: 31, exceeded: false, location: 'Law Garden' }
-  ];
+  const numAlerts = Number(crowdAlerts || 0);
 
-  const maxVal = 140;
-  const threshold = 40;
+  // Dynamically generate hourly crowd points reflecting actual alerts from API
+  const crowdData = React.useMemo(() => {
+    const slots = [
+      { time: '08:00', normal: 22, alertCount: 52, location: 'Navrangpura Circle' },
+      { time: '08:30', normal: 28, alertCount: 58, location: 'Vastrapur Lake' },
+      { time: '09:00', normal: 34, alertCount: 64, location: 'SG Highway BRTS' },
+      { time: '09:30', normal: 31, alertCount: 72, location: 'Satellite Crossroads' },
+      { time: '10:00', normal: 36, alertCount: 86, location: 'University Ground' },
+      { time: '10:15', normal: 38, alertCount: 94, location: 'SG Highway Transit' },
+      { time: '10:30', normal: 32, alertCount: 48, location: 'Ellis Bridge' },
+      { time: '11:00', normal: 25, alertCount: 44, location: 'Law Garden' }
+    ];
+
+    // Distribute the exact number of threshold breaches across peak hours (starting at 10:15, 10:00, etc.)
+    const alertIndices = [5, 4, 3, 2, 6, 1, 7, 0].slice(0, Math.min(numAlerts, slots.length));
+
+    return slots.map((s, idx) => {
+      const isExceeded = alertIndices.includes(idx);
+      const count = isExceeded ? s.alertCount : s.normal;
+      return {
+        time: s.time,
+        count,
+        exceeded: count > threshold,
+        location: s.location
+      };
+    });
+  }, [numAlerts, threshold]);
+
+  const maxVal = Math.max(threshold * 1.6, ...crowdData.map(d => d.count)) * 1.15;
 
   return (
     <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '10px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: '#64748b' }}>
         <span>Edge Crowd Density (Camera Vision AI)</span>
-        <span style={{ color: '#dc2626', fontFamily: "'JetBrains Mono', monospace", fontWeight: 700 }}>
-          Threshold Limit: 40 heads
+        <span style={{ color: numAlerts > 0 ? '#dc2626' : '#10b981', fontFamily: "'JetBrains Mono', monospace", fontWeight: 700 }}>
+          {numAlerts > 0 ? `${numAlerts} Surge Alert${numAlerts > 1 ? 's' : ''} (> ${threshold})` : `All Clear (< ${threshold} heads)`}
         </span>
       </div>
 

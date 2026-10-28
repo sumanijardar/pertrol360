@@ -18,7 +18,7 @@ export default function JetsonFleetTelemetryChart({ data }) {
           <span style={{ color: '#dc2626', fontWeight: 600 }}>● Thermal Throttle (&gt;60°C)</span>
         </div>
         <div style={{ fontFamily: "'JetBrains Mono', monospace", color: '#0284c7', fontSize: '11px', fontWeight: 600 }}>
-          Avg Fleet Temp: 49.3°C
+          Avg Fleet Temp: {data && data.length > 0 ? (data.reduce((sum, item) => sum + (Number(item.temp) || 0), 0) / data.length).toFixed(1) : '0.0'}°C
         </div>
       </div>
 

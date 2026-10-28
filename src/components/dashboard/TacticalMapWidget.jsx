@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export default function TacticalMapWidget({ vehicles = [], selectedVehicleId, onSelectVehicle, onOpenThreatModal }) {
+export default function TacticalMapWidget({ vehicles = [], selectedVehicleId, onSelectVehicle, onOpenThreatModal, threatAlerts = [] }) {
   const [mapMode, setMapMode] = useState('TACTICAL'); // 'TACTICAL' | 'SATELLITE' | 'HEATMAP'
 
   // Approximate relative positioning inside tactical vector map canvas
@@ -26,12 +26,36 @@ export default function TacticalMapWidget({ vehicles = [], selectedVehicleId, on
     { name: 'SEC-E • ELLIS BRIDGE', cx: '80%', cy: '74%', r: '13%' }
   ];
 
-  // Threat markers distributed cleanly in non-colliding coordinates
-  const activeThreatPings = [
-    { id: 'T1', type: 'STOLEN_MATCH', label: 'STOLEN CRETA: GJ01AB1234', lat: 23.062, lng: 72.568, color: '#dc2626' },
-    { id: 'T2', type: 'WEAPON', label: 'WEAPON: HANDGUN', lat: 23.048, lng: 72.515, color: '#dc2626' },
-    { id: 'T3', type: 'FIRE', label: 'ACTIVE FLAME HAZARD', lat: 23.018, lng: 72.545, color: '#d97706' }
-  ];
+  // Threat markers strictly derived from live backend alerts
+  const activeThreatPings = React.useMemo(() => {
+    if (!threatAlerts || !Array.isArray(threatAlerts)) return [];
+    return threatAlerts.map((a, i) => {
+      const type = (a.event_type || '').toUpperCase();
+      let color = '#dc2626';
+      let label = a.title || 'THREAT';
+      if (type.includes('ANPR') || type.includes('STOLEN')) {
+        label = `STOLEN: ${a.title}`;
+        color = '#dc2626';
+      } else if (type.includes('WEAPON')) {
+        label = `WEAPON: ${a.title}`;
+        color = '#ef4444';
+      } else if (type.includes('FRS')) {
+        label = `WANTED: ${a.title}`;
+        color = '#8b5cf6';
+      } else if (type.includes('FIRE')) {
+        label = `FIRE: ${a.title}`;
+        color = '#f59e0b';
+      }
+      return {
+        id: a.event_id || `TP_${a.id || i + 1}`,
+        type: a.event_type,
+        label,
+        lat: 23.018 + (i * 0.022),
+        lng: 72.515 + (i * 0.024),
+        color
+      };
+    });
+  }, [threatAlerts]);
 
   return (
     <div

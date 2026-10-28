@@ -1,12 +1,14 @@
 import React from 'react';
 
-export default function VehicleClassificationChart({ data, totalScanned }) {
+export default function VehicleClassificationChart({ data = [], totalScanned = 0 }) {
+  const safeTotal = Number(totalScanned || 0);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: '#64748b' }}>
         <span>ANPR AI Vehicle Categorization</span>
         <span style={{ fontFamily: "'JetBrains Mono', monospace", color: '#0284c7', fontWeight: 600 }}>
-          {totalScanned ? `${Number(totalScanned).toLocaleString()} Scanned` : '3,842 Scanned'}
+          {safeTotal.toLocaleString()} Scanned
         </span>
       </div>
 

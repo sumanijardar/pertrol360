@@ -6,19 +6,21 @@ export default function IncidentModal({ modalData, onClose, onDispatchUnit }) {
   const { type, data } = modalData;
 
   const getTitle = () => {
-    if (type === 'ANPR') return `ANPR DETECTION: ${data.detected_plate_number}`;
-    if (type === 'WEAPON') return `WEAPON THREAT ALERT: ${data.weapon_class}`;
-    if (type === 'FIRE') return `ENVIRONMENTAL HAZARD: ${data.hazard_type}`;
-    if (type === 'CROWD') return `CROWD SURGE ANOMALY: ${data.location_name}`;
-    return 'TACTICAL INCIDENT DETAIL';
+    if (type === 'ANPR' || type === 'PLATES') return `ANPR DETECTION: ${data.detected_plate_number || data.title || ''}`;
+    if (type === 'WEAPON' || type === 'WEAPONS') return `WEAPON THREAT ALERT: ${data.weapon_class || data.title || ''}`;
+    if (type === 'FRS' || type === 'WANTED') return `WANTED FRS MATCH: ${data.suspect_name || data.title || ''}`;
+    if (type === 'FIRE') return `ENVIRONMENTAL HAZARD: ${data.hazard_type || data.title || ''}`;
+    if (type === 'CROWD' || type === 'HAZARDS') return `CROWD SURGE ANOMALY: ${data.location_name || data.title || ''}`;
+    return `TACTICAL INCIDENT DETAIL: ${data.title || ''}`;
   };
 
   const getSubtitle = () => {
-    if (type === 'ANPR') return data.is_stolen_match ? '🚨 STOLEN VEHICLE WATCHLIST MATCH' : 'Standard License Plate Scan';
-    if (type === 'WEAPON') return `Severity: ${data.severity_level} (AI Confidence: ${data.confidence}%)`;
-    if (type === 'FIRE') return `Smoke Density: ${data.smoke_density_level}`;
-    if (type === 'CROWD') return `Head Count: ${data.head_count} (Limit: ${data.threshold_limit})`;
-    return '';
+    if (type === 'ANPR' || type === 'PLATES') return '🚨 STOLEN VEHICLE WATCHLIST MATCH (High Priority)';
+    if (type === 'WEAPON' || type === 'WEAPONS') return `Severity: ${data.severity || data.severity_level || 'CRITICAL'} (Tactical Alert Dispatch)`;
+    if (type === 'FRS' || type === 'WANTED') return `Severity: ${data.severity || 'HIGH'} (Facial Recognition Match)`;
+    if (type === 'FIRE') return `Thermal Hazard: ${data.title || 'Flame Detected'}`;
+    if (type === 'CROWD' || type === 'HAZARDS') return 'Public Safety Threshold Exceeded (>40 heads)';
+    return `Severity: ${data.severity || 'ACTIVE'}`;
   };
 
   return (

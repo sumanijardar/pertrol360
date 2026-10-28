@@ -12,13 +12,13 @@ export default function TimelineActivityChart({ data }) {
   const chartW = width - padding.left - padding.right;
   const chartH = height - padding.top - padding.bottom;
 
-  // Add 25% headroom so curves never hit the ceiling
-  const maxAnpr = Math.max(...data.map(d => d.anprCount)) * 1.25;
-  const maxThreats = 10;
+  // Add 25% headroom so curves never hit the ceiling, ensure non-zero to prevent division by zero
+  const maxAnpr = Math.max(1, ...(data || []).map(d => d.anprCount || 0)) * 1.25;
+  const maxThreats = Math.max(5, ...(data || []).map(d => (d.threats || 0) + (d.fire || 0) + (d.crowdSurges || 0)));
 
-  const getX = (idx) => padding.left + (idx / (data.length - 1)) * chartW;
-  const getYAnpr = (val) => padding.top + chartH - (val / maxAnpr) * chartH;
-  const getYThreats = (val) => padding.top + chartH - (val / maxThreats) * chartH;
+  const getX = (idx) => padding.left + (data.length > 1 ? (idx / (data.length - 1)) * chartW : chartW / 2);
+  const getYAnpr = (val) => padding.top + chartH - ((val || 0) / maxAnpr) * chartH;
+  const getYThreats = (val) => padding.top + chartH - ((val || 0) / maxThreats) * chartH;
 
   // Smooth bezier curve generator
   const buildSmoothPath = (points) => {
