@@ -2,6 +2,14 @@ import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import { POLICE_OFFICERS, POLICE_VEHICLES } from '../../data/mockData';
 import {
+    getUsersApi,
+    createUserApi,
+    updateUserApi,
+    deleteUserApi,
+    getVehiclesApi,
+    API_BASE_URL
+} from '../../services/api';
+import {
     IconUsers,
     IconSearch,
     IconShieldAlert,
@@ -294,10 +302,12 @@ export default function PoliceMaster() {
         officer_id: '',
         badge_number: '',
         officer_name: '',
+        email: '',
+        password: '',
+        role: 'user',
         rank: 'Police Sub-Inspector (PSI)',
         police_station: 'Navrangpura Police Station',
         contact_number: '',
-        email: '',
         assigned_vehicle_id: 'PATROL_VAN_01',
         assigned_vehicle_plate: 'GJ-01-G-9999',
         shift: 'Day Shift (08:00 - 18:00)',
@@ -308,27 +318,79 @@ export default function PoliceMaster() {
     };
     const [formData, setFormData] = useState(initialFormState);
 
+    const [isLiveApi, setIsLiveApi] = useState(false);
+    const [availableVehicles, setAvailableVehicles] = useState([]);
+
     // -------------------------------------------------------------------------
-    // 🔌 API INTEGRATION HANDLER
+    // 🔌 API INTEGRATION HANDLER (GET /api/users)
     // -------------------------------------------------------------------------
     const fetchOfficersApi = async () => {
         setIsLoading(true);
         setApiError(null);
         try {
-            // API call placeholder:
-            // const res = await axios.get('/api/police-officers');
-            // setOfficers(res.data);
-            setOfficers(POLICE_OFFICERS);
+            const res = await getUsersApi({ page: 1, limit: 100 });
+            const userList = Array.isArray(res?.data) ? res.data : (res?.data?.users || []);
+
+            if (res && res.success && Array.isArray(userList)) {
+                const mapped = userList.map((u, idx) => ({
+                    id: u.id,
+                    officer_id: u.id ? String(u.id) : (u.badge_number || `OFFICER_${idx + 1}`),
+                    badge_number: u.badge_number || `POL-${u.id || idx + 1}`,
+                    officer_name: u.name || u.officer_name || '-',
+                    rank: u.role === 'admin' ? 'Super Admin' : (u.rank || 'Police Sub-Inspector (PSI)'),
+                    role: u.role || 'user',
+                    police_station: u.police_station || '-',
+                    contact_number: u.phone || u.contact_number || '-',
+                    email: u.email || '',
+                    assigned_vehicle_id: u.assigned_vehicle_id || '-',
+                    assigned_vehicle_plate: u.assigned_vehicle_plate || '-',
+                    shift: u.shift || '-',
+                    blood_group: u.blood_group || '-',
+                    emergency_contact: u.emergency_contact || '-',
+                    joined_date: u.created_at ? u.created_at.split(' ')[0] : '-',
+                    is_active: u.is_active === undefined ? true : (u.is_active === 1 || u.is_active === true || u.is_active === '1')
+                }));
+                setOfficers(mapped);
+                setIsLiveApi(true);
+            } else if (res?.isAuthRestricted) {
+                setApiError('Administrator login required to load officer records.');
+                setOfficers([]);
+                setIsLiveApi(false);
+            } else {
+                setOfficers([]);
+                setIsLiveApi(false);
+            }
         } catch (err) {
-            console.error('API Error:', err);
-            setApiError('Failed to fetch police officers from server');
+            console.warn('[UserMaster] API fetch error:', err.message);
+            setOfficers([]);
+            setIsLiveApi(false);
+            setApiError(err.message);
         } finally {
             setIsLoading(false);
         }
     };
 
+    // -------------------------------------------------------------------------
+    // 🔌 FETCH DYNAMIC VEHICLES FOR DROPDOWN (GET /api/vehicles)
+    // -------------------------------------------------------------------------
+    const fetchAvailableVehicles = async () => {
+        try {
+            const res = await getVehiclesApi({ page: 1, limit: 100 });
+            const list = Array.isArray(res?.data) ? res.data : (res?.data?.vehicles || []);
+            if (res && res.success && Array.isArray(list) && list.length > 0) {
+                setAvailableVehicles(list);
+            } else {
+                setAvailableVehicles(POLICE_VEHICLES);
+            }
+        } catch (err) {
+            console.warn('[UserMaster] fetchAvailableVehicles fallback:', err.message);
+            setAvailableVehicles(POLICE_VEHICLES);
+        }
+    };
+
     useEffect(() => {
         fetchOfficersApi();
+        fetchAvailableVehicles();
     }, []);
 
     // Reset to page 1 on filter change
@@ -341,18 +403,51 @@ export default function PoliceMaster() {
         .filter(c => c.key !== 'index' && c.key !== 'actions')
         .map(c => ({ key: c.key, label: c.label }));
 
+    // Dynamic unique stations derived from officers list
+    const uniqueStations = Array.from(
+        new Set(
+            officers
+                .map(o => o.police_station?.trim())
+                .filter(station => Boolean(station) && station !== '-' && station !== 'Unassigned')
+        )
+    ).sort();
+
+    // Dynamic unique ranks derived from officers list
+    const uniqueRanks = Array.from(
+        new Set(
+            officers
+                .map(o => o.rank?.trim())
+                .filter(rank => Boolean(rank) && rank !== '-' && rank !== 'Unassigned')
+        )
+    ).sort();
+
+    // Track if any filter is active
+    const hasActiveFilters = searchQuery !== '' || stationFilter !== 'ALL' || rankFilter !== 'ALL' || statusFilter !== 'ALL';
+
+    const handleResetFilters = () => {
+        setSearchQuery('');
+        setStationFilter('ALL');
+        setRankFilter('ALL');
+        setStatusFilter('ALL');
+        setCurrentPage(1);
+    };
+
     // Filtered officers
     const filteredOfficers = officers.filter(o => {
         const matchesSearch =
-            o.officer_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            o.badge_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            o.officer_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            o.police_station.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            o.contact_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (o.officer_id && o.officer_id.toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (o.badge_number && o.badge_number.toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (o.officer_name && o.officer_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (o.police_station && o.police_station.toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (o.contact_number && o.contact_number.toLowerCase().includes(searchQuery.toLowerCase())) ||
             (o.assigned_vehicle_plate && o.assigned_vehicle_plate.toLowerCase().includes(searchQuery.toLowerCase()));
 
-        const matchesStation = stationFilter === 'ALL' || o.police_station.toLowerCase().includes(stationFilter.toLowerCase());
-        const matchesRank = rankFilter === 'ALL' || o.rank.toLowerCase().includes(rankFilter.toLowerCase());
+        const matchesStation =
+            stationFilter === 'ALL' ||
+            (o.police_station && o.police_station.trim().toLowerCase() === stationFilter.trim().toLowerCase());
+        const matchesRank =
+            rankFilter === 'ALL' ||
+            (o.rank && o.rank.trim().toLowerCase() === rankFilter.trim().toLowerCase());
         const matchesStatus =
             statusFilter === 'ALL' ||
             (statusFilter === 'ACTIVE' && o.is_active) ||
@@ -371,7 +466,10 @@ export default function PoliceMaster() {
         setFormData({
             ...initialFormState,
             officer_id: `OFFICER_00${officers.length + 1}`,
-            badge_number: `GJ-NP-${Math.floor(100 + Math.random() * 900)}`
+            badge_number: `GJ-NP-${Math.floor(100 + Math.random() * 900)}`,
+            email: '',
+            password: 'Officer@12345',
+            role: 'user'
         });
         setIsFormModalOpen(true);
     };
@@ -380,9 +478,12 @@ export default function PoliceMaster() {
     const handleOpenEditModal = (officer) => {
         setEditingOfficer(officer);
         setFormData({
+            id: officer.id,
             officer_id: officer.officer_id,
             badge_number: officer.badge_number,
             officer_name: officer.officer_name,
+            password: '',
+            role: officer.role || 'user',
             rank: officer.rank,
             police_station: officer.police_station,
             contact_number: officer.contact_number,
@@ -404,48 +505,167 @@ export default function PoliceMaster() {
         setIsViewModalOpen(true);
     };
 
-    // Toggle Active Status
-    const handleToggleStatus = (officerId) => {
+    // Toggle Active Status (PUT /api/users/:id)
+    const handleToggleStatus = async (officerId) => {
+        const target = officers.find(o => o.officer_id === officerId || o.id === officerId);
+        if (!target) return;
+        const newStatus = !target.is_active;
+
         setOfficers(prev =>
-            prev.map(o => (o.officer_id === officerId ? { ...o, is_active: !o.is_active } : o))
+            prev.map(o => (o.officer_id === officerId || o.id === officerId ? { ...o, is_active: newStatus } : o))
         );
+
+        try {
+            const res = await updateUserApi(target.id || officerId, { is_active: newStatus ? 1 : 0 });
+            if (res && res.success === false) {
+                throw new Error(res.error || 'Failed to update status on server');
+            }
+        } catch (apiErr) {
+            setOfficers(prev =>
+                prev.map(o => (o.officer_id === officerId || o.id === officerId ? { ...o, is_active: target.is_active } : o))
+            );
+            Swal.fire('Error', apiErr.response?.data?.error || apiErr.message || 'Status sync failed', 'error');
+        }
     };
 
-    // Delete Officer
+    // Delete Officer (DELETE /api/users/:id)
     const handleDeleteOfficer = (officer) => {
         Swal.fire({
             title: 'Remove Officer Record?',
             text: `Are you sure you want to remove ${officer.officer_name} (${officer.badge_number}) from the master directory?`,
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#dc3545',
+            confirmButtonColor: '#dc2626',
             cancelButtonColor: '#64748b',
             confirmButtonText: 'Yes, Remove Record'
-        }).then((result) => {
+        }).then(async (result) => {
             if (result.isConfirmed) {
-                setOfficers(prev => prev.filter(o => o.officer_id !== officer.officer_id));
-                Swal.fire('Removed!', `Record of ${officer.officer_name} has been archived.`, 'success');
+                try {
+                    const res = await deleteUserApi(officer.id || officer.officer_id);
+                    if (res && res.success === false) {
+                        throw new Error(res.error || 'Server rejected officer deletion');
+                    }
+                    setOfficers(prev => prev.filter(o => o.officer_id !== officer.officer_id && o.id !== officer.id));
+                    Swal.fire('Removed!', `Record of ${officer.officer_name} has been archived.`, 'success');
+                } catch (apiErr) {
+                    Swal.fire('Error', apiErr.response?.data?.error || apiErr.message || 'Failed to remove officer', 'error');
+                }
             }
         });
     };
 
-    // Handle Form Submit (Add / Edit)
-    const handleSubmitForm = (e) => {
+    // Handle Form Submit (POST /api/users or PUT /api/users/:id)
+    const handleSubmitForm = async (e) => {
         e.preventDefault();
-        if (editingOfficer) {
-            setOfficers(prev =>
-                prev.map(o => (o.officer_id === editingOfficer.officer_id ? { ...o, ...formData } : o))
-            );
-            Swal.fire('Updated!', `Officer record for ${formData.officer_name} updated successfully.`, 'success');
-        } else {
-            const newOfficer = {
-                ...formData,
-                officer_id: formData.officer_id || `OFFICER_00${officers.length + 1}`
-            };
-            setOfficers(prev => [newOfficer, ...prev]);
-            Swal.fire('Registered!', `Officer ${newOfficer.officer_name} registered successfully.`, 'success');
+
+        if (!formData.officer_name.trim()) {
+            Swal.fire('Error', 'Please enter Officer Full Name.', 'error');
+            return;
         }
-        setIsFormModalOpen(false);
+
+        if (!formData.email.trim()) {
+            Swal.fire('Error', 'Field "email" is required by server.', 'error');
+            return;
+        }
+
+        setIsLoading(true);
+
+        // Required by backend: name, email, password, role
+        const payload = {
+            name: formData.officer_name.trim(),
+            email: formData.email.trim().toLowerCase(),
+            role: formData.role || (formData.rank?.toLowerCase().includes('admin') ? 'admin' : 'user'),
+            badge_number: formData.badge_number.trim(),
+            phone: formData.contact_number.trim(),
+            police_station: formData.police_station.trim(),
+            rank: formData.rank,
+            assigned_vehicle_id: formData.assigned_vehicle_id,
+            assigned_vehicle_plate: formData.assigned_vehicle_plate,
+            shift: formData.shift,
+            blood_group: formData.blood_group,
+            emergency_contact: formData.emergency_contact,
+            is_active: formData.is_active ? 1 : 0
+        };
+
+        if (!editingOfficer || formData.password) {
+            payload.password = formData.password ? formData.password.trim() : 'Officer@12345';
+        }
+
+        try {
+            if (editingOfficer) {
+                const targetId = editingOfficer.id || editingOfficer.officer_id;
+                const res = await updateUserApi(targetId, payload);
+                if (res && res.success === false) {
+                    throw new Error(res.error || 'Server rejected officer update');
+                }
+
+                setOfficers(prev =>
+                    prev.map(o => (o.officer_id === editingOfficer.officer_id || o.id === editingOfficer.id ? { ...o, ...formData, ...payload, officer_name: payload.name } : o))
+                );
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Updated!',
+                    text: `Officer ${payload.name} details have been updated successfully.`,
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                setIsFormModalOpen(false);
+            } else {
+                const res = await createUserApi(payload);
+                if (res && res.success === false) {
+                    let errMsg = res.error || 'Validation failed';
+                    if (res.details) {
+                        const detailMsgs = Object.values(res.details).flat().join('\n');
+                        errMsg = `${errMsg}:\n${detailMsgs}`;
+                    }
+                    throw new Error(errMsg);
+                }
+
+                const createdUser = res?.data || {};
+                const newOfficer = {
+                    id: createdUser.id || Date.now(),
+                    officer_id: String(createdUser.id || Date.now()),
+                    badge_number: createdUser.badge_number || payload.badge_number,
+                    officer_name: createdUser.name || payload.name,
+                    rank: payload.rank,
+                    role: createdUser.role || payload.role,
+                    police_station: createdUser.police_station || payload.police_station,
+                    contact_number: payload.phone,
+                    email: createdUser.email || payload.email,
+                    assigned_vehicle_id: payload.assigned_vehicle_id,
+                    assigned_vehicle_plate: payload.assigned_vehicle_plate,
+                    shift: payload.shift,
+                    blood_group: payload.blood_group,
+                    emergency_contact: payload.emergency_contact,
+                    joined_date: new Date().toISOString().split('T')[0],
+                    is_active: payload.is_active === 1
+                };
+
+                setOfficers(prev => [newOfficer, ...prev]);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Registered!',
+                    text: `New Officer ${newOfficer.officer_name} registered successfully.`,
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                setIsFormModalOpen(false);
+            }
+        } catch (err) {
+            let errorText = err.response?.data?.error || err.message || 'Operation failed';
+            if (err.response?.data?.details) {
+                const validationErrors = Object.values(err.response.data.details).flat().join('<br>• ');
+                errorText = `<strong>${errorText}</strong><br><br>• ${validationErrors}`;
+            }
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Failed',
+                html: errorText
+            });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const totalOfficers = officers.length;
@@ -557,18 +777,47 @@ export default function PoliceMaster() {
             {/* 2. ACTIONS & TOOLBAR CARD */}
             <div className="card shadow-sm border-0 mb-3">
                 <div className="card-body py-2 px-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    {/* Left Side: Summary Context */}
+                    {/* Left Side: Summary Context & API Status */}
                     <div className="d-flex align-items-center gap-2">
                         <div className="p-2 bg-primary-subtle text-primary rounded d-flex align-items-center justify-content-center">
                             <IconUsers size={18} />
                         </div>
                         <div>
                             <div className="fw-bold text-dark small">Personnel Operations & Shift Management</div>
+                            <div className="d-flex align-items-center gap-1.5" style={{ fontSize: '11px' }}>
+
+                            </div>
                         </div>
                     </div>
 
-                    {/* Right Side: Excel Export & Register Button */}
-                    <div className="d-flex align-items-center gap-2 ms-auto">
+                    {/* Right Side: Refresh, Excel Export & Register Button */}
+                    <div className="d-flex align-items-center gap-2 ms-auto flex-wrap">
+                        <button
+                            type="button"
+                            className="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1 py-1 px-2.5"
+                            onClick={fetchOfficersApi}
+                            disabled={isLoading}
+                            title="Refresh from API"
+                            style={{ fontSize: '12px' }}
+                        >
+                            <svg
+                                width="13"
+                                height="13"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className={isLoading ? 'spinner-border spinner-border-sm border-0' : ''}
+                            >
+                                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                                <path d="M3 3v5h5" />
+                                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                                <path d="M16 21h5v-5" />
+                            </svg>
+                            <span>{isLoading ? 'Syncing...' : 'Refresh'}</span>
+                        </button>
                         <ExportExcelButton
                             data={filteredOfficers}
                             fileName="Police_Officers_Registry"
@@ -622,14 +871,14 @@ export default function PoliceMaster() {
                                 value={stationFilter}
                                 onChange={(e) => setStationFilter(e.target.value)}
                                 className="form-select form-select-sm fw-semibold text-dark"
-                                style={{ width: 'auto', minWidth: '130px' }}
+                                style={{ width: 'auto', minWidth: '140px' }}
                             >
-                                <option value="ALL">All Stations</option>
-                                <option value="Navrangpura">Navrangpura</option>
-                                <option value="Vastrapur">Vastrapur</option>
-                                <option value="Satellite">Satellite</option>
-                                <option value="SG Highway">SG Highway</option>
-                                <option value="Ellis Bridge">Ellis Bridge</option>
+                                <option value="ALL">All Stations ({uniqueStations.length})</option>
+                                {uniqueStations.map(station => (
+                                    <option key={station} value={station}>
+                                        {station}
+                                    </option>
+                                ))}
                             </select>
                         </div>
 
@@ -640,13 +889,14 @@ export default function PoliceMaster() {
                                 value={rankFilter}
                                 onChange={(e) => setRankFilter(e.target.value)}
                                 className="form-select form-select-sm fw-semibold text-dark"
-                                style={{ width: 'auto', minWidth: '110px' }}
+                                style={{ width: 'auto', minWidth: '130px' }}
                             >
-                                <option value="ALL">All Ranks</option>
-                                <option value="Inspector">Inspector</option>
-                                <option value="Sub-Inspector">Sub-Inspector</option>
-                                <option value="ASI">ASI</option>
-                                <option value="Constable">Constable</option>
+                                <option value="ALL">All Ranks ({uniqueRanks.length})</option>
+                                {uniqueRanks.map(rank => (
+                                    <option key={rank} value={rank}>
+                                        {rank}
+                                    </option>
+                                ))}
                             </select>
                         </div>
 
@@ -664,6 +914,22 @@ export default function PoliceMaster() {
                                 <option value="INACTIVE">Inactive</option>
                             </select>
                         </div>
+
+                        {/* Reset / Refresh Filters Button */}
+                        <button
+                            type="button"
+                            className={`btn btn-sm d-inline-flex align-items-center gap-1.5 shadow-none ${hasActiveFilters ? 'btn-primary text-white' : 'btn-outline-secondary'
+                                }`}
+                            onClick={handleResetFilters}
+                            title="Reset all filters"
+                            style={{ fontSize: '12px' }}
+                        >
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                                <path d="M3 3v5h5" />
+                            </svg>
+                            <span>Reset Filters</span>
+                        </button>
                     </div>
                 </div>
 
@@ -872,31 +1138,46 @@ export default function PoliceMaster() {
 
                                         <div className="row g-3">
                                             {/* Police Station */}
+
                                             <div className="col-12 col-md-6">
-                                                <label className="form-label small fw-bold text-dark mb-1">Jurisdiction Police Station <span className="text-danger">*</span></label>
-                                                <select
-                                                    className="form-select form-select-sm fw-semibold text-dark"
+                                                <label className="form-label small fw-bold text-dark mb-1">
+                                                    Jurisdiction Police Station{" "}
+                                                    <span className="text-danger">*</span>
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control form-control-sm fw-semibold text-dark"
+                                                    placeholder="Enter Jurisdiction Police Station"
                                                     value={formData.police_station}
-                                                    onChange={(e) => setFormData({ ...formData, police_station: e.target.value })}
-                                                    style={{ borderColor: '#cbd5e1', fontSize: '12.5px' }}
-                                                >
-                                                    <option value="Navrangpura Police Station">Navrangpura Police Station</option>
-                                                    <option value="Vastrapur Police Station">Vastrapur Police Station</option>
-                                                    <option value="Satellite Police Station">Satellite Police Station</option>
-                                                    <option value="SG Highway Police Station">SG Highway Police Station</option>
-                                                    <option value="Ellis Bridge Police Station">Ellis Bridge Police Station</option>
-                                                </select>
+                                                    onChange={(e) =>
+                                                        setFormData({
+                                                            ...formData,
+                                                            police_station: e.target.value,
+                                                        })
+                                                    }
+                                                    style={{
+                                                        borderColor: '#cbd5e1',
+                                                        fontSize: '12.5px',
+                                                    }}
+                                                    required
+                                                />
                                             </div>
+
 
                                             {/* Assigned Patrol Van */}
                                             <div className="col-12 col-md-6">
-                                                <label className="form-label small fw-bold text-dark mb-1">Assigned Tactical Patrol Van</label>
+                                                <label className="form-label small fw-bold text-dark mb-1">
+                                                    Assigned Tactical Patrol Van
+                                                </label>
                                                 <select
                                                     className="form-select form-select-sm fw-semibold text-dark font-mono"
                                                     value={formData.assigned_vehicle_plate}
                                                     onChange={(e) => {
                                                         const selectedPlate = e.target.value;
-                                                        const foundVehicle = POLICE_VEHICLES.find(v => v.registration_number === selectedPlate);
+                                                        const vehicleOptions = availableVehicles.length > 0 ? availableVehicles : POLICE_VEHICLES;
+                                                        const foundVehicle = vehicleOptions.find(
+                                                            v => v.registration_number === selectedPlate
+                                                        );
                                                         setFormData({
                                                             ...formData,
                                                             assigned_vehicle_plate: selectedPlate,
@@ -906,9 +1187,9 @@ export default function PoliceMaster() {
                                                     style={{ borderColor: '#cbd5e1', fontSize: '12.5px' }}
                                                 >
                                                     <option value="Unassigned">Unassigned (HQ / Station Duty)</option>
-                                                    {POLICE_VEHICLES.map(v => (
-                                                        <option key={v.vehicle_id} value={v.registration_number}>
-                                                            {v.vehicle_id} - {v.registration_number} ({v.vehicle_model})
+                                                    {(availableVehicles.length > 0 ? availableVehicles : POLICE_VEHICLES).map((v, i) => (
+                                                        <option key={v.vehicle_id || v.id || i} value={v.registration_number}>
+                                                            {v.vehicle_id} - {v.registration_number} {v.vehicle_model ? `(${v.vehicle_model})` : ''}
                                                         </option>
                                                     ))}
                                                 </select>
@@ -977,15 +1258,47 @@ export default function PoliceMaster() {
 
                                             {/* Email Address */}
                                             <div className="col-12 col-md-6">
-                                                <label className="form-label small fw-bold text-dark mb-1">Government Email</label>
+                                                <label className="form-label small fw-bold text-dark mb-1">Government Email <span className="text-danger">*</span></label>
                                                 <input
                                                     type="email"
                                                     className="form-control form-control-sm"
-                                                    placeholder="e.g. officer@gujaratpolice.gov.in"
+                                                    required
+                                                    placeholder="e.g. officer@police.gov.in"
                                                     value={formData.email}
                                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                                     style={{ borderColor: '#cbd5e1' }}
                                                 />
+                                            </div>
+
+                                            {/* Account Password */}
+                                            <div className="col-12 col-md-6">
+                                                <label className="form-label small fw-bold text-dark mb-1">
+                                                    Login Password {!editingOfficer && <span className="text-danger">*</span>}
+                                                </label>
+                                                <input
+                                                    type="password"
+                                                    className="form-control form-control-sm font-mono"
+                                                    required={!editingOfficer}
+                                                    placeholder={editingOfficer ? "Leave blank to keep current" : "e.g. Officer@12345"}
+                                                    value={formData.password || ''}
+                                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                                    style={{ borderColor: '#cbd5e1' }}
+                                                />
+                                            </div>
+
+                                            {/* System Role */}
+                                            <div className="col-12 col-md-6">
+                                                <label className="form-label small fw-bold text-dark mb-1">System Role <span className="text-danger">*</span></label>
+                                                <select
+                                                    className="form-select form-select-sm fw-semibold text-dark"
+                                                    value={formData.role || 'user'}
+                                                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                                                    style={{ borderColor: '#cbd5e1', fontSize: '12.5px' }}
+                                                    required
+                                                >
+                                                    <option value="user">Officer (Standard User)</option>
+                                                    <option value="admin">Administrator (Full Access)</option>
+                                                </select>
                                             </div>
 
                                             {/* Emergency Contact */}
@@ -1237,7 +1550,7 @@ export default function PoliceMaster() {
                                 </div>
 
                                 {/* 3. Service Record & Verification */}
-                                <div className="border rounded-3 p-3" style={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0' }}>
+                                {/* <div className="border rounded-3 p-3" style={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0' }}>
                                     <div className="d-flex justify-content-between align-items-center mb-2.5">
                                         <div className="d-flex align-items-center gap-2">
                                             <span className="text-primary d-inline-flex"><IconShieldAlert size={16} /></span>
@@ -1276,7 +1589,7 @@ export default function PoliceMaster() {
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                </div> */}
 
                             </div>
 

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { IconShieldAlert } from '../../components/common/Icons';
+import { loginApi, API_BASE_URL } from '../../services/api';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -18,46 +19,43 @@ export default function Login() {
     setPassword(presetPassword);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!email.trim() || !password.trim()) {
       Swal.fire({
         title: 'Missing Fields',
-        text: 'Please enter your email and password.',
+        text: 'Please enter both your email address and password.',
         icon: 'warning',
-        confirmButtonColor: '#0d6efd'
+        confirmButtonColor: '#2563eb'
       });
       return;
     }
 
     setIsLoading(true);
 
-    // Simulated Authentication
-    setTimeout(() => {
-      setIsLoading(false);
-
-      const userSession = {
-        name: email.includes('admin') ? 'ACP Vikram Solanki' : 'Insp. Rajesh Dave',
-        email: email,
-        role: email.includes('admin') ? 'Super Admin' : 'Patrol Officer',
-        station: 'Central Command HQ',
-        loginTime: new Date().toLocaleTimeString()
-      };
-
-      localStorage.setItem('patrol360_user', JSON.stringify(userSession));
-      localStorage.setItem('patrol360_authenticated', 'true');
+    try {
+      const res = await loginApi(email, password);
 
       Swal.fire({
-        title: 'Welcome Back',
-        text: `Logged in as ${userSession.name}`,
+        title: 'Login Successful',
+        text: `Welcome back, ${res.user?.name || 'Officer'}!`,
         icon: 'success',
-        timer: 1200,
+        timer: 1400,
         showConfirmButton: false
       }).then(() => {
         navigate('/dashboard');
       });
-    }, 600);
+    } catch (err) {
+      Swal.fire({
+        title: 'Authentication Failed',
+        text: err.message || 'Invalid email or password. Please verify your credentials.',
+        icon: 'error',
+        confirmButtonColor: '#dc2626'
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -230,26 +228,32 @@ export default function Login() {
             </button>
           </form>
 
-          {/* Quick Demo Fill (Subtle & Clean) */}
+          {/* Quick Demo Fill */}
           <div className="mt-4 pt-3 border-top text-center">
             <span className="text-muted small" style={{ fontSize: '11px' }}>Quick Fill Demo:</span>
             <div className="d-inline-flex gap-1.5 ms-2">
               <button
                 type="button"
-                onClick={() => handleQuickPreset('admin@patrol360.police.gov.in', 'Patrol360@2026')}
+                onClick={() => handleQuickPreset('admin@police.gov.in', 'Admin@12345')}
                 className="btn btn-light btn-sm py-0 px-2 border rounded-pill text-secondary"
                 style={{ fontSize: '11px' }}
+                title="Super Admin Officer"
               >
                 Admin
               </button>
               <button
                 type="button"
-                onClick={() => handleQuickPreset('officer@patrol360.police.gov.in', 'Officer@123')}
+                onClick={() => handleQuickPreset('officer@police.gov.in', 'Officer@12345')}
                 className="btn btn-light btn-sm py-0 px-2 border rounded-pill text-secondary"
                 style={{ fontSize: '11px' }}
+                title="Inspector Rajesh Sharma"
               >
                 Officer
               </button>
+            </div>
+            <div className="mt-2 text-muted" style={{ fontSize: '10.5px' }}>
+              <span className="d-inline-block rounded-circle bg-success me-1" style={{ width: '6px', height: '6px' }} />
+              Connected: <span className="font-monospace text-secondary">{API_BASE_URL.replace(/^https?:\/\//, '')}</span>
             </div>
           </div>
 

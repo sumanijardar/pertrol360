@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+.env
+API_DOCUMENTATION_SUMMARY.md
+postman_collection_patrol360.json
+test_all_apis.cjs

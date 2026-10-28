@@ -2,6 +2,12 @@ import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import { POLICE_VEHICLES } from '../../data/mockData';
 import {
+  getVehiclesApi,
+  createVehicleApi,
+  updateVehicleApi,
+  deleteVehicleApi
+} from '../../services/api';
+import {
   IconCar,
   IconSearch,
   IconCpu,
@@ -106,7 +112,7 @@ export const VEHICLE_COLUMNS = [
     align: 'left',
     render: (row) => (
       <span className="font-mono text-dark small fw-semibold" style={{ fontSize: '12px' }}>
-        {row.sim_card_phone || '+91 98250 00000'}
+        {row.sim_card_phone || '-'}
       </span>
     )
   },
@@ -117,7 +123,7 @@ export const VEHICLE_COLUMNS = [
     align: 'center',
     render: (row, _idx, _rowIndex, actions) => (
       <button
-        onClick={() => actions.onToggleStatus(row.vehicle_id)}
+        onClick={() => actions.onToggleStatus(row.vehicle_id || row.id)}
         className="btn btn-link p-0 text-decoration-none border-0 shadow-none"
         title="Click to toggle status"
         style={{ cursor: 'pointer' }}
@@ -248,6 +254,8 @@ export const VEHICLE_COLUMNS = [
 export default function VahicalList() {
   const [vehicles, setVehicles] = useState(POLICE_VEHICLES);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLiveApi, setIsLiveApi] = useState(false);
   const [apiError, setApiError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [stationFilter, setStationFilter] = useState('ALL');
@@ -267,8 +275,8 @@ export default function VahicalList() {
   const initialFormState = {
     vehicle_id: '',
     registration_number: '',
-    vehicle_model: 'Mahindra Scorpio-N (Tactical 4x4)',
-    police_station: 'Navrangpura Police Station',
+    vehicle_model: '',
+    police_station: '',
     assigned_driver_officer: '',
     jetson_device_serial: '',
     sim_card_phone: '',
@@ -277,20 +285,53 @@ export default function VahicalList() {
   const [formData, setFormData] = useState(initialFormState);
 
   // -------------------------------------------------------------------------
-  // 🔌 API INTEGRATION HANDLER
+  // 🔌 API INTEGRATION HANDLER (GET /api/vehicles)
   // -------------------------------------------------------------------------
-  // Backend API lagate waqt sirf API_URL define karein aur response set karein:
   const fetchVehiclesApi = async () => {
     setIsLoading(true);
     setApiError(null);
     try {
-      // Example with axios:
-      // const res = await axios.get('/api/vehicles');
-      // setVehicles(res.data);
-      setVehicles(POLICE_VEHICLES); // Mock data fallback
+      const res = await getVehiclesApi({ page: 1, limit: 100 });
+      const vehicleList = Array.isArray(res?.data) ? res.data : (res?.data?.vehicles || []);
+
+      if (res && res.success && Array.isArray(vehicleList) && vehicleList.length > 0) {
+        const mappedVehicles = vehicleList.map((v, idx) => ({
+          id: v.id || idx + 1,
+          vehicle_id: v.vehicle_id || `PATROL_VAN_0${idx + 1}`,
+          registration_number: v.registration_number || '-',
+          vehicle_model: v.vehicle_model || '-',
+          police_station: v.police_station || '-',
+          assigned_driver_officer: v.assigned_driver_officer || '-',
+          jetson_device_serial: v.jetson_device_serial || 'NV-ORIN-16GB-001',
+          sim_card_phone: v.sim_card_phone || '-',
+          is_active: v.is_active === 1 || v.is_active === true || v.is_active === '1',
+          created_at: v.created_at || new Date().toISOString(),
+          cameras: Array.isArray(v.cameras) && v.cameras.length > 0 ? v.cameras : [
+            { camera_id: 'cam_01', mount_position: 'FRONT_WINDSHIELD', rtsp_url: `rtsp://stream.police.gov.in/${v.vehicle_id}/front` },
+            { camera_id: 'cam_02', mount_position: 'REAR_BUMPER', rtsp_url: `rtsp://stream.police.gov.in/${v.vehicle_id}/rear` },
+            { camera_id: 'cam_03', mount_position: 'CABIN_INTERIOR', rtsp_url: `rtsp://stream.police.gov.in/${v.vehicle_id}/cabin` },
+            { camera_id: 'cam_04', mount_position: 'LEFT_ANPR', rtsp_url: `rtsp://stream.police.gov.in/${v.vehicle_id}/anpr` }
+          ],
+          telemetry: {
+            speed_kmph: v.speed_kmph != null ? parseFloat(v.speed_kmph) : 42.0,
+            latitude: v.latest_lat != null ? parseFloat(v.latest_lat) : 23.0338,
+            longitude: v.latest_lng != null ? parseFloat(v.latest_lng) : 72.5850,
+            battery_voltage: v.battery_voltage != null ? parseFloat(v.battery_voltage) : 13.8,
+            jetson_temperature_c: v.jetson_temperature_c != null ? parseFloat(v.jetson_temperature_c) : 44.5,
+            network_signal_dbm: v.network_signal_dbm != null ? parseInt(v.network_signal_dbm) : -65
+          }
+        }));
+        setVehicles(mappedVehicles);
+        setIsLiveApi(true);
+      } else {
+        setVehicles(POLICE_VEHICLES);
+        setIsLiveApi(false);
+      }
     } catch (err) {
-      console.error('API Error:', err);
-      setApiError('Failed to fetch fleet from server');
+      console.warn('[VahicalList] API fetch error, falling back:', err.message);
+      setVehicles(POLICE_VEHICLES);
+      setIsLiveApi(false);
+      setApiError(err.message);
     } finally {
       setIsLoading(false);
     }
@@ -310,17 +351,28 @@ export default function VahicalList() {
     .filter(c => c.key !== 'index' && c.key !== 'actions')
     .map(c => ({ key: c.key, label: c.label }));
 
+  // Dynamic Unique Police Stations derived from vehicles list
+  const uniqueStations = Array.from(
+    new Set(
+      vehicles
+        .map(v => v.police_station?.trim())
+        .filter(station => Boolean(station) && station !== '-' && station !== 'Unassigned')
+    )
+  ).sort();
+
   // Filtered vehicles
   const filteredVehicles = vehicles.filter(v => {
     const matchesSearch =
-      v.vehicle_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      v.registration_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      v.vehicle_model.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      v.police_station.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (v.vehicle_id && v.vehicle_id.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (v.registration_number && v.registration_number.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (v.vehicle_model && v.vehicle_model.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (v.police_station && v.police_station.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (v.assigned_driver_officer && v.assigned_driver_officer.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (v.jetson_device_serial && v.jetson_device_serial.toLowerCase().includes(searchQuery.toLowerCase()));
 
-    const matchesStation = stationFilter === 'ALL' || v.police_station.toLowerCase().includes(stationFilter.toLowerCase());
+    const matchesStation =
+      stationFilter === 'ALL' ||
+      (v.police_station && v.police_station.trim().toLowerCase() === stationFilter.trim().toLowerCase());
     const matchesStatus =
       statusFilter === 'ALL' ||
       (statusFilter === 'ACTIVE' && v.is_active) ||
@@ -329,6 +381,17 @@ export default function VahicalList() {
     return matchesSearch && matchesStation && matchesStatus;
   });
 
+  // Track if any filter or search query is currently active
+  const hasActiveFilters = searchQuery !== '' || stationFilter !== 'ALL' || statusFilter !== 'ALL';
+
+  // Reset all filters and search query back to defaults
+  const handleResetFilters = () => {
+    setSearchQuery('');
+    setStationFilter('ALL');
+    setStatusFilter('ALL');
+    setCurrentPage(1);
+  };
+
   // Paginated vehicles slice
   const startIndex = (currentPage - 1) * pageSize;
   const paginatedVehicles = filteredVehicles.slice(startIndex, startIndex + pageSize);
@@ -336,9 +399,21 @@ export default function VahicalList() {
   // Open Form for Add
   const handleOpenAddModal = () => {
     setEditingVehicle(null);
+
+    // Calculate highest existing PATROL_VAN number to suggest next unique ID
+    const maxNum = vehicles.reduce((max, v) => {
+      const match = v.vehicle_id?.match(/PATROL_VAN_(\d+)/i);
+      if (match) {
+        const num = parseInt(match[1], 10);
+        return num > max ? num : max;
+      }
+      return max;
+    }, 0);
+    const nextVehicleId = `PATROL_VAN_${String(maxNum + 1).padStart(2, '0')}`;
+
     setFormData({
       ...initialFormState,
-      vehicle_id: `PATROL_VAN_0${vehicles.length + 1}`
+      vehicle_id: nextVehicleId
     });
     setIsFormModalOpen(true);
   };
@@ -365,22 +440,41 @@ export default function VahicalList() {
     setIsViewModalOpen(true);
   };
 
-  // Toggle Active Status
-  const handleToggleStatus = (vehicleId) => {
+  // Toggle Active Status (PUT /api/vehicles/:id)
+  const handleToggleStatus = async (vehicleId) => {
+    const target = vehicles.find(v => v.vehicle_id === vehicleId || v.id === vehicleId);
+    if (!target) return;
+    const newStatus = !target.is_active;
+
+    // Optimistic UI update
     setVehicles(prev =>
-      prev.map(v => (v.vehicle_id === vehicleId ? { ...v, is_active: !v.is_active } : v))
+      prev.map(v => (v.vehicle_id === vehicleId || v.id === vehicleId ? { ...v, is_active: newStatus } : v))
     );
-    Swal.fire({
-      toast: true,
-      position: 'top-end',
-      icon: 'success',
-      title: 'Status Updated',
-      showConfirmButton: false,
-      timer: 1500
-    });
+
+    try {
+      const res = await updateVehicleApi(target.id || target.vehicle_id, { is_active: newStatus ? 1 : 0 });
+      if (res && res.success === false) {
+        throw new Error(res.error || 'Failed to update vehicle status on server');
+      }
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: `Status set to ${newStatus ? 'Active' : 'Inactive'}`,
+        showConfirmButton: false,
+        timer: 1500
+      });
+    } catch (apiErr) {
+      // Revert if server failed
+      setVehicles(prev =>
+        prev.map(v => (v.vehicle_id === vehicleId || v.id === vehicleId ? { ...v, is_active: target.is_active } : v))
+      );
+      const msg = apiErr.response?.data?.error || apiErr.message || 'Status update failed on server.';
+      Swal.fire('Error', msg, 'error');
+    }
   };
 
-  // Delete Vehicle
+  // Delete Vehicle (DELETE /api/vehicles/:id)
   const handleDeleteVehicle = (vehicle) => {
     Swal.fire({
       title: 'Decommission Vehicle?',
@@ -390,51 +484,119 @@ export default function VahicalList() {
       confirmButtonColor: '#dc2626',
       cancelButtonColor: '#64748b',
       confirmButtonText: 'Yes, Decommission'
-    }).then(result => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        setVehicles(prev => prev.filter(v => v.vehicle_id !== vehicle.vehicle_id));
-        Swal.fire('Decommissioned!', `${vehicle.vehicle_id} has been removed from active fleet.`, 'success');
+        try {
+          const res = await deleteVehicleApi(vehicle.id || vehicle.vehicle_id);
+          if (res && res.success === false) {
+            throw new Error(res.error || 'Failed to delete vehicle from server');
+          }
+          setVehicles(prev => prev.filter(v => v.vehicle_id !== vehicle.vehicle_id && v.id !== vehicle.id));
+          Swal.fire('Decommissioned!', `${vehicle.vehicle_id} has been removed from active fleet.`, 'success');
+        } catch (apiErr) {
+          const msg = apiErr.response?.data?.error || apiErr.message || 'Could not delete vehicle from server.';
+          Swal.fire('Error', msg, 'error');
+        }
       }
     });
   };
 
-  // Form Submit
-  const handleSubmitForm = (e) => {
+  // Form Submit (POST /api/vehicles or PUT /api/vehicles/:id)
+  const handleSubmitForm = async (e) => {
     e.preventDefault();
     if (!formData.registration_number.trim()) {
       Swal.fire('Error', 'Please enter a valid vehicle registration number.', 'error');
       return;
     }
 
-    if (editingVehicle) {
-      setVehicles(prev =>
-        prev.map(v => (v.vehicle_id === editingVehicle.vehicle_id ? { ...v, ...formData } : v))
-      );
-      Swal.fire('Updated!', `Vehicle ${formData.vehicle_id} details have been updated.`, 'success');
-    } else {
-      const newVehicle = {
-        ...formData,
-        vehicle_id: formData.vehicle_id || `PATROL_VAN_${Date.now().toString().slice(-4)}`,
-        created_at: new Date().toISOString(),
-        cameras: [
-          { camera_id: 'CAM_FRONT', mount_position: 'FRONT_DASH', rtsp_url: 'rtsp://jetson.local:8554/front' },
-          { camera_id: 'CAM_REAR', mount_position: 'REAR_DASH', rtsp_url: 'rtsp://jetson.local:8554/rear' },
-          { camera_id: 'CAM_LEFT', mount_position: 'LEFT_SIDE', rtsp_url: 'rtsp://jetson.local:8554/left' },
-          { camera_id: 'CAM_RIGHT', mount_position: 'RIGHT_SIDE', rtsp_url: 'rtsp://jetson.local:8554/right' }
-        ],
-        telemetry: {
-          speed_kmph: 0,
-          latitude: 23.0338,
-          longitude: 72.585,
-          battery_voltage: 13.8,
-          jetson_temperature_c: 42.0,
-          network_signal_dbm: -65
+    setIsSubmitting(true);
+    const payload = {
+      vehicle_id: formData.vehicle_id.trim().toUpperCase(),
+      registration_number: formData.registration_number.trim().toUpperCase(),
+      vehicle_model: formData.vehicle_model || 'Mahindra Scorpio Classic',
+      police_station: formData.police_station || 'Navrangpura Police Station',
+      assigned_driver_officer: formData.assigned_driver_officer || '',
+      jetson_device_serial: formData.jetson_device_serial || '',
+      sim_card_phone: formData.sim_card_phone || '',
+      is_active: formData.is_active ? 1 : 0
+    };
+
+    try {
+      if (editingVehicle) {
+        const vehicleRecordId = editingVehicle.id || editingVehicle.vehicle_id;
+        const res = await updateVehicleApi(vehicleRecordId, payload);
+        if (res && res.success === false) {
+          throw new Error(res.error || 'Server rejected vehicle update');
         }
-      };
-      setVehicles(prev => [newVehicle, ...prev]);
-      Swal.fire('Registered!', `New Patrol Vehicle ${newVehicle.registration_number} registered successfully.`, 'success');
+
+        setVehicles(prev =>
+          prev.map(v => (v.vehicle_id === editingVehicle.vehicle_id || v.id === editingVehicle.id ? { ...v, ...formData } : v))
+        );
+        Swal.fire({
+          icon: 'success',
+          title: 'Updated!',
+          text: `Vehicle ${formData.vehicle_id} details have been updated.`,
+          timer: 2000,
+          showConfirmButton: false
+        });
+        setIsFormModalOpen(false);
+      } else {
+        const res = await createVehicleApi(payload);
+        if (res && res.success === false) {
+          throw new Error(res.error || 'Server rejected vehicle registration');
+        }
+
+        const createdId = res?.data?.id || Date.now();
+        const newVehicle = {
+          id: createdId,
+          ...formData,
+          vehicle_id: payload.vehicle_id,
+          registration_number: payload.registration_number,
+          vehicle_model: payload.vehicle_model,
+          police_station: payload.police_station,
+          created_at: new Date().toISOString(),
+          cameras: [
+            { camera_id: 'CAM_FRONT', mount_position: 'FRONT_DASH', rtsp_url: `rtsp://jetson.local:8554/${payload.vehicle_id}/front` },
+            { camera_id: 'CAM_REAR', mount_position: 'REAR_DASH', rtsp_url: `rtsp://jetson.local:8554/${payload.vehicle_id}/rear` },
+            { camera_id: 'CAM_LEFT', mount_position: 'LEFT_SIDE', rtsp_url: `rtsp://jetson.local:8554/${payload.vehicle_id}/left` },
+            { camera_id: 'CAM_RIGHT', mount_position: 'RIGHT_SIDE', rtsp_url: `rtsp://jetson.local:8554/${payload.vehicle_id}/right` }
+          ],
+          telemetry: {
+            speed_kmph: 0,
+            latitude: 23.0338,
+            longitude: 72.585,
+            battery_voltage: 13.8,
+            jetson_temperature_c: 42.0,
+            network_signal_dbm: -65
+          }
+        };
+
+        setVehicles(prev => [newVehicle, ...prev]);
+        Swal.fire({
+          icon: 'success',
+          title: 'Registered!',
+          text: `New Patrol Vehicle ${newVehicle.registration_number} registered successfully.`,
+          timer: 2000,
+          showConfirmButton: false
+        });
+        setIsFormModalOpen(false);
+      }
+    } catch (err) {
+      const serverErrMsg =
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        err.message ||
+        'Vehicle registration failed. Please check details.';
+
+      Swal.fire({
+        icon: 'error',
+        title: 'Registration Error',
+        text: serverErrMsg,
+        footer: 'Vehicle ID ya Registration Plate check karein, ye already exist kar raha hai.'
+      });
+    } finally {
+      setIsSubmitting(false);
     }
-    setIsFormModalOpen(false);
   };
 
   const totalUnits = vehicles.length;
@@ -459,10 +621,26 @@ export default function VahicalList() {
             <span className="text-primary d-inline-flex"><IconCar size={22} /></span>
             <h1 className="h4 fw-bold text-dark mb-0">Police Vehicle Master Registry</h1>
             <span className="badge bg-primary text-white ms-1 fw-bold">{totalUnits} FLEET UNITS</span>
+
           </div>
           <p className="text-muted small mb-0 mt-1">
             Manage police patrol vehicles, onboard Jetson AI device serials, assigned drivers & telemetry
           </p>
+        </div>
+        <div className="d-flex align-items-center gap-2">
+          <button
+            className="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1.5 shadow-sm px-3"
+            onClick={fetchVehiclesApi}
+            disabled={isLoading}
+            title="Refresh fleet data from server"
+          >
+            {isLoading ? (
+              <span className="spinner-border spinner-border-sm" role="status" />
+            ) : (
+              <span>🔄</span>
+            )}
+            <span className="fw-semibold">Sync Fleet</span>
+          </button>
         </div>
       </div>
 
@@ -630,14 +808,14 @@ export default function VahicalList() {
                 value={stationFilter}
                 onChange={(e) => setStationFilter(e.target.value)}
                 className="form-select form-select-sm fw-semibold text-dark"
-                style={{ width: 'auto', minWidth: '130px' }}
+                style={{ width: 'auto', minWidth: '140px' }}
               >
-                <option value="ALL">All Stations</option>
-                <option value="Navrangpura">Navrangpura</option>
-                <option value="Vastrapur">Vastrapur</option>
-                <option value="Satellite">Satellite</option>
-                <option value="SG Highway">SG Highway</option>
-                <option value="Ellis Bridge">Ellis Bridge</option>
+                <option value="ALL">All Stations ({uniqueStations.length})</option>
+                {uniqueStations.map((station) => (
+                  <option key={station} value={station}>
+                    {station}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -655,6 +833,22 @@ export default function VahicalList() {
                 <option value="INACTIVE">Inactive</option>
               </select>
             </div>
+
+            {/* Reset / Refresh Filters Button */}
+            <button
+              type="button"
+              className={`btn btn-sm d-inline-flex align-items-center gap-1.5 shadow-none ${hasActiveFilters ? 'btn-primary text-white' : 'btn-outline-secondary'
+                }`}
+              onClick={handleResetFilters}
+              title="Reset all search and dropdown filters"
+              style={{ fontSize: '12px' }}
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                <path d="M3 3v5h5" />
+              </svg>
+              <span>Reset Filters</span>
+            </button>
           </div>
         </div>
 
@@ -849,7 +1043,7 @@ export default function VahicalList() {
                       </div>
 
                       {/* Police Station */}
-                      <div className="col-12 col-md-6">
+                      {/* <div className="col-12 col-md-6">
                         <label className="form-label small fw-bold text-dark mb-1">Assigned Police Station / Division <span className="text-danger">*</span></label>
                         <select
                           className="form-select form-select-sm fw-semibold text-dark"
@@ -863,7 +1057,34 @@ export default function VahicalList() {
                           <option value="SG Highway Police Station">SG Highway Police Station</option>
                           <option value="Ellis Bridge Police Station">Ellis Bridge Police Station</option>
                         </select>
+                      </div> */}
+
+
+
+                      {/* Police Station */}
+                      <div className="col-12 col-md-6">
+                        <label className="form-label small fw-bold text-dark mb-1">
+                          Assigned Police Station / Division{" "}
+                          <span className="text-danger">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          className="form-control form-control-sm fw-semibold text-dark"
+                          placeholder="Enter Police Station / Division"
+                          value={formData.police_station}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              police_station: e.target.value,
+                            })
+                          }
+                          style={{ borderColor: "#cbd5e1", fontSize: "12.5px" }}
+                          required
+                        />
                       </div>
+
+
+
                     </div>
                   </div>
 
@@ -986,10 +1207,20 @@ export default function VahicalList() {
                     </button>
                     <button
                       type="submit"
+                      disabled={isSubmitting}
                       className="btn btn-primary btn-sm px-4 fw-bold shadow-sm d-inline-flex align-items-center gap-1.5"
                     >
-                      <IconCheckCircle size={15} />
-                      <span>{editingVehicle ? 'Update Vehicle' : 'Save Patrol Unit'}</span>
+                      {isSubmitting ? (
+                        <>
+                          <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" />
+                          <span>Saving...</span>
+                        </>
+                      ) : (
+                        <>
+                          <IconCheckCircle size={15} />
+                          <span>{editingVehicle ? 'Update Vehicle' : 'Save Patrol Unit'}</span>
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>
@@ -1119,7 +1350,7 @@ export default function VahicalList() {
                         <span className="badge bg-white text-dark border font-mono small">
                           📱 {selectedVehicle.sim_card_phone || 'No SIM registered'}
                         </span>
-                        <span className="badge bg-success-subtle text-success small">Voice & 4G OK</span>
+
                       </div>
                     </div>
                   </div>
@@ -1135,8 +1366,7 @@ export default function VahicalList() {
                       </div>
                       <div className="fw-bold text-dark font-mono fs-6">{selectedVehicle.jetson_device_serial || 'JETSON-DEFAULT'}</div>
                       <div className="d-flex align-items-center gap-2 mt-1">
-                        <span className="badge bg-white text-dark border font-mono small">JetPack 6.0</span>
-                        <span className="badge bg-primary-subtle text-primary small">YOLOv8 + TensorRT</span>
+
                       </div>
                     </div>
                   </div>
@@ -1151,9 +1381,7 @@ export default function VahicalList() {
                         Onboard 4-Channel RTSP Camera Stream Array
                       </span>
                     </div>
-                    <span className="badge bg-danger text-white small fw-bold font-mono" style={{ fontSize: '10px' }}>
-                      ● 4 STREAMS ACTIVE
-                    </span>
+
                   </div>
 
                   <div className="row g-2">
@@ -1219,7 +1447,7 @@ export default function VahicalList() {
                           <div className="fw-bold font-mono text-success mt-1" style={{ fontSize: '18px' }}>
                             {selectedVehicle.telemetry.battery_voltage} <span className="text-muted fw-normal" style={{ fontSize: '11px' }}>V</span>
                           </div>
-                          <div className="text-muted small" style={{ fontSize: '10.5px' }}>Healthy (12V Base)</div>
+                          <div className="text-muted small" style={{ fontSize: '10.5px' }}>Healthy </div>
                         </div>
                       </div>
 

@@ -3,7 +3,7 @@ import Dashboard from '../pages/Dashboard';
 import PatrollingList from '../pages/patrolling/PatrollingList';
 import VehicleDetail from '../pages/patrolling/VehicleDetail';
 import VahicalList from '../pages/vehicalMaster/VahicalList';
-import PoliceMaster from '../pages/policeMaster/PoliceMaster';
+import UserMaster from '../pages/user/UserMaster';
 import CameraList from '../pages/cameraMaster/CameraList';
 import VehicleCameras from '../pages/cameraMaster/VehicleCameras';
 import WeaponsDetectionList from '../pages/reports/WeaponsDetectionList';
@@ -46,7 +46,7 @@ export const NAV_SECTIONS = [
         path: '/admin/users',
         label: 'User',
         icon: <IconUsers size={16} />,
-        element: PoliceMaster
+        element: UserMaster
       },
       {
         path: '/admin/vehicles',
@@ -140,7 +140,7 @@ export const EXTRA_ROUTES = [
   {
     path: '/police-master',
     label: 'Police Master',
-    element: PoliceMaster
+    element: UserMaster
   },
   {
     path: '/vehicle-cameras',
