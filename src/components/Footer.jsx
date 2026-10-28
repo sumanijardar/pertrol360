@@ -1,25 +1,29 @@
 import React from 'react';
+import { Badge } from './ui/badge';
 
 export default function Footer() {
   return (
-    <footer className="bg-white border-top py-2 px-3 d-flex justify-content-between align-items-center flex-wrap gap-2 small text-muted mt-auto" style={{ fontSize: '11px' }}>
-      <div className="d-flex align-items-center gap-2 flex-wrap">
-        <div className="d-flex align-items-center gap-1">
-          <span className="fw-bold text-dark">PATROL360</span>
-
-        </div>
-        <span>•</span>
+    <footer
+      className="bg-card/90 border-t border-border px-3.5 py-1.5 flex items-center justify-between flex-wrap gap-2 text-[11px] text-muted-foreground mt-auto transition-colors select-none"
+      style={{ minHeight: '30px' }}
+    >
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="font-semibold text-foreground tracking-tight">PATROL360</span>
+        <span className="text-border">•</span>
         <span>Government of Gujarat — Police Home Department</span>
-        <span>•</span>
-
-        <span>Edge Queue: <strong className="text-dark">Store-and-Forward Active</strong></span>
+        <span className="text-border">•</span>
+        <span>
+          Edge Queue: <strong className="font-medium text-foreground">Store-and-Forward Active</strong>
+        </span>
       </div>
 
-      <div className="d-flex align-items-center gap-2 font-mono" style={{ fontSize: '10px' }}>
-        <span className="badge bg-danger-subtle text-danger border border-danger-subtle fw-bold">
+      <div className="flex items-center gap-2 font-mono text-[10px]">
+        <Badge
+          variant="destructive"
+          className="text-[9.5px] font-semibold tracking-wide uppercase px-1.5 py-0 h-4 rounded"
+        >
           RESTRICTED / LAW ENFORCEMENT ONLY
-        </span>
-
+        </Badge>
       </div>
     </footer>
   );

@@ -10,31 +10,27 @@ export default function Layout({ children, onStationChange, currentStation = 'AL
 
   // If on Login page, render clean full-screen view without admin shell
   if (location.pathname === '/login') {
-    return <main className="w-100 min-vh-100">{children}</main>;
+    return <main className="w-full min-h-screen bg-background text-foreground">{children}</main>;
   }
 
   return (
     <div
-      className="d-flex vh-100 vw-100 overflow-hidden bg-light"
+      className="flex h-screen w-screen overflow-hidden bg-background text-foreground relative select-none"
       style={{
         width: '100vw',
         height: '100vh',
         maxWidth: '100vw',
         maxHeight: '100vh',
-        position: 'relative'
       }}
     >
-      {/* 1. Left Sidebar Navigation (Fixed pinned to left edge, zero horizontal displacement) */}
+      {/* 1. Left Sidebar Navigation */}
       <Sidebar
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       />
 
-      {/* 2. Main Work Area (Occupies strictly the remaining width, zero overflow-x) */}
-      <div
-        className="d-flex flex-column flex-grow-1 h-100 min-w-0 overflow-hidden"
-        style={{ width: 0 }}
-      >
+      {/* 2. Main Command Workspace */}
+      <div className="flex flex-col flex-1 h-full min-w-0 overflow-hidden">
         {/* Top Header Navbar */}
         <Header
           onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
@@ -43,12 +39,9 @@ export default function Layout({ children, onStationChange, currentStation = 'AL
           currentStation={currentStation}
         />
 
-        {/* Page Content View: Only this container handles vertical scrolling smoothly */}
-        <main
-          className="flex-grow-1 overflow-y-auto overflow-x-hidden d-flex flex-column"
-          style={{ width: '100%' }}
-        >
-          <div className="flex-grow-1">
+        {/* Page Content View */}
+        <main className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col bg-muted/20 w-full">
+          <div className="flex-1">
             {children}
           </div>
 

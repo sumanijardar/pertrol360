@@ -1,46 +1,173 @@
 @import "tailwindcss";
 
-/* PATROL360 — Professional Light Command Center Design System */
+/* ==========================================================================
+   PATROL360 — ShadCn Mira Style & Neutral Theme Design System
+   Density: Mira (High Density, Information-Rich, Compact)
+   Palette: Neutral (Crisp Blacks, Balanced Neutral Grays, Pure Highlights)
+   Typography: Inter / JetBrains Mono
+   ========================================================================== */
+
+@theme inline {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --radius-xs: calc(var(--radius) - 4px);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 4px);
+}
 
 :root {
+  /* ShadCn Neutral Palette */
+  --background: #ffffff;
+  --foreground: #09090b;
+  --card: #ffffff;
+  --card-foreground: #09090b;
+  --popover: #ffffff;
+  --popover-foreground: #09090b;
+  --primary: #18181b;
+  --primary-foreground: #fafafa;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #18181b;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  --accent: #f4f4f5;
+  --accent-foreground: #18181b;
+  --destructive: #ef4444;
+  --destructive-foreground: #fafafa;
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --ring: #18181b;
+
+  /* Mira High-Density Specs */
+  --radius: 0.375rem; /* 6px crisp radius */
+  --card-spacing: 0.875rem; /* Compact 14px padding */
+
+  /* Data Visualization / Charts (Neutral Monochromatic + Accents) */
+  --chart-1: #18181b;
+  --chart-2: #52525b;
+  --chart-3: #71717a;
+  --chart-4: #a1a1aa;
+  --chart-5: #d4d4d8;
+
+  /* Sidebar Theme (Neutral Clean) */
+  --sidebar: #fafafa;
+  --sidebar-foreground: #18181b;
+  --sidebar-primary: #18181b;
+  --sidebar-primary-foreground: #fafafa;
+  --sidebar-accent: #f4f4f5;
+  --sidebar-accent-foreground: #18181b;
+  --sidebar-border: #e4e4e7;
+  --sidebar-ring: #18181b;
+
+  /* Command Center Operational & Tactical Accents */
+  --police-blue: #1d4ed8;
+  --police-blue-subtle: #eff6ff;
+  --crimson-alert: #dc2626;
+  --crimson-subtle: #fef2f2;
+  --amber-warning: #d97706;
+  --amber-subtle: #fffbeb;
+  --emerald-safe: #059669;
+  --emerald-subtle: #ecfdf5;
+
+  /* Backward Compatibility / Global System Aliases */
   --bg-main: #f8fafc;
   --bg-card: #ffffff;
-  --bg-card-hover: #f1f5f9;
-  --bg-surface: #f8fafc;
-  --bg-input: #ffffff;
-  
-  --border-subtle: #f1f5f9;
-  --border-card: #e2e8f0;
-  --border-highlight: #cbd5e1;
-  
-  /* Ultra-Deep High-Contrast Pure Black Typography */
-  --text-main: #000000;
-  --text-muted: #0a0a0a;
-  --text-dim: #111827;
-  
-  --police-blue: #1d4ed8;
-  --police-cyan: #0284c7;
-  
-  --crimson-alert: #dc2626;
-  --amber-warning: #d97706;
-  --emerald-safe: #059669;
-  --purple-intel: #7c3aed;
-  
-  --font-sans: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --bg-card-hover: #f4f4f5;
+  --border-card: #e4e4e7;
+  --border-subtle: #f4f4f5;
+  --text-main: #09090b;
+  --text-muted: #52525b;
+  --text-dim: #71717a;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
-  
-  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
-  --shadow-hover: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
-  
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 12px;
+  --shadow-card: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  --shadow-hover: 0 4px 12px 0 rgba(0, 0, 0, 0.06);
 }
+
+.dark {
+  --background: #09090b;
+  --foreground: #fafafa;
+  --card: #09090b;
+  --card-foreground: #fafafa;
+  --popover: #09090b;
+  --popover-foreground: #fafafa;
+  --primary: #fafafa;
+  --primary-foreground: #18181b;
+  --secondary: #27272a;
+  --secondary-foreground: #fafafa;
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
+  --accent: #27272a;
+  --accent-foreground: #fafafa;
+  --destructive: #7f1d1d;
+  --destructive-foreground: #fafafa;
+  --border: #27272a;
+  --input: #27272a;
+  --ring: #d4d4d8;
+
+  --sidebar: #09090b;
+  --sidebar-foreground: #f4f4f5;
+  --sidebar-primary: #18181b;
+  --sidebar-primary-foreground: #fafafa;
+  --sidebar-accent: #27272a;
+  --sidebar-accent-foreground: #f4f4f5;
+  --sidebar-border: #27272a;
+  --sidebar-ring: #d4d4d8;
+
+  --bg-main: #09090b;
+  --bg-card: #18181b;
+  --bg-card-hover: #27272a;
+  --border-card: #27272a;
+  --text-main: #fafafa;
+  --text-muted: #a1a1aa;
+}
+
+/* ==========================================================================
+   Base Reset & Clean Layout
+   ========================================================================== */
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  border-color: var(--border);
 }
 
 html, body {
@@ -48,55 +175,16 @@ html, body {
   height: 100%;
   max-width: 100vw;
   overflow-x: hidden !important;
-  background-color: var(--bg-main);
-  color: #000000 !important;
+  background-color: var(--background);
+  color: var(--foreground);
   font-family: var(--font-sans);
   font-size: 13px;
-  font-weight: 600;
-  letter-spacing: -0.012em;
-  line-height: 1.4;
+  font-weight: 500;
+  letter-spacing: -0.011em;
+  line-height: 1.42;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-}
-
-/* Centralized Pure Dark Black Headings */
-h1, h2, h3, h4, h5, h6 {
-  color: #000000 !important;
-  font-weight: 800 !important;
-  letter-spacing: -0.02em;
-}
-
-p, span, div, label, td, th, input, select, button, li, a {
-  font-family: var(--font-sans);
-}
-
-/* Primary text and data numbers in crisp dark black */
-.text-dark, .kpi-num, strong, b, h1, h2, h3, h4, h5, h6 {
-  color: #000000 !important;
-}
-
-/* Table elements in crisp dark styling */
-th {
-  color: #000000 !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.02em;
-}
-
-td {
-  color: #0f172a !important;
-  font-weight: 600;
-}
-
-/* Inputs and Selects clear dark font */
-input, select, textarea {
-  color: #000000 !important;
-  font-weight: 600 !important;
-}
-
-input::placeholder {
-  color: #64748b !important;
-  font-weight: 500;
 }
 
 #root {
@@ -109,184 +197,160 @@ input::placeholder {
   overflow: hidden !important;
   display: flex;
   flex-direction: column;
-  background-color: var(--bg-main);
+  background-color: var(--background);
 }
 
-/* Custom Scrollbars */
+/* Typography matching ShadCn Mira */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--foreground);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+p, span, div, label, td, th, input, select, button, li, a {
+  font-family: var(--font-sans);
+}
+
+/* Inputs & Form Controls in Mira density */
+input, select, textarea {
+  color: var(--foreground);
+  font-size: 12px;
+  background-color: var(--background);
+  border: 1px solid var(--input);
+  border-radius: var(--radius);
+  transition: all 0.15s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--ring);
+  box-shadow: 0 0 0 1px var(--ring);
+}
+
+input::placeholder {
+  color: var(--muted-foreground);
+  font-weight: 400;
+}
+
+/* Custom Sleek Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
+  background: #d4d4d8;
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #a1a1aa;
 }
 
 .font-mono {
   font-family: var(--font-mono);
 }
 
-/* Animations */
-@keyframes pulseGlow {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.65;
-    transform: scale(1.08);
-  }
-}
+/* ==========================================================================
+   ShadCn Mira Components & Density Helpers
+   ========================================================================== */
 
-@keyframes sirenFlash {
-  0%, 100% {
-    background-color: #fee2e2;
-    border-color: #ef4444;
-  }
-  50% {
-    background-color: #dbeafe;
-    border-color: #3b82f6;
-  }
-}
-
-@keyframes radarSweep {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.animate-siren {
-  animation: sirenFlash 2s infinite ease-in-out;
-}
-
-.animate-radar {
-  animation: radarSweep 6s infinite linear;
-}
-
-/* Executive Card Styles */
+/* Mira Compact Card */
 .patrol-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-card);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-card);
-  transition: all 0.2s ease;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
   position: relative;
   overflow: hidden;
 }
 
 .patrol-card:hover {
-  box-shadow: var(--shadow-hover);
-  border-color: #cbd5e1;
+  border-color: #a1a1aa;
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.05);
 }
 
 .patrol-card-header {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border-card);
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  background: #ffffff;
+  gap: 8px;
+  background: var(--card);
 }
 
 .patrol-card-title {
-  font-size: 13px;
-  font-weight: 800;
+  font-size: 12.5px;
+  font-weight: 600;
   letter-spacing: -0.01em;
-  color: #000000;
+  color: var(--foreground);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
-/* Tactical Badges Complementing Bootstrap 5 */
-.badge-tactical {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 8px;
-  border-radius: 4px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-}
-
-.badge-critical {
-  background: #fee2e2;
-  color: #b91c1c;
-  border: 1px solid #fca5a5;
-}
-
-.badge-warning {
-  background: #fef3c7;
-  color: #b45309;
-  border: 1px solid #fde68a;
-}
-
-.badge-success {
-  background: #d1fae5;
-  color: #047857;
-  border: 1px solid #a7f3d0;
-}
-
-.badge-info {
-  background: #e0f2fe;
-  color: #0369a1;
-  border: 1px solid #bae6fd;
-}
-
-.badge-purple {
-  background: #ede9fe;
-  color: #6d28d9;
-  border: 1px solid #ddd6fe;
-}
-
-/* Indian High Security License Plate */
-.ind-number-plate {
-  display: inline-flex;
-  align-items: center;
-  background: #ffffff;
-  color: #111827;
-  font-family: var(--font-mono);
-  font-weight: 700;
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  padding: 2px 7px 2px 5px;
-  border-radius: 4px;
-  border: 1.5px solid #1e293b;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+/* KPI Count Metric Card in Mira Neutral Style */
+.kpi-count-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
   position: relative;
-  user-select: none;
-}
-
-.ind-number-plate .ind-flag {
+  overflow: hidden;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-right: 5px;
-  padding-right: 5px;
-  border-right: 1.5px solid #2563eb;
-  font-size: 8px;
-  line-height: 1;
-  color: #1d4ed8;
-  font-weight: 800;
+  justify-content: space-between;
+  min-height: 96px;
 }
 
-/* 5-Column Balanced Metrics Grid (NO WRAPPING ARTIFACTS) */
+.kpi-count-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px -3px rgba(0, 0, 0, 0.08);
+  border-color: #a1a1aa;
+}
+
+.kpi-count-card .kpi-num {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.1;
+  font-family: var(--font-mono);
+  letter-spacing: -0.02em;
+  color: var(--foreground);
+  transition: transform 0.2s ease;
+}
+
+.kpi-count-card:hover .kpi-num {
+  transform: scale(1.03);
+  transform-origin: left center;
+}
+
+.kpi-count-card .kpi-icon-pill {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+}
+
+.kpi-count-card:hover .kpi-icon-pill {
+  transform: scale(1.08);
+}
+
+/* Balanced 5-Column Metrics Grid */
 .kpi-row-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 14px;
+  gap: 12px;
   width: 100%;
 }
 
@@ -308,11 +372,10 @@ input::placeholder {
   }
 }
 
-/* Split Rows */
 .split-hub-grid {
   display: grid;
   grid-template-columns: 1.15fr 0.85fr;
-  gap: 16px;
+  gap: 14px;
   width: 100%;
 }
 
@@ -322,66 +385,113 @@ input::placeholder {
   }
 }
 
-/* Animated Interactive KPI Count Card */
-.kpi-count-card {
+/* Mira Style Subtle Badges */
+.badge-tactical {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.badge-critical {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.badge-warning {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.badge-success {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.badge-info {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.badge-neutral {
+  background: #f4f4f5;
+  color: #18181b;
+  border: 1px solid #e4e4e7;
+}
+
+/* Indian High Security License Plate */
+.ind-number-plate {
+  display: inline-flex;
+  align-items: center;
   background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 12px 14px;
+  color: #18181b;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  padding: 2px 6px 2px 4px;
+  border-radius: 4px;
+  border: 1px solid #18181b;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
   position: relative;
-  overflow: hidden;
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  user-select: none;
+}
+
+.ind-number-plate .ind-flag {
   display: flex;
   flex-direction: column;
-  justifyContent: space-between;
-  min-height: 104px;
-  cursor: default;
-}
-
-.kpi-count-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 16px -4px rgba(15, 23, 42, 0.1), 0 4px 6px -2px rgba(15, 23, 42, 0.05);
-  border-color: #cbd5e1;
-}
-
-.kpi-count-card .kpi-num {
-  font-size: 24px;
-  font-weight: 800;
-  line-height: 1.1;
-  font-family: 'JetBrains Mono', monospace;
-  letter-spacing: -0.02em;
-  transition: transform 0.2s ease, color 0.2s ease;
-}
-
-.kpi-count-card:hover .kpi-num {
-  transform: scale(1.05);
-  transform-origin: left center;
-}
-
-.kpi-count-card .kpi-icon-pill {
-  width: 42px;
-  height: 42px;
-  border-radius: 10px;
-  display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  margin-right: 5px;
+  padding-right: 5px;
+  border-right: 1.5px solid #2563eb;
+  font-size: 8px;
+  line-height: 1;
+  color: #1d4ed8;
+  font-weight: 800;
 }
 
-.kpi-count-card:hover .kpi-icon-pill {
-  transform: scale(1.12) rotate(6deg);
+/* Pulsing radar & siren animations */
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.65;
+    transform: scale(1.08);
+  }
 }
 
-.kpi-count-card::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 100%);
-  pointer-events: none;
+@keyframes sirenFlash {
+  0%, 100% {
+    background-color: #fee2e2;
+    border-color: #ef4444;
+  }
+  50% {
+    background-color: #eff6ff;
+    border-color: #3b82f6;
+  }
 }
 
+@keyframes radarSweep {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.animate-siren {
+  animation: sirenFlash 2s infinite ease-in-out;
+}
+
+.animate-radar {
+  animation: radarSweep 6s infinite linear;
+}
