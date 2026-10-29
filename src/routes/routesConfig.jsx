@@ -9,6 +9,7 @@ import VehicleCameras from '../pages/cameraMaster/VehicleCameras';
 import WeaponsDetectionList from '../pages/reports/WeaponsDetectionList';
 import WantedSuspectList from '../pages/reports/WantedSuspectList';
 import SuspectDetail from '../pages/reports/SuspectDetail';
+import AiAlerts from '../pages/aialert/AiAlerts';
 import Login from '../pages/auth/Login';
 import {
   IconDashboard,
@@ -60,13 +61,13 @@ export const NAV_SECTIONS = [
         icon: <IconCamera size={16} />,
         element: CameraList
       },
-      {
-        path: '/admin/camera-mapping',
-        label: 'Camera Mapping',
-        sublabel: 'Vehicle + Camera (Multiple)',
-        icon: <IconVideo size={16} />,
-        element: VehicleCameras
-      }
+      // {
+      //   path: '/admin/camera-mapping',
+      //   label: 'Camera Mapping',
+      //   sublabel: 'Vehicle + Camera (Multiple)',
+      //   icon: <IconVideo size={16} />,
+      //   element: VehicleCameras
+      // }
     ]
   },
   {
@@ -108,6 +109,14 @@ export const NAV_SECTIONS = [
         icon: <IconCrosshair size={17} />,
         element: WeaponsDetectionList,
         badge: 'THREAT',
+        badgeClass: 'bg-danger-subtle text-danger border border-danger-subtle'
+      },
+      {
+        path: '/ai-alerts',
+        label: 'Ai Alerts',
+        icon: <IconCrosshair size={17} />,
+        element: AiAlerts,
+        badge: 'LIVE',
         badgeClass: 'bg-danger-subtle text-danger border border-danger-subtle'
       }
     ]

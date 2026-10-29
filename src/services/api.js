@@ -376,5 +376,47 @@ export async function getDashboardStatsApi() {
   }
 }
 
+/* ==========================================================================
+   AI ALERTS APIS (/api/ai-alerts)
+   ========================================================================== */
+
+/**
+ * Fetch list of AI alerts with pagination, status, and filter parameters
+ * @param {object} params - { page, limit, status, alerttype, search }
+ * @returns {Promise<object>}
+ */
+export async function getAiAlertsApi(params = {}) {
+  const cleanParams = {};
+  if (params.page) cleanParams.page = params.page;
+  if (params.limit) cleanParams.limit = params.limit;
+  if (params.status && params.status !== 'ALL') cleanParams.status = params.status;
+  if (params.alerttype && params.alerttype !== 'ALL') cleanParams.alerttype = params.alerttype;
+  if (params.search && params.search.trim()) cleanParams.search = params.search.trim();
+
+  const response = await api.get('/api/ai-alerts', { params: cleanParams });
+  return response.data;
+}
+
+/**
+ * Fetch detailed AI alert data including base64 snapshot image
+ * @param {string|number} id
+ * @returns {Promise<object>}
+ */
+export async function getAiAlertByIdApi(id) {
+  const response = await api.get(`/api/ai-alerts/${id}`);
+  return response.data;
+}
+
+/**
+ * Update AI alert details (e.g. comment, status 'O'/'C', closedBy)
+ * @param {string|number} id
+ * @param {object} updateData - { comment, status, closedBy }
+ * @returns {Promise<object>}
+ */
+export async function updateAiAlertApi(id, updateData) {
+  const response = await api.put(`/api/ai-alerts/${id}`, updateData);
+  return response.data;
+}
+
 export default api;
 
