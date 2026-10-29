@@ -11,6 +11,9 @@ import WantedSuspectList from '../pages/reports/WantedSuspectList';
 import SuspectDetail from '../pages/reports/SuspectDetail';
 import AiAlerts from '../pages/aialert/AiAlerts';
 import Login from '../pages/auth/Login';
+import OfficerCockpit from '../pages/officer/OfficerCockpit';
+import OfficerAlerts from '../pages/officer/OfficerAlerts';
+import PlateLookup from '../pages/officer/PlateLookup';
 import {
   IconDashboard,
   IconCar,
@@ -24,89 +27,110 @@ import {
 
 /**
  * =========================================================================
- * CENTRALIZED ROUTES & NAVIGATION CONFIGURATION
+ * CENTRALIZED ROUTES & NAVIGATION CONFIGURATION WITH RBAC
  * =========================================================================
- * Strictly ordered as requested:
- * 1. Admin (Master Menu)
- *    - User
- *    - Vehicles
- *    - Camera
- *    - Camera Mapping [Vehicle + Camera (Multiple)]
- * 2. Dashboard
- * 3. Patrolling (5-grid column layout -> Dedicated Vehicle Live Cameras & Alerts)
- * 4. Weapon Detection
+ * - Officer / Field User: Focused on Tactical In-Vehicle Cockpit, Alerts, Plate Lookup
+ * - Admin: Full Master CRUD (Users, Vehicles, Cameras, Reports) + Tactical Edge
  */
 
 export const NAV_SECTIONS = [
+  // 1. OFFICER TACTICAL EDGE (Accessible by Officers, Field Users, and Admin)
   {
-    title: 'Admin',
-    isMasterMenu: true,
-    icon: <IconSettings size={16} />,
+    title: 'Tactical Edge Operations',
+    forRoles: ['officer', 'user', 'admin'],
     items: [
       {
-        path: '/admin/users',
-        label: 'User',
-        icon: <IconUsers size={16} />,
-        element: UserMaster
+        path: '/officer/cockpit',
+        label: 'In-Vehicle Cockpit',
+        icon: <IconCar size={17} />,
+        element: OfficerCockpit,
+        badge: 'EDGE',
+        isOfficerHome: true
       },
       {
-        path: '/admin/vehicles',
-        label: 'Vehicles',
-        icon: <IconCar size={16} />,
-        element: VahicalList
+        path: '/officer/alerts',
+        label: 'AI Alerts Stream',
+        icon: <IconAlertTriangle size={17} />,
+        element: OfficerAlerts
       },
       {
-        path: '/admin/cameras',
-        label: 'Camera',
-        icon: <IconCamera size={16} />,
-        element: CameraList
-      },
-      // {
-      //   path: '/admin/camera-mapping',
-      //   label: 'Camera Mapping',
-      //   sublabel: 'Vehicle + Camera (Multiple)',
-      //   icon: <IconVideo size={16} />,
-      //   element: VehicleCameras
-      // }
-    ]
-  },
-  {
-    title: 'Operations',
-    items: [
-      {
-        path: '/dashboard',
-        label: 'Dashboard',
-        icon: <IconDashboard size={17} />,
-        element: Dashboard,
-        isDefault: true
+        path: '/officer/plate-lookup',
+        label: 'Plate Hotlist Search',
+        icon: <IconCrosshair size={17} />,
+        element: PlateLookup
       },
       {
         path: '/patrolling',
-        label: 'Patrolling',
+        label: 'Patrolling Map',
         icon: <IconCar size={17} />,
-        element: PatrollingList,
-
+        element: PatrollingList
       }
     ]
   },
+
+  // 2. FIELD THREAT INTELLIGENCE (Shared: Officers & Admins)
   {
-    title: 'Intelligence Reports',
+    title: 'Threat Intelligence',
+    forRoles: ['officer', 'user', 'admin'],
     items: [
       {
         path: '/reports/wanted-suspects',
-        label: 'Wanted Suspects',
+        label: 'Wanted Suspects (FRS)',
         icon: <IconAlertTriangle size={16} />,
         element: WantedSuspectList
       },
       {
         path: '/weapon-detection',
-        label: 'Weapon Detection',
+        label: 'Weapon Threats',
         icon: <IconCrosshair size={17} />,
-        element: WeaponsDetectionList,
+        element: WeaponsDetectionList
+      }
+    ]
+  },
+
+  // 3. ADMIN MASTER DIRECTORY (ADMIN ONLY)
+  {
+    title: 'Admin Master Menu',
+    isMasterMenu: true,
+    forRoles: ['admin'],
+    icon: <IconSettings size={16} />,
+    items: [
+      {
+        path: '/admin/users',
+        label: 'User Master',
+        icon: <IconUsers size={16} />,
+        element: UserMaster
+      },
+      {
+        path: '/admin/vehicles',
+        label: 'Vehicles Master',
+        icon: <IconCar size={16} />,
+        element: VahicalList
+      },
+      {
+        path: '/admin/cameras',
+        label: 'Camera Master',
+        icon: <IconCamera size={16} />,
+        element: CameraList
+      }
+    ]
+  },
+
+  // 4. COMMAND OVERVIEW & AUDIT (ADMIN ONLY)
+  {
+    title: 'Command Intelligence',
+    forRoles: ['admin'],
+    items: [
+      {
+        path: '/dashboard',
+        label: 'Command Dashboard',
+        icon: <IconDashboard size={17} />,
+        element: Dashboard,
+        isDefault: true
       },
       {
         path: '/ai-alerts',
-        label: 'Ai Alerts',
+        label: 'Ai Alerts (Admin Table)',
         icon: <IconCrosshair size={17} />,
         element: AiAlerts
       }
@@ -114,12 +138,26 @@ export const NAV_SECTIONS = [
   }
 ];
 
-// Any routes not shown directly in sidebar (e.g. details, legacy aliases)
+// Helper to filter navigation sections for the active user role
+export const getNavSectionsForRole = (role = 'user') => {
+  const normRole = (role || 'user').toLowerCase();
+  return NAV_SECTIONS.filter((sec) => {
+    if (!sec.forRoles) return true;
+    return sec.forRoles.includes(normRole);
+  });
+};
+
+// Any routes not shown directly in sidebar (details, aliases, etc.)
 export const EXTRA_ROUTES = [
   {
     path: '/login',
     label: 'Command Center Login',
     element: Login
+  },
+  {
+    path: '/officer',
+    label: 'Officer Cockpit',
+    element: OfficerCockpit
   },
   {
     path: '/patrolling/:vehicleId',
@@ -131,7 +169,7 @@ export const EXTRA_ROUTES = [
     label: 'Suspect Details & Dossier',
     element: SuspectDetail
   },
-  // Legacy aliases for backward compatibility
+  // Legacy aliases
   {
     path: '/vehicles',
     label: 'Vehicles Master',

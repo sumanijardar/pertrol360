@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Swal from 'sweetalert2';
+import { toast } from '../../components/common/Toast';
 import { IconShieldAlert } from '../../components/common/Icons';
 import { loginApi } from '../../services/api';
 
@@ -26,17 +26,7 @@ export default function Login() {
     e.preventDefault();
 
     if (!email.trim() || !password.trim()) {
-      Swal.fire({
-        title: 'Missing Credentials',
-        text: 'Please enter both your officer email address and password.',
-        icon: 'warning',
-        confirmButtonColor: '#18181b',
-        background: '#ffffff',
-        color: '#09090b',
-        customClass: {
-          popup: 'border border-[#e4e4e7] rounded-xl shadow-lg'
-        }
-      });
+      toast.warning('Please enter both your officer email address and password.', 'Missing Credentials');
       return;
     }
 
@@ -44,33 +34,21 @@ export default function Login() {
 
     try {
       const res = await loginApi(email, password);
+      const userRole = (res.user?.role || localStorage.getItem('patrol360_role') || 'user').toLowerCase();
+      const isOfficer = userRole === 'officer' || userRole === 'user';
 
-      Swal.fire({
-        title: 'Authentication Verified',
-        text: `Welcome back, ${res.user?.name || res.user?.officer_name || 'Officer'}!`,
-        icon: 'success',
-        timer: 1200,
-        showConfirmButton: false,
-        background: '#ffffff',
-        color: '#09090b',
-        customClass: {
-          popup: 'border border-[#e4e4e7] rounded-xl shadow-lg'
-        }
-      }).then(() => {
+      toast.success(
+        `Welcome back, ${res.user?.name || res.user?.officer_name || 'Officer'}! Logged in as ${isOfficer ? 'Tactical Field Officer' : 'System Administrator'}.`,
+        'Authentication Verified'
+      );
+
+      if (isOfficer) {
+        navigate('/officer/cockpit');
+      } else {
         navigate('/dashboard');
-      });
+      }
     } catch (err) {
-      Swal.fire({
-        title: 'Access Denied',
-        text: err.message || 'Invalid email or password. Please verify your credentials.',
-        icon: 'error',
-        confirmButtonColor: '#dc2626',
-        background: '#ffffff',
-        color: '#09090b',
-        customClass: {
-          popup: 'border border-[#e4e4e7] rounded-xl shadow-lg'
-        }
-      });
+      toast.error(err.message || 'Invalid email or password. Please verify your credentials.', 'Access Denied');
     } finally {
       setIsLoading(false);
     }
@@ -183,7 +161,7 @@ export default function Login() {
         </div>
 
         {/* Login Form */}
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {/* Email Field */}
           <div>
             <label

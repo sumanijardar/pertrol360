@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import Swal from 'sweetalert2';
+import { toast, Swal } from '../../components/common/Toast';
 import {
   IconCamera,
   IconVideo,

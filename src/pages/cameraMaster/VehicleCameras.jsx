@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Swal from 'sweetalert2';
+import { toast, Swal } from '../../components/common/Toast';
 import { VEHICLE_CAMERA_MAPPINGS, POLICE_VEHICLES } from '../../data/mockData';
 import {
   IconVideo,

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import Swal from 'sweetalert2';
+import { toast, Swal } from '../../components/common/Toast';
 import {
   POLICE_VEHICLES,
   ANPR_DETECTION_EVENTS,

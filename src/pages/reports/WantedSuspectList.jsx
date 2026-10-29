@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Swal from 'sweetalert2';
+import { toast, Swal } from '../../components/common/Toast';
 import { WANTED_SUSPECTS } from '../../data/mockData';
 import {
     IconShieldAlert,

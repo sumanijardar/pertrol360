@@ -88,7 +88,21 @@ export default function PatrollingList({ stationFilter }) {
     WEAPON_THREAT_DETECTIONS.length + FIRE_SMOKE_DETECTIONS.length;
 
   return (
-    <div className="container-fluid px-3 py-3 patrolling-fleet-page">
+    <div
+      className="flex flex-col flex-1 w-full min-h-screen text-slate-800 font-sans patrolling-fleet-page"
+      style={{
+        backgroundColor: '#f8fafc',
+        padding: '24px 32px 64px 32px',
+        boxSizing: 'border-box'
+      }}
+    >
+      <div
+        className="flex flex-col gap-6"
+        style={{
+          width: '100%',
+          boxSizing: 'border-box'
+        }}
+      >
 
       {/* Embedded CSS for 5-grid layout and interactive card styling */}
       <style>{`
@@ -277,7 +291,7 @@ export default function PatrollingList({ stationFilter }) {
       </div>
 
       {/* 2. FLEET KPI STATS OVERVIEW CARDS (ENLARGED & ANIMATED) */}
-      <div className="row g-3 mb-4 py-3">
+      <div className="row g-3 mx-0 mb-4">
         {/* Card 1: Total Fleet Units */}
         <div className="col-12 col-sm-6 col-xl-3">
           <div
@@ -709,6 +723,7 @@ export default function PatrollingList({ stationFilter }) {
         </div>
       )}
 
+      </div>
     </div>
   );
 }

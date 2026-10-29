@@ -1,7 +1,22 @@
 import React from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { getAllRoutes } from './routesConfig';
-import { isAuthenticated } from '../services/api';
+import { isAuthenticated, getUserRole } from '../services/api';
+
+/**
+ * Root Redirector: Sends authenticated officers to /officer/cockpit,
+ * authenticated admins to /dashboard, and unauthenticated to /login
+ */
+function RootRedirect() {
+  if (!isAuthenticated()) {
+    return <Navigate to="/login" replace />;
+  }
+  const role = (getUserRole() || 'user').toLowerCase();
+  if (role === 'officer' || role === 'user') {
+    return <Navigate to="/officer/cockpit" replace />;
+  }
+  return <Navigate to="/dashboard" replace />;
+}
 
 /**
  * Route Guard: Only accessible when officer/admin is authenticated
@@ -20,6 +35,8 @@ function ProtectedRoute({ children }) {
 // 404 Fallback Page
 function NotFoundPage() {
   const authed = isAuthenticated();
+  const role = (getUserRole() || 'user').toLowerCase();
+  const homePath = (role === 'officer' || role === 'user') ? '/officer/cockpit' : '/dashboard';
 
   return (
     <div
@@ -32,8 +49,8 @@ function NotFoundPage() {
         <p className="text-muted small mb-4">
           The requested command route does not exist or has been decommissioned.
         </p>
-        <a href={authed ? '/dashboard' : '/login'} className="btn btn-primary btn-sm px-3 py-2 fw-bold">
-          {authed ? 'Return to Dashboard' : 'Go to Login'}
+        <a href={authed ? homePath : '/login'} className="btn btn-primary btn-sm px-3 py-2 fw-bold">
+          {authed ? 'Return to Cockpit' : 'Go to Login'}
         </a>
       </div>
     </div>
@@ -45,8 +62,8 @@ export default function AppRoutes({ stationFilter }) {
 
   return (
     <Routes>
-      {/* Root redirect: ALWAYS show /login first when project starts or is opened */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      {/* Root redirect: Role-aware navigation */}
+      <Route path="/" element={<RootRedirect />} />
 
       {/* Dynamically generated routes */}
       {routes.map((r) => {

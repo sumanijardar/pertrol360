@@ -165,11 +165,11 @@
    Base Reset & Clean Layout
    ========================================================================== */
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  border-color: var(--border);
+@layer base {
+  *, ::after, ::before {
+    box-sizing: border-box;
+    border-color: var(--border);
+  }
 }
 
 html,

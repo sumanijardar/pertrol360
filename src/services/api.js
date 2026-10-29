@@ -6,7 +6,10 @@ import axios from 'axios';
  * If you ever need to change the API server, change it in .env only!
  */
 export const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'https://sarsspl.com/patrol360/backend/public';
+  import.meta.env.VITE_API_BASE_URL ||
+  (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost/vehicle_gov/backend/public'
+    : 'https://sarsspl.com/patrol360/backend/public');
 
 // Primary Axios Client Instance
 const api = axios.create({
@@ -420,6 +423,115 @@ export async function getAiAlertByIdApi(id) {
  */
 export async function updateAiAlertApi(id, updateData) {
   const response = await api.put(`/api/ai-alerts/${id}`, updateData);
+  return response.data;
+}
+
+/* ==========================================================================
+   OFFICER & TACTICAL FIELD APIS (/api/officer)
+   ========================================================================== */
+
+/**
+ * Dedicated In-Vehicle Edge Cockpit payload (officer, assigned vehicle, 4 cameras, telemetry, duty metrics, scoped alerts)
+ */
+export async function getMyActivityApi() {
+  const response = await api.get('/api/officer/my-activity');
+  return response.data;
+}
+
+/**
+ * Fleet-wide situational awareness (all vehicles, streaming cameras, citywide alert metrics)
+ */
+export async function getFleetActivityApi() {
+  const response = await api.get('/api/officer/fleet-activity');
+  return response.data;
+}
+
+/**
+ * Operational dashboard for field officers
+ */
+export async function getOfficerDashboardApi() {
+  const response = await api.get('/api/officer/dashboard');
+  return response.data;
+}
+
+/**
+ * Scoped alerts feed (supporting scope=my|all, status, vehicle_id, plate, alerttype, today, limit, page)
+ */
+export async function getOfficerAlertsApi(params = {}) {
+  const response = await api.get('/api/officer/alerts', { params });
+  return response.data;
+}
+
+/**
+ * Lightweight real-time polling with stolen siren audio trigger
+ */
+export async function pollOfficerLiveAlertsApi(params = {}) {
+  const response = await api.get('/api/officer/alerts/live', { params });
+  return response.data;
+}
+
+/**
+ * Inspect single alert details with stolen watchlist card
+ */
+export async function getOfficerAlertByIdApi(id) {
+  const response = await api.get(`/api/officer/alerts/${id}`);
+  return response.data;
+}
+
+/**
+ * 1-click Acknowledge alert (status='A')
+ */
+export async function acknowledgeOfficerAlertApi(id, note = 'Patrol unit acknowledged. In pursuit / en route.') {
+  const response = await api.put(`/api/officer/alerts/${id}/acknowledge`, { note });
+  return response.data;
+}
+
+/**
+ * Resolve alert with field action taken (status='C')
+ */
+export async function resolveOfficerAlertApi(id, data = {}) {
+  const response = await api.put(`/api/officer/alerts/${id}/resolve`, data);
+  return response.data;
+}
+
+/**
+ * Append field note to ongoing alert investigation
+ */
+export async function addOfficerNoteApi(id, note) {
+  const response = await api.post(`/api/officer/alerts/${id}/notes`, { note });
+  return response.data;
+}
+
+/**
+ * License plate intelligence lookup (stolen watchlist FIR + historical camera sightings)
+ */
+export async function lookupOfficerPlateApi(plate) {
+  const response = await api.get(`/api/officer/lookup/plate/${encodeURIComponent(plate)}`);
+  return response.data;
+}
+
+/**
+ * Assigned patrol car, telemetry, and 4 mounted cameras
+ */
+export async function getOfficerVehicleApi() {
+  const response = await api.get('/api/officer/my-vehicle');
+  return response.data;
+}
+
+/**
+ * List streaming vehicle cameras
+ */
+export async function getOfficerCamerasApi(vehicleId = null) {
+  const params = vehicleId ? { vehicle_id: vehicleId } : {};
+  const response = await api.get('/api/officer/cameras', { params });
+  return response.data;
+}
+
+/**
+ * Manual field incident ingest directly into AI alerts pipeline
+ */
+export async function reportOfficerIncidentApi(incidentData) {
+  const response = await api.post('/api/officer/report-incident', incidentData);
   return response.data;
 }
 

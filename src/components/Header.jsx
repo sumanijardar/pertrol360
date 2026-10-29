@@ -59,6 +59,18 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onSelectSt
   // Dynamic breadcrumb label from route
   const getPageTitle = (path) => {
     switch (path) {
+      case '/officer/cockpit':
+        return 'In-Vehicle Tactical Cockpit';
+      case '/officer/alerts':
+        return 'Officer Field Alerts Feed';
+      case '/officer/plate-lookup':
+        return 'ANPR Hotlist Plate Search';
+      case '/patrolling':
+        return 'Live GPS Patrolling Map';
+      case '/reports/wanted-suspects':
+        return 'Wanted Suspects (FRS)';
+      case '/weapon-detection':
+        return 'Real-Time Weapon Detection';
       case '/vehicles':
         return 'Vehicle Master Registry';
       case '/anpr-watchlist':
@@ -74,6 +86,7 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onSelectSt
       case '/duty-assignment':
         return 'Duty Allocation';
       case '/alerts-feed':
+      case '/ai-alerts':
         return 'AI Threat & Anomaly Alerts';
       case '/anpr-hits':
         return 'ANPR Hits Log';
@@ -100,8 +113,8 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onSelectSt
 
   return (
     <header
-      className="w-full bg-card/95 backdrop-blur-md border-b border-border flex items-center justify-between px-3 sticky top-0 z-30 transition-colors"
-      style={{ height: '48px' }}
+      className="w-full bg-card/95 backdrop-blur-md border-b border-border flex items-center justify-between px-5 sm:px-8 sticky top-0 z-30 transition-colors"
+      style={{ height: '52px' }}
     >
       {/* Left: Sidebar Toggle & Breadcrumb */}
       <div className="flex items-center gap-2.5">
@@ -220,7 +233,7 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onSelectSt
             }}
             onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f4f4f5')}
             onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#ffffff')}
-            title="Click to view Admin Details"
+            title={user?.role === 'admin' ? "Click to view Admin Details" : "Click to view Officer Profile"}
           >
             <span
               style={{
@@ -230,7 +243,7 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onSelectSt
                 letterSpacing: '-0.01em',
               }}
             >
-              Admin
+              {user?.role === 'admin' ? 'Admin' : 'Officer'}
             </span>
             <IconChevronDown
               size={13}
@@ -456,9 +469,31 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onSelectSt
                       borderRadius: '4px',
                     }}
                   >
-                    {user?.role === 'admin' ? 'SUPER_ADMIN' : 'COMMANDER'}
+                    {user?.role === 'admin' ? 'SUPER_ADMIN' : 'PATROL_OFFICER'}
                   </span>
                 </div>
+                {user?.role !== 'admin' && (
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      fontSize: '11px',
+                    }}
+                  >
+                    <span style={{ color: '#71717a', fontWeight: 500 }}>Assigned Unit:</span>
+                    <span
+                      style={{
+                        fontFamily: 'monospace',
+                        fontSize: '10.5px',
+                        fontWeight: 600,
+                        color: '#0284c7',
+                      }}
+                    >
+                      PATROL_VAN_01 (4-CAM)
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Divider */}
