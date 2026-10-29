@@ -29,10 +29,10 @@ export default function ExportExcelButton({
       onClick={handleExport}
       type="button"
       title="Download Excel Spreadsheet (.csv/.xls)"
-      className={`btn btn-success btn-sm d-inline-flex align-items-center gap-1 shadow-sm fw-semibold px-3 py-1 ${className}`}
-      style={{ fontSize: '12px', ...style }}
+      className={`inline-flex items-center justify-center gap-2 h-8 px-3.5 rounded-md text-xs font-medium bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/20 border border-emerald-500/20 shadow-2xs transition-colors cursor-pointer ${className}`}
+      style={{ minHeight: '32px', paddingLeft: '12px', paddingRight: '12px', gap: '8px', ...style }}
     >
-      <IconFileSpreadsheet size={16} color="#ffffff" />
+      <IconFileSpreadsheet size={14} className="text-emerald-700 flex-shrink-0" />
       <span>{label}</span>
     </button>
   );

@@ -203,7 +203,7 @@ export default function CameraList({ stationFilter = 'ALL' }) {
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(20);
 
   // Form Modal State
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -533,11 +533,12 @@ export default function CameraList({ stationFilter = 'ALL' }) {
             type="button"
             onClick={loadData}
             disabled={isLoading}
-            className="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1.5 shadow-sm fw-semibold"
+            className="btn btn-outline-secondary btn-sm d-inline-flex align-items-center justify-content-center gap-2 px-3 shadow-sm fw-semibold"
             style={{ height: '32px' }}
             title="Reload live camera data from backend"
           >
-            <span className={isLoading ? 'spinner-border spinner-border-sm' : ''}>↻</span> Refresh
+            <span className={isLoading ? 'spinner-border spinner-border-sm' : ''}>↻</span>
+            <span>Refresh</span>
           </button>
           <ExportExcelButton
             data={filteredCameras}
@@ -557,10 +558,11 @@ export default function CameraList({ stationFilter = 'ALL' }) {
           <button
             type="button"
             onClick={handleOpenAddModal}
-            className="btn btn-primary btn-sm d-flex align-items-center gap-1.5 fw-bold shadow-sm"
+            className="btn btn-primary btn-sm d-inline-flex align-items-center justify-content-center gap-2 px-3 fw-bold shadow-sm"
             style={{ height: '32px' }}
           >
-            <span>+</span> Register New Camera
+            <span>+</span>
+            <span>Register New Camera</span>
           </button>
         </div>
       </div>
@@ -893,11 +895,10 @@ export default function CameraList({ stationFilter = 'ALL' }) {
                           {modalMode === 'ADD' ? 'Register New Camera Sensor' : 'Edit Surveillance Camera'}
                         </h5>
                         <span
-                          className={`badge font-mono border ${
-                            modalMode === 'ADD'
+                          className={`badge font-mono border ${modalMode === 'ADD'
                               ? 'bg-primary-subtle text-primary border-primary-subtle'
                               : 'bg-info-subtle text-info-emphasis border-info-subtle'
-                          }`}
+                            }`}
                           style={{ fontSize: '11px', padding: '3px 8px' }}
                         >
                           {modalMode === 'ADD' ? '+ NEW SENSOR' : formData.camera_id}
@@ -1131,18 +1132,16 @@ export default function CameraList({ stationFilter = 'ALL' }) {
 
                   {/* --- Section 3: Streaming Status Highlight Card --- */}
                   <div
-                    className={`p-3 rounded-3 border transition-all ${
-                      formData.is_streaming
+                    className={`p-3 rounded-3 border transition-all ${formData.is_streaming
                         ? 'border-success-subtle bg-success-subtle'
                         : 'border-secondary-subtle bg-light'
-                    }`}
+                      }`}
                   >
                     <div className="d-flex align-items-center justify-content-between flex-wrap gap-2">
                       <div className="d-flex align-items-center gap-2.5">
                         <span
-                          className={`rounded-circle d-inline-block ${
-                            formData.is_streaming ? 'bg-success' : 'bg-secondary'
-                          }`}
+                          className={`rounded-circle d-inline-block ${formData.is_streaming ? 'bg-success' : 'bg-secondary'
+                            }`}
                           style={{
                             width: '10px',
                             height: '10px',

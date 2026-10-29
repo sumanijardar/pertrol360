@@ -13,10 +13,10 @@ import React from 'react';
 export default function Pagination({
   currentPage = 1,
   totalItems = 0,
-  pageSize = 10,
+  pageSize = 20,
   onPageChange,
   onPageSizeChange,
-  pageSizeOptions = [5, 10, 20, 50]
+  pageSizeOptions = [20, 50, 100, 500]
 }) {
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
   const startItem = totalItems === 0 ? 0 : (currentPage - 1) * pageSize + 1;
@@ -42,23 +42,23 @@ export default function Pagination({
   };
 
   return (
-    <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 px-3 py-2 bg-white border-top">
+    <div className="flex items-center justify-between flex-wrap gap-2 px-3.5 py-2 bg-card border-t border-border text-xs select-none">
       {/* Left: Range text & Page Size selector */}
-      <div className="d-flex align-items-center gap-3 flex-wrap">
-        <span className="text-dark small fw-semibold">
-          Showing <strong className="text-black fw-bold">{startItem}</strong> to{' '}
-          <strong className="text-black fw-bold">{endItem}</strong> of{' '}
-          <strong className="text-black fw-bold">{totalItems}</strong> entries
+      <div className="flex items-center gap-3 flex-wrap">
+        <span className="text-muted-foreground font-medium text-[11.5px]">
+          Showing <span className="font-semibold text-foreground">{startItem}</span> to{' '}
+          <span className="font-semibold text-foreground">{endItem}</span> of{' '}
+          <span className="font-semibold text-foreground">{totalItems}</span> entries
         </span>
 
         {onPageSizeChange && (
-          <div className="d-flex align-items-center gap-2">
-            <span className="small text-muted fw-semibold">Per page:</span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[11px] text-muted-foreground font-medium">Per page:</span>
             <select
               value={pageSize}
               onChange={(e) => onPageSizeChange(Number(e.target.value))}
-              className="form-select form-select-sm py-0 px-2 fw-bold text-dark border-secondary-subtle"
-              style={{ width: 'auto', minWidth: '65px', height: '28px', fontSize: '11px' }}
+              className="h-6 rounded border border-border bg-background px-1.5 text-[11px] font-medium text-foreground outline-none cursor-pointer focus:ring-1 focus:ring-ring"
+              style={{ width: 'auto' }}
             >
               {pageSizeOptions.map(opt => (
                 <option key={opt} value={opt}>
@@ -70,57 +70,58 @@ export default function Pagination({
         )}
       </div>
 
-      {/* Right: Bootstrap 5 Pagination List */}
-      <nav aria-label="Table pagination">
-        <ul className="pagination pagination-sm mb-0">
-          {/* Previous Button */}
-          <li className={`page-item ${currentPage <= 1 ? 'disabled' : ''}`}>
-            <button
-              className="page-link text-black fw-semibold"
-              onClick={() => onPageChange && onPageChange(currentPage - 1)}
-              disabled={currentPage <= 1}
-              style={{ cursor: currentPage <= 1 ? 'not-allowed' : 'pointer' }}
-            >
-              Previous
-            </button>
-          </li>
+      {/* Right: ShadCn Mira Pagination */}
+      <nav aria-label="Table pagination" className="flex items-center gap-1.5">
+        {/* Previous Button */}
+        <button
+          className={`h-8 px-3 inline-flex items-center justify-center rounded-md border text-xs font-medium transition-colors ${currentPage <= 1
+              ? 'border-border/40 text-muted-foreground/40 cursor-not-allowed bg-transparent'
+              : 'border-border text-foreground hover:bg-accent cursor-pointer'
+            }`}
+          onClick={() => onPageChange && onPageChange(currentPage - 1)}
+          disabled={currentPage <= 1}
+        >
+          Previous
+        </button>
 
-          {/* Number Buttons */}
+        {/* Number Buttons */}
+        <div className="flex items-center gap-1">
           {getPageNumbers().map((page, idx) => {
             if (page === '...') {
               return (
-                <li key={`ellipsis-${idx}`} className="page-item disabled">
-                  <span className="page-link text-muted">...</span>
-                </li>
+                <span key={`ellipsis-${idx}`} className="h-8 w-7 inline-flex items-center justify-center text-muted-foreground text-xs">
+                  ...
+                </span>
               );
             }
 
             const isActive = currentPage === page;
             return (
-              <li key={page} className={`page-item ${isActive ? 'active' : ''}`}>
-                <button
-                  className={`page-link fw-bold ${isActive ? 'bg-primary border-primary text-white' : 'text-black'}`}
-                  onClick={() => onPageChange && onPageChange(page)}
-                  style={{ minWidth: '32px', textAlign: 'center' }}
-                >
-                  {page}
-                </button>
-              </li>
+              <button
+                key={page}
+                className={`h-8 min-w-[32px] px-2.5 inline-flex items-center justify-center rounded-md text-xs font-medium transition-all ${isActive
+                    ? 'bg-primary text-primary-foreground font-semibold shadow-2xs border border-primary'
+                    : 'border border-border/80 text-foreground hover:bg-accent cursor-pointer'
+                  }`}
+                onClick={() => onPageChange && onPageChange(page)}
+              >
+                {page}
+              </button>
             );
           })}
+        </div>
 
-          {/* Next Button */}
-          <li className={`page-item ${currentPage >= totalPages ? 'disabled' : ''}`}>
-            <button
-              className="page-link text-black fw-semibold"
-              onClick={() => onPageChange && onPageChange(currentPage + 1)}
-              disabled={currentPage >= totalPages}
-              style={{ cursor: currentPage >= totalPages ? 'not-allowed' : 'pointer' }}
-            >
-              Next
-            </button>
-          </li>
-        </ul>
+        {/* Next Button */}
+        <button
+          className={`h-8 px-3 inline-flex items-center justify-center rounded-md border text-xs font-medium transition-colors ${currentPage >= totalPages
+              ? 'border-border/40 text-muted-foreground/40 cursor-not-allowed bg-transparent'
+              : 'border-border text-foreground hover:bg-accent cursor-pointer'
+            }`}
+          onClick={() => onPageChange && onPageChange(currentPage + 1)}
+          disabled={currentPage >= totalPages}
+        >
+          Next
+        </button>
       </nav>
     </div>
   );

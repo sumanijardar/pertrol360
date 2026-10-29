@@ -320,51 +320,52 @@ export default function AiAlerts() {
     return (
         <div className="container-fluid px-3 py-3">
             {/* 1. Header Title & Live Status */}
-            <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <div className="flex justify-between items-center flex-wrap gap-2 mb-3">
                 <div>
-                    <div className="d-flex align-items-center gap-2">
-                        <span className="text-danger d-inline-flex">
-                            <IconCrosshair size={22} />
+                    <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center text-foreground">
+                            <IconCrosshair size={20} />
                         </span>
-                        <h1 className="h4 fw-bold text-dark mb-0">AI Threat & Telemetry Alerts Ingestion</h1>
-                        <span className="badge bg-danger text-white ms-1 fw-bold font-mono">
+                        <h1 className="text-base font-bold text-foreground mb-0 tracking-tight">AI Threat & Telemetry Alerts Ingestion</h1>
+                        <span className="bg-muted text-muted-foreground border border-border px-2 py-0.5 rounded-full font-mono text-[10.5px] font-medium ms-1">
                             {totalCount} TOTAL DETECTIONS
                         </span>
                     </div>
-                    <p className="text-muted small mb-0 mt-0.5">
+                    <p className="text-muted-foreground text-xs mb-0 mt-0.5">
                         Real-time automated edge AI classification from deployed mobile patrol vans and CCTV sensors
                     </p>
                 </div>
 
                 {/* Refresh & Controls */}
-                <div className="d-flex align-items-center gap-2">
+                <div className="flex items-center gap-2">
                     <button
                         type="button"
                         onClick={() => {
                             fetchAlerts(currentPage, pageSize);
                             fetchOverallMetrics();
                         }}
-                        className="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1.5 shadow-xs"
+                        className="h-8 px-3.5 rounded-md border border-border bg-background hover:bg-accent text-foreground text-xs font-medium inline-flex items-center justify-center gap-2 shadow-2xs transition-colors cursor-pointer select-none"
+                        style={{ height: '32px', padding: '0 12px', gap: '8px' }}
                         disabled={isLoading}
                         title="Reload latest alerts from edge nodes"
                     >
-                        <span className={isLoading ? 'spinner-border spinner-border-sm' : ''}>
-                            {!isLoading && <IconRefreshCw size={14} />}
+                        <span className={isLoading ? 'spinner-border spinner-border-sm' : ''} style={{ display: 'inline-flex', alignItems: 'center' }}>
+                            {!isLoading && <IconRefreshCw size={13} />}
                         </span>
                         <span>Refresh Feed</span>
                     </button>
                 </div>
             </div>
 
-            {/* 2. KPI Metrics Summary Cards (Overall Database Metrics) */}
-            <div className="row g-3 mb-3">
+            {/* 2. KPI Metrics Summary Cards (ShadCn Mira Color Shades) */}
+            <div className="row g-2.5 mb-3">
                 {/* Total Ingested Alerts */}
                 <div className="col-12 col-sm-6 col-xl-3">
-                    <div className="card h-100 border-0 border-start border-4 border-primary shadow-sm p-3">
-                        <div className="d-flex justify-content-between align-items-start">
+                    <div className="rounded-lg border border-border bg-card p-3 shadow-2xs h-full flex flex-col justify-between">
+                        <div className="flex justify-between items-start">
                             <div>
-                                <span className="text-muted small fw-bold text-uppercase">Total Ingested Alerts</span>
-                                <div className="h3 fw-bold text-dark mt-1 mb-0">
+                                <span className="text-muted-foreground text-[10.5px] font-semibold uppercase tracking-wider">Total Ingested Alerts</span>
+                                <div className="text-2xl font-bold font-mono tracking-tight text-foreground mt-1 mb-0">
                                     {overallMetrics.isLoading && totalCount === 0 ? (
                                         <span className="spinner-border spinner-border-sm" />
                                     ) : (
@@ -373,23 +374,22 @@ export default function AiAlerts() {
                                 </div>
                             </div>
                             <div
-                                className="rounded-3 p-2 bg-primary-subtle text-primary d-flex align-items-center justify-content-center"
-                                style={{ width: '38px', height: '38px' }}
+                                className="w-8 h-8 rounded-md bg-muted text-foreground flex items-center justify-center border border-border/80 flex-shrink-0"
                             >
-                                <IconCrosshair size={20} />
+                                <IconCrosshair size={16} />
                             </div>
                         </div>
-                        <div className="mt-2 text-muted small">Citywide edge sensor alerts</div>
+                        <div className="mt-2 text-muted-foreground text-[11px]">Citywide edge sensor alerts</div>
                     </div>
                 </div>
 
                 {/* Active Open Incidents */}
                 <div className="col-12 col-sm-6 col-xl-3">
-                    <div className="card h-100 border-0 border-start border-4 border-danger shadow-sm p-3">
-                        <div className="d-flex justify-content-between align-items-start">
+                    <div className="rounded-lg border border-border bg-card p-3 shadow-2xs h-full flex flex-col justify-between">
+                        <div className="flex justify-between items-start">
                             <div>
-                                <span className="text-muted small fw-bold text-uppercase">Active Open Incidents</span>
-                                <div className="h3 fw-bold text-danger mt-1 mb-0">
+                                <span className="text-muted-foreground text-[10.5px] font-semibold uppercase tracking-wider">Active Open Incidents</span>
+                                <div className="text-2xl font-bold font-mono tracking-tight text-red-600 mt-1 mb-0">
                                     {overallMetrics.isLoading && openCount === 0 ? (
                                         <span className="spinner-border spinner-border-sm" />
                                     ) : (
@@ -398,23 +398,22 @@ export default function AiAlerts() {
                                 </div>
                             </div>
                             <div
-                                className="rounded-3 p-2 bg-danger-subtle text-danger d-flex align-items-center justify-content-center"
-                                style={{ width: '38px', height: '38px' }}
+                                className="w-8 h-8 rounded-md bg-red-500/10 text-red-600 border border-red-500/20 flex items-center justify-center flex-shrink-0"
                             >
-                                <IconAlertTriangle size={20} />
+                                <IconAlertTriangle size={16} />
                             </div>
                         </div>
-                        <div className="mt-2 text-muted small">Requires surveillance review</div>
+                        <div className="mt-2 text-muted-foreground text-[11px]">Requires surveillance review</div>
                     </div>
                 </div>
 
                 {/* Closed & Neutralized */}
                 <div className="col-12 col-sm-6 col-xl-3">
-                    <div className="card h-100 border-0 border-start border-4 border-success shadow-sm p-3">
-                        <div className="d-flex justify-content-between align-items-start">
+                    <div className="rounded-lg border border-border bg-card p-3 shadow-2xs h-full flex flex-col justify-between">
+                        <div className="flex justify-between items-start">
                             <div>
-                                <span className="text-muted small fw-bold text-uppercase">Closed & Neutralized</span>
-                                <div className="h3 fw-bold text-success mt-1 mb-0">
+                                <span className="text-muted-foreground text-[10.5px] font-semibold uppercase tracking-wider">Closed & Neutralized</span>
+                                <div className="text-2xl font-bold font-mono tracking-tight text-emerald-600 mt-1 mb-0">
                                     {overallMetrics.isLoading && closedCount === 0 ? (
                                         <span className="spinner-border spinner-border-sm" />
                                     ) : (
@@ -423,23 +422,22 @@ export default function AiAlerts() {
                                 </div>
                             </div>
                             <div
-                                className="rounded-3 p-2 bg-success-subtle text-success d-flex align-items-center justify-content-center"
-                                style={{ width: '38px', height: '38px' }}
+                                className="w-8 h-8 rounded-md bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center justify-center flex-shrink-0"
                             >
-                                <IconCheckCircle size={20} />
+                                <IconCheckCircle size={16} />
                             </div>
                         </div>
-                        <div className="mt-2 text-muted small">Investigated & cleared</div>
+                        <div className="mt-2 text-muted-foreground text-[11px]">Investigated & cleared</div>
                     </div>
                 </div>
 
                 {/* Patrol Nodes Reporting */}
                 <div className="col-12 col-sm-6 col-xl-3">
-                    <div className="card h-100 border-0 border-start border-4 border-info shadow-sm p-3">
-                        <div className="d-flex justify-content-between align-items-start">
+                    <div className="rounded-lg border border-border bg-card p-3 shadow-2xs h-full flex flex-col justify-between">
+                        <div className="flex justify-between items-start">
                             <div>
-                                <span className="text-muted small fw-bold text-uppercase">Patrol Vans Reporting</span>
-                                <div className="h3 fw-bold text-info mt-1 mb-0">
+                                <span className="text-muted-foreground text-[10.5px] font-semibold uppercase tracking-wider">Patrol Vans Reporting</span>
+                                <div className="text-2xl font-bold font-mono tracking-tight text-blue-600 mt-1 mb-0">
                                     {overallMetrics.isLoading && vehicleCount === 0 ? (
                                         <span className="spinner-border spinner-border-sm" />
                                     ) : (
@@ -448,118 +446,115 @@ export default function AiAlerts() {
                                 </div>
                             </div>
                             <div
-                                className="rounded-3 p-2 bg-info-subtle text-info d-flex align-items-center justify-content-center"
-                                style={{ width: '38px', height: '38px' }}
+                                className="w-8 h-8 rounded-md bg-blue-500/10 text-blue-600 border border-blue-500/20 flex items-center justify-center flex-shrink-0"
                             >
-                                <IconCar size={20} />
+                                <IconCar size={16} />
                             </div>
                         </div>
-                        <div className="mt-2 text-muted small">Active mobile camera transmitters</div>
+                        <div className="mt-2 text-muted-foreground text-[11px]">Active mobile camera transmitters</div>
                     </div>
                 </div>
             </div>
 
             {/* 3. Toolbar & Filter Section */}
-            <div className="card shadow-sm border-0 mb-3">
-                <div className="card-body py-2 px-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    {/* Search Bar */}
-                    <div className="input-group input-group-sm" style={{ maxWidth: '340px' }}>
-                        <span className="input-group-text bg-white border-end-0 text-muted">
-                            <IconSearch size={14} />
-                        </span>
-                        <input
-                            type="text"
-                            className="form-control form-control-sm border-start-0"
-                            placeholder="Search alert type, vehicle ID, location, plate..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                        {searchQuery && (
-                            <button
-                                className="btn btn-outline-secondary btn-sm"
-                                type="button"
-                                onClick={() => setSearchQuery('')}
-                            >
-                                ✕
-                            </button>
-                        )}
+            <div className="rounded-lg border border-border bg-card px-3 py-2 shadow-2xs mb-3 flex justify-between items-center flex-wrap gap-2">
+                {/* Search Bar */}
+                <div className="flex items-center border border-input rounded-md bg-background px-2 h-7" style={{ maxWidth: '340px', width: '100%' }}>
+                    <span className="text-muted-foreground me-1.5 flex items-center">
+                        <IconSearch size={13} />
+                    </span>
+                    <input
+                        type="text"
+                        className="w-full bg-transparent border-0 outline-none text-xs text-foreground placeholder:text-muted-foreground"
+                        placeholder="Search alert type, vehicle ID, location, plate..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                    {searchQuery && (
+                        <button
+                            className="text-muted-foreground hover:text-foreground text-xs ms-1 border-0 bg-transparent cursor-pointer"
+                            type="button"
+                            onClick={() => setSearchQuery('')}
+                        >
+                            ✕
+                        </button>
+                    )}
+                </div>
+
+                {/* Filter Dropdowns */}
+                <div className="flex items-center gap-2 flex-wrap ms-auto">
+                    {/* Status Filter */}
+                    <div className="flex items-center gap-1.5">
+                        <span className="text-[11px] text-muted-foreground font-medium">Status:</span>
+                        <select
+                            value={statusFilter}
+                            onChange={(e) => {
+                                setStatusFilter(e.target.value);
+                                setCurrentPage(1);
+                            }}
+                            className="h-7 px-2 text-xs font-medium rounded-md border border-input bg-background text-foreground outline-none cursor-pointer focus:ring-1 focus:ring-ring"
+                            style={{ width: 'auto', minWidth: '120px' }}
+                        >
+                            <option value="ALL">All Statuses</option>
+                            <option value="O">Open</option>
+                            <option value="C">Closed</option>
+                        </select>
                     </div>
 
-                    {/* Filter Dropdowns */}
-                    <div className="d-flex align-items-center gap-2 flex-wrap ms-auto">
-                        {/* Status Filter */}
-                        <div className="d-flex align-items-center gap-1.5">
-                            <span className="small text-muted fw-semibold">Status:</span>
-                            <select
-                                value={statusFilter}
-                                onChange={(e) => {
-                                    setStatusFilter(e.target.value);
-                                    setCurrentPage(1);
-                                }}
-                                className="form-select form-select-sm fw-semibold text-dark"
-                                style={{ width: 'auto', minWidth: '130px' }}
-                            >
-                                <option value="ALL">All Statuses</option>
-                                <option value="O">Open</option>
-                                <option value="C">Closed</option>
-                            </select>
-                        </div>
-
-                        {/* Dynamic Alert Type Filter */}
-                        <div className="d-flex align-items-center gap-1.5">
-                            <span className="small text-muted fw-semibold">Detection Type:</span>
-                            <select
-                                value={typeFilter}
-                                onChange={(e) => {
-                                    setTypeFilter(e.target.value);
-                                    setCurrentPage(1);
-                                }}
-                                className="form-select form-select-sm fw-semibold text-dark"
-                                style={{ width: 'auto', minWidth: '150px' }}
-                            >
-                                <option value="ALL">
-                                    All Detections ({availableTypes.length > 0 ? `${availableTypes.length} types` : 'All'})
+                    {/* Dynamic Alert Type Filter */}
+                    <div className="flex items-center gap-1.5">
+                        <span className="text-[11px] text-muted-foreground font-medium">Type:</span>
+                        <select
+                            value={typeFilter}
+                            onChange={(e) => {
+                                setTypeFilter(e.target.value);
+                                setCurrentPage(1);
+                            }}
+                            className="h-7 px-2 text-xs font-medium rounded-md border border-input bg-background text-foreground outline-none cursor-pointer focus:ring-1 focus:ring-ring"
+                            style={{ width: 'auto', minWidth: '140px' }}
+                        >
+                            <option value="ALL">
+                                All Detections ({availableTypes.length > 0 ? `${availableTypes.length} types` : 'All'})
+                            </option>
+                            {availableTypes.map((type) => (
+                                <option key={type} value={type}>
+                                    {type}
                                 </option>
-                                {availableTypes.map((type) => (
-                                    <option key={type} value={type}>
-                                        {type}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        {/* Excel Export Button */}
-                        <ExportExcelButton
-                            data={alerts}
-                            fileName="Patrol360_AI_Alerts_Report"
-                            columns={AI_ALERT_COLUMNS}
-                            label="Export Excel"
-                        />
+                            ))}
+                        </select>
                     </div>
+
+                    {/* Excel Export Button */}
+                    <ExportExcelButton
+                        data={alerts}
+                        fileName="Patrol360_AI_Alerts_Report"
+                        columns={AI_ALERT_COLUMNS}
+                        label="Export Excel"
+                    />
                 </div>
             </div>
 
-            {/* 4. Main AI Alerts Data Table */}
-            <div className="card shadow-sm border-0 mb-4">
+            {/* 4. Main AI Alerts Data Table (Mira High Density) */}
+            <div className="rounded-lg border border-border bg-card shadow-2xs mb-4 overflow-hidden">
                 <div className="table-responsive">
                     <table className="table table-hover align-middle mb-0 text-nowrap" style={{ minWidth: '1150px' }}>
-                        <thead style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                        <thead style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e4e4e7' }}>
                             <tr
-                                className="text-uppercase small"
-                                style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', letterSpacing: '0.04em' }}
+                                className="text-uppercase"
+                                style={{ fontSize: '10.5px', fontWeight: 600, color: '#71717a', letterSpacing: '0.04em' }}
                             >
-                                <th className="py-3 px-3 text-center" style={{ width: '60px' }}>
+                                <th className="py-2.5 px-3 text-center" style={{ width: '50px' }}>
                                     #
                                 </th>
-                                <th className="py-3 px-3">Alert ID</th>
-                                <th className="py-3 px-3">Detection Type</th>
-                                <th className="py-3 px-3">Status</th>
-                                <th className="py-3 px-3">Patrol Vehicle</th>
-                                <th className="py-3 px-3">Scanned Plate</th>
-                                <th className="py-3 px-3">Location & GPS</th>
-                                <th className="py-3 px-3">Event Timestamp</th>
-                                <th className="py-3 px-3">Remarks & Review</th>
-                                <th className="py-3 px-3 text-center" style={{ width: '110px' }}>
+                                <th className="py-2.5 px-3">Alert ID</th>
+                                <th className="py-2.5 px-3">Detection Type</th>
+                                <th className="py-2.5 px-3">Status</th>
+                                <th className="py-2.5 px-3">Patrol Vehicle</th>
+                                <th className="py-2.5 px-3">Scanned Plate</th>
+                                <th className="py-2.5 px-3">Location & GPS</th>
+                                <th className="py-2.5 px-3">Event Timestamp</th>
+                                <th className="py-2.5 px-3">Remarks & Review</th>
+                                <th className="py-2.5 px-3 text-center" style={{ width: '80px' }}>
                                     Action
                                 </th>
                             </tr>
@@ -567,21 +562,21 @@ export default function AiAlerts() {
                         <tbody>
                             {isLoading ? (
                                 <tr>
-                                    <td colSpan={10} className="py-5 text-center text-muted fw-semibold">
-                                        <div className="spinner-border spinner-border-sm text-primary me-2" role="status" />
+                                    <td colSpan={10} className="py-5 text-center text-muted-foreground font-medium text-xs">
+                                        <div className="spinner-border spinner-border-sm text-foreground me-2" role="status" />
                                         Fetching real-time AI alert stream ....
                                     </td>
                                 </tr>
                             ) : apiError ? (
                                 <tr>
-                                    <td colSpan={10} className="py-5 text-center text-danger fw-semibold">
-                                        <IconAlertTriangle size={20} className="me-2" />
+                                    <td colSpan={10} className="py-5 text-center text-red-600 font-medium text-xs">
+                                        <IconAlertTriangle size={18} className="me-1.5 inline" />
                                         {apiError}
                                     </td>
                                 </tr>
                             ) : alerts.length === 0 ? (
                                 <tr>
-                                    <td colSpan={10} className="py-5 text-center text-muted fw-semibold" style={{ fontSize: '13px' }}>
+                                    <td colSpan={10} className="py-5 text-center text-muted-foreground font-medium text-xs">
                                         No AI alerts found matching the current search & filter parameters.
                                     </td>
                                 </tr>
@@ -590,38 +585,37 @@ export default function AiAlerts() {
                                     const rowIndex = (pagination.page - 1) * pagination.limit + index + 1;
                                     const isClosed = item.status === 'C';
 
-                                    // Dynamic Badge color based on alerttype
-                                    let typeBadgeClass = 'bg-primary-subtle text-primary border border-primary-subtle';
+                                    // Dynamic subtle badge shades based on alerttype
+                                    let typeBadgeClass = 'bg-blue-500/10 text-blue-700 border border-blue-500/20';
                                     if (item.alerttype?.toLowerCase().includes('motorcycle')) {
-                                        typeBadgeClass = 'bg-info-subtle text-info-emphasis border border-info-subtle';
+                                        typeBadgeClass = 'bg-blue-500/10 text-blue-700 border border-blue-500/20';
                                     } else if (item.alerttype?.toLowerCase().includes('unknown')) {
-                                        typeBadgeClass = 'bg-warning-subtle text-warning-emphasis border border-warning-subtle';
+                                        typeBadgeClass = 'bg-amber-500/10 text-amber-700 border border-amber-500/20';
                                     } else if (item.alerttype?.toLowerCase().includes('chair')) {
-                                        typeBadgeClass = 'bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle';
+                                        typeBadgeClass = 'bg-zinc-100 text-zinc-700 border border-zinc-200';
                                     }
 
                                     return (
                                         <tr
                                             key={item.id}
                                             style={{
-                                                borderBottom: '1px solid #f1f5f9',
+                                                borderBottom: '1px solid #f4f4f5',
                                                 backgroundColor: isClosed ? '#fafafa' : '#ffffff'
                                             }}
                                         >
                                             {/* Row Index */}
-                                            <td className="py-3 px-3 text-center text-muted fw-semibold" style={{ fontSize: '12px' }}>
+                                            <td className="py-2.5 px-3 text-center text-muted-foreground font-mono" style={{ fontSize: '11px' }}>
                                                 {rowIndex}
                                             </td>
 
                                             {/* Alert ID */}
-                                            <td className="py-3 px-3">
+                                            <td className="py-2.5 px-3">
                                                 <span
-                                                    className="badge font-mono fw-bold px-2 py-1 shadow-xs"
+                                                    className="font-mono font-medium px-1.5 py-0.5 rounded shadow-2xs text-[10.5px]"
                                                     style={{
-                                                        backgroundColor: '#0f172a',
+                                                        backgroundColor: '#18181b',
                                                         color: '#ffffff',
-                                                        fontSize: '11px',
-                                                        letterSpacing: '0.04em'
+                                                        letterSpacing: '0.03em'
                                                     }}
                                                 >
                                                     #{item.id}
@@ -629,11 +623,10 @@ export default function AiAlerts() {
                                             </td>
 
                                             {/* Alert Type */}
-                                            <td className="py-3 px-3">
-                                                <div className="d-flex align-items-center gap-1.5">
+                                            <td className="py-2.5 px-3">
+                                                <div className="flex items-center gap-1.5">
                                                     <span
-                                                        className={`badge px-2 py-1 font-mono fw-bold text-uppercase ${typeBadgeClass}`}
-                                                        style={{ fontSize: '11px' }}
+                                                        className={`px-2 py-0.5 font-mono text-[10.5px] font-medium rounded-full uppercase ${typeBadgeClass}`}
                                                     >
                                                         ● {item.alerttype || 'Generic Alert'}
                                                     </span>
@@ -641,24 +634,20 @@ export default function AiAlerts() {
                                             </td>
 
                                             {/* Status */}
-                                            <td className="py-3 px-3">
+                                            <td className="py-2.5 px-3">
                                                 {isClosed ? (
                                                     <span
-                                                        className="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-2.5 py-1 fw-bold d-inline-flex align-items-center gap-1"
-                                                        style={{ fontSize: '11px' }}
+                                                        className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 font-semibold text-[10.5px] inline-flex items-center gap-1"
                                                     >
-                                                        <IconCheckCircle size={12} />
+                                                        <IconCheckCircle size={11} />
                                                         CLOSED
                                                     </span>
                                                 ) : (
                                                     <span
-                                                        className="badge rounded-pill bg-danger-subtle text-danger border border-danger-subtle px-2.5 py-1 fw-bold d-inline-flex align-items-center gap-1"
-                                                        style={{ fontSize: '11px' }}
+                                                        className="px-2 py-0.5 rounded-full bg-red-500/10 text-red-600 border border-red-500/20 font-semibold text-[10.5px] inline-flex items-center gap-1"
                                                     >
                                                         <span
-                                                            className="spinner-grow spinner-grow-sm"
-                                                            role="status"
-                                                            style={{ width: '6px', height: '6px' }}
+                                                            className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"
                                                         />
                                                         OPEN
                                                     </span>
@@ -666,43 +655,43 @@ export default function AiAlerts() {
                                             </td>
 
                                             {/* Patrol Vehicle & Cam */}
-                                            <td className="py-3 px-3">
-                                                <div className="fw-bold text-dark font-mono" style={{ fontSize: '12px' }}>
+                                            <td className="py-2.5 px-3">
+                                                <div className="font-semibold text-foreground font-mono" style={{ fontSize: '11.5px' }}>
                                                     {item.vehicle_registration || item.vehicle_id || 'PATROL_VAN'}
                                                 </div>
-                                                <div className="text-muted small font-mono mt-0.5" style={{ fontSize: '10.5px' }}>
-                                                    <IconVideo size={11} className="me-1" />
+                                                <div className="text-muted-foreground font-mono mt-0.5" style={{ fontSize: '10px' }}>
+                                                    <IconVideo size={10} className="me-1 inline" />
                                                     CAM-{item.camera_id || '1'} • IP: {item.sendip || '127.0.0.1'}
                                                 </div>
                                             </td>
 
                                             {/* Scanned Number Plate */}
-                                            <td className="py-3 px-3">
+                                            <td className="py-2.5 px-3">
                                                 {item.scanned_vehicle_numberplate ? (
                                                     <div
-                                                        className="ind-number-plate d-inline-flex align-middle shadow-xs"
-                                                        style={{ height: '24px', padding: '1px 6px' }}
+                                                        className="ind-number-plate inline-flex items-center shadow-2xs"
+                                                        style={{ height: '22px', padding: '1px 5px' }}
                                                         title="Automated ANPR scan from video feed"
                                                     >
-                                                        <span className="ind-flag" style={{ fontSize: '7.5px' }}>
+                                                        <span className="ind-flag" style={{ fontSize: '7px' }}>
                                                             IND
                                                         </span>
-                                                        <span style={{ fontSize: '11px', fontWeight: 700 }}>
+                                                        <span style={{ fontSize: '10.5px', fontWeight: 700 }}>
                                                             {item.scanned_vehicle_numberplate}
                                                         </span>
                                                     </div>
                                                 ) : (
-                                                    <span className="text-muted small font-mono" style={{ fontSize: '11px' }}>
+                                                    <span className="text-muted-foreground font-mono text-xs">
                                                         —
                                                     </span>
                                                 )}
                                             </td>
 
                                             {/* Location & GPS */}
-                                            <td className="py-3 px-3">
+                                            <td className="py-2.5 px-3">
                                                 <div
-                                                    className="fw-semibold text-dark text-truncate"
-                                                    style={{ fontSize: '12px', maxWidth: '180px' }}
+                                                    className="font-medium text-foreground truncate"
+                                                    style={{ fontSize: '11.5px', maxWidth: '180px' }}
                                                     title={item.location}
                                                 >
                                                     📍 {item.location || 'Patrol Jurisdiction'}
@@ -712,8 +701,7 @@ export default function AiAlerts() {
                                                         href={`https://maps.google.com/?q=${item.lat},${item.lon}`}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="text-decoration-none font-mono text-muted small mt-0.5 d-inline-block"
-                                                        style={{ fontSize: '10.5px' }}
+                                                        className="no-underline font-mono text-muted-foreground hover:text-foreground text-[10px] mt-0.5 inline-block"
                                                         title="View GPS coordinates on Google Maps"
                                                     >
                                                         {item.lat}, {item.lon} ↗
@@ -722,64 +710,87 @@ export default function AiAlerts() {
                                             </td>
 
                                             {/* Timestamps */}
-                                            <td className="py-3 px-3">
-                                                <div className="font-mono text-secondary fw-semibold" style={{ fontSize: '11.5px' }}>
+                                            <td className="py-2.5 px-3">
+                                                <div className="font-mono text-foreground font-medium" style={{ fontSize: '11px' }}>
                                                     🕒 {item.createtime}
                                                 </div>
                                                 {item.receivedtime && (
-                                                    <div className="text-muted small font-mono mt-0.5" style={{ fontSize: '10px' }}>
+                                                    <div className="text-muted-foreground font-mono mt-0.5" style={{ fontSize: '9.5px' }}>
                                                         Rec: {item.receivedtime}
                                                     </div>
                                                 )}
                                             </td>
 
                                             {/* Remarks & Officer */}
-                                            <td className="py-3 px-3">
+                                            <td className="py-2.5 px-3">
                                                 {item.comment ? (
                                                     <div>
                                                         <div
-                                                            className="text-dark small fw-medium text-truncate"
-                                                            style={{ maxWidth: '200px', fontSize: '11.5px' }}
+                                                            className="text-foreground font-normal truncate"
+                                                            style={{ maxWidth: '200px', fontSize: '11px' }}
                                                             title={item.comment}
                                                         >
                                                             {item.comment}
                                                         </div>
                                                         {item.closedBy && (
-                                                            <div className="text-muted small font-mono mt-0.5" style={{ fontSize: '10px' }}>
+                                                            <div className="text-muted-foreground font-mono mt-0.5" style={{ fontSize: '9.5px' }}>
                                                                 By: {item.closedBy}
                                                             </div>
                                                         )}
                                                     </div>
                                                 ) : (
-                                                    <span className="text-muted small font-italic" style={{ fontSize: '11px' }}>
+                                                    <span className="text-muted-foreground italic text-[10.5px]">
                                                         Pending review
                                                     </span>
                                                 )}
                                             </td>
 
                                             {/* Action Button */}
-                                            <td className="py-3 px-3 text-center">
+                                            <td className="py-2.5 px-3 text-center">
                                                 <button
                                                     type="button"
-                                                    className="btn btn-sm btn-primary px-2.5 py-1 shadow-xs d-inline-flex align-items-center gap-1"
-                                                    style={{ fontSize: '11.5px', fontWeight: 600, borderRadius: '6px' }}
+                                                    className="btn-icon"
+                                                    style={{
+                                                        width: '34px',
+                                                        height: '34px',
+                                                        padding: 0,
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        color: '#18181b',
+                                                        backgroundColor: '#ffffff',
+                                                        border: '1px solid #e4e4e7',
+                                                        borderRadius: '7px',
+                                                        boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                                                        cursor: 'pointer',
+                                                        transition: 'background-color 0.15s ease, border-color 0.15s ease',
+                                                        flexShrink: 0,
+                                                    }}
+                                                    onMouseEnter={e => {
+                                                        e.currentTarget.style.backgroundColor = '#f4f4f5';
+                                                        e.currentTarget.style.borderColor = '#a1a1aa';
+                                                    }}
+                                                    onMouseLeave={e => {
+                                                        e.currentTarget.style.backgroundColor = '#ffffff';
+                                                        e.currentTarget.style.borderColor = '#e4e4e7';
+                                                    }}
                                                     onClick={() => handleOpenModal(item)}
                                                     title="Inspect AI alert, review snapshot & update status"
                                                 >
                                                     <svg
-                                                        width="13"
-                                                        height="13"
+                                                        width="17"
+                                                        height="17"
                                                         viewBox="0 0 24 24"
                                                         fill="none"
-                                                        stroke="currentColor"
-                                                        strokeWidth="2.5"
+                                                        stroke="#18181b"
+                                                        strokeWidth="2"
                                                         strokeLinecap="round"
                                                         strokeLinejoin="round"
+                                                        style={{ display: 'block', flexShrink: 0 }}
                                                     >
                                                         <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
                                                         <circle cx="12" cy="12" r="3" />
                                                     </svg>
-
                                                 </button>
                                             </td>
                                         </tr>
@@ -809,75 +820,76 @@ export default function AiAlerts() {
             </div>
 
             {/* ===================================================================== */}
-            {/* 5. AI ALERT INSPECTION & RESOLUTION MODAL                              */}
+            {/* 5. AI ALERT INSPECTION & RESOLUTION MODAL (ShadCn Mira Minimalist)    */}
             {/* ===================================================================== */}
             {isModalOpen && selectedAlert && (
                 <div
                     className="modal show d-block"
                     tabIndex="-1"
-                    style={{ backgroundColor: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(5px)', zIndex: 1055 }}
+                    style={{ backgroundColor: 'rgba(9, 9, 11, 0.75)', backdropFilter: 'blur(4px)', zIndex: 1055 }}
                     onClick={() => setIsModalOpen(false)}
                 >
                     <div className="modal-dialog modal-dialog-centered modal-lg" onClick={(e) => e.stopPropagation()}>
-                        <div className="modal-content shadow-lg border-0" style={{ borderRadius: '12px', overflow: 'hidden' }}>
+                        <div className="modal-content shadow-xl border border-border bg-card" style={{ borderRadius: '10px', overflow: 'hidden' }}>
                             {/* Modal Header */}
-                            <div className="modal-header py-3 px-4 border-bottom bg-light">
-                                <div className="d-flex align-items-center gap-2.5">
+                            <div className="modal-header py-2.5 px-3.5 border-b border-border bg-muted/30 flex items-center justify-between">
+                                <div className="flex items-center gap-2">
                                     <div
-                                        className="d-flex align-items-center justify-content-center rounded-3 shadow-sm text-white"
-                                        style={{
-                                            width: '38px',
-                                            height: '38px',
-                                            backgroundColor: selectedAlert.status === 'C' ? '#10b981' : '#dc3545'
-                                        }}
+                                        className={`w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0 ${
+                                            selectedAlert.status === 'C'
+                                                ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20'
+                                                : 'bg-red-500/10 text-red-600 border border-red-500/20'
+                                        }`}
                                     >
-                                        <IconCrosshair size={20} />
+                                        <IconCrosshair size={15} />
                                     </div>
                                     <div>
-                                        <div className="d-flex align-items-center gap-2">
-                                            <h5 className="modal-title h6 fw-bold mb-0 text-dark">
+                                        <div className="flex items-center gap-2">
+                                            <h5 className="modal-title text-xs font-semibold text-foreground mb-0">
                                                 AI Alert Resolution & Snapshot Inspection
                                             </h5>
-                                            <span className="badge bg-dark text-white fw-bold font-mono" style={{ fontSize: '11px' }}>
+                                            <span className="bg-primary text-primary-foreground font-mono text-[10px] px-1.5 py-0.2 rounded font-medium">
                                                 #{selectedAlert.id}
                                             </span>
                                         </div>
-                                        <span className="text-muted small" style={{ fontSize: '11.5px' }}>
-                                            Detection Type: <strong>{selectedAlert.alerttype}</strong> • Vehicle:{' '}
-                                            <strong>{selectedAlert.vehicle_id}</strong>
+                                        <span className="text-muted-foreground text-[10.5px]">
+                                            Type: <strong className="text-foreground">{selectedAlert.alerttype}</strong> • Van:{' '}
+                                            <strong className="text-foreground">{selectedAlert.vehicle_id}</strong>
                                         </span>
                                     </div>
                                 </div>
 
                                 <button
                                     type="button"
-                                    className="btn-close shadow-none"
+                                    className="text-muted-foreground hover:text-foreground text-xs p-1 bg-transparent border-0 cursor-pointer"
                                     onClick={() => setIsModalOpen(false)}
                                     aria-label="Close"
-                                />
+                                >
+                                    ✕
+                                </button>
                             </div>
 
                             {/* Modal Body */}
-                            <div className="modal-body p-4" style={{ maxHeight: '76vh', overflowY: 'auto' }}>
+                            <div className="modal-body p-3.5" style={{ maxHeight: '76vh', overflowY: 'auto' }}>
                                 {/* Visual Snapshot & Telemetry Banner */}
-                                <div className="row g-3 mb-4">
+                                <div className="row g-3 mb-3">
                                     {/* Left Column: Image Snapshot */}
                                     <div className="col-12 col-md-7">
                                         <div
-                                            className="rounded-3 p-2 position-relative overflow-hidden shadow-sm d-flex flex-column justify-content-center align-items-center"
+                                            className="rounded-lg p-2 relative overflow-hidden shadow-2xs flex flex-col justify-center items-center"
                                             style={{
-                                                backgroundColor: '#020617',
-                                                border: '1px solid #1e293b',
-                                                minHeight: '230px'
+                                                backgroundColor: '#09090b',
+                                                border: '1px solid #27272a',
+                                                minHeight: '220px'
                                             }}
                                         >
                                             {isLoadingModalDetails ? (
                                                 <div className="text-center py-5 text-white">
-                                                    <div className="spinner-border text-danger spinner-border-sm mb-2" role="status" />
-                                                    <div className="small font-mono text-muted">Retrieving raw sensor capture...</div>
+                                                    <div className="spinner-border text-zinc-400 spinner-border-sm mb-2" role="status" />
+                                                    <div className="text-xs font-mono text-zinc-400">Retrieving raw sensor capture...</div>
                                                 </div>
                                             ) : modalDetails?.File_loc ? (
-                                                <div className="position-relative w-100 text-center">
+                                                <div className="relative w-full text-center">
                                                     <img
                                                         src={
                                                             modalDetails.File_loc.startsWith('data:')
@@ -885,27 +897,26 @@ export default function AiAlerts() {
                                                                 : `data:image/jpeg;base64,${modalDetails.File_loc}`
                                                         }
                                                         alt={`Alert ${selectedAlert.id} Snapshot`}
-                                                        className="img-fluid rounded shadow"
-                                                        style={{ maxHeight: '250px', objectFit: 'contain', width: '100%' }}
+                                                        className="img-fluid rounded shadow-sm"
+                                                        style={{ maxHeight: '240px', objectFit: 'contain', width: '100%' }}
                                                     />
-                                                    {/* Live Target Reticle overlay */}
+                                                    {/* Target Reticle overlay */}
                                                     <div
-                                                        className="position-absolute top-0 start-0 m-2 badge bg-danger text-white font-mono px-2 py-1 shadow"
-                                                        style={{ fontSize: '10px' }}
+                                                        className="absolute top-0 start-0 m-2 bg-black/80 text-white border border-red-500/40 font-mono px-2 py-0.5 rounded text-[10px]"
                                                     >
-                                                        AI TARGET: {selectedAlert.alerttype}
+                                                        TARGET: {selectedAlert.alerttype}
                                                     </div>
                                                 </div>
                                             ) : (
                                                 <div className="text-center py-4 text-white">
-                                                    <IconCrosshair size={36} className="text-danger mb-2" />
-                                                    <div className="small fw-bold font-mono text-white">EDGE SENSOR TELEMETRY LOCK</div>
-                                                    <div className="text-muted small font-mono mt-1">
+                                                    <IconCrosshair size={32} className="text-zinc-400 mb-2 inline" />
+                                                    <div className="text-xs font-semibold font-mono text-zinc-200">EDGE SENSOR TELEMETRY LOCK</div>
+                                                    <div className="text-zinc-500 text-[11px] font-mono mt-1">
                                                         CAM-{selectedAlert.camera_id} • IP: {selectedAlert.sendip || '223.182.122.63'}
                                                     </div>
                                                     {selectedAlert.scanned_vehicle_numberplate && (
                                                         <div className="mt-2">
-                                                            <span className="badge bg-warning text-dark font-mono fw-bold">
+                                                            <span className="bg-zinc-800 text-zinc-200 border border-zinc-700 font-mono font-medium text-[10.5px] px-2 py-0.5 rounded">
                                                                 PLATE: {selectedAlert.scanned_vehicle_numberplate}
                                                             </span>
                                                         </div>
@@ -915,110 +926,97 @@ export default function AiAlerts() {
 
                                             {/* Viewport Bottom Overlay */}
                                             <div
-                                                className="w-100 d-flex justify-content-between align-items-center text-muted font-mono pt-2 mt-2 border-top border-secondary border-opacity-25"
-                                                style={{ fontSize: '10.5px' }}
+                                                className="w-full flex justify-between items-center text-zinc-500 font-mono pt-1.5 mt-2 border-t border-zinc-800 text-[10px]"
                                             >
                                                 <span>Van: {selectedAlert.vehicle_id}</span>
-                                                <span className="text-emerald-400">Node GPS: {selectedAlert.lat}, {selectedAlert.lon}</span>
+                                                <span className="text-zinc-400">GPS: {selectedAlert.lat}, {selectedAlert.lon}</span>
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Right Column: Key Details */}
                                     <div className="col-12 col-md-5">
-                                        <div className="p-3 rounded-3 border bg-light h-100 d-flex flex-column justify-content-between">
+                                        <div className="p-3 rounded-lg border border-border bg-muted/20 h-full flex flex-col justify-between">
                                             <div>
-                                                <div className="d-flex align-items-center justify-content-between pb-2 border-bottom mb-2">
-                                                    <span className="text-muted small fw-bold text-uppercase" style={{ fontSize: '10.5px' }}>
+                                                <div className="flex items-center justify-between pb-1.5 border-b border-border/80 mb-2">
+                                                    <span className="text-muted-foreground text-[10px] font-semibold uppercase tracking-wider">
                                                         Incident Details
                                                     </span>
                                                     <span
-                                                        className={`badge ${selectedAlert.status === 'C' ? 'bg-success' : 'bg-danger'} font-mono`}
+                                                        className={`px-2 py-0.2 rounded-full font-mono text-[10px] font-semibold ${
+                                                            selectedAlert.status === 'C'
+                                                                ? 'bg-emerald-500/10 text-emerald-700 border border-emerald-500/20'
+                                                                : 'bg-red-500/10 text-red-600 border border-red-500/20'
+                                                        }`}
                                                     >
                                                         {selectedAlert.status === 'C' ? 'RESOLVED' : 'ACTIVE'}
                                                     </span>
                                                 </div>
 
-                                                <div className="d-flex flex-column gap-1.5" style={{ fontSize: '11.5px' }}>
-                                                    <div className="d-flex justify-content-between">
-                                                        <span className="text-muted">Detection:</span>
-                                                        <strong className="text-dark text-uppercase">{selectedAlert.alerttype}</strong>
+                                                <div className="flex flex-col gap-1.5 text-xs">
+                                                    <div className="flex justify-between">
+                                                        <span className="text-muted-foreground">Detection:</span>
+                                                        <strong className="text-foreground text-uppercase">{selectedAlert.alerttype}</strong>
                                                     </div>
 
-                                                    <div className="d-flex justify-content-between">
-                                                        <span className="text-muted">Vehicle ID:</span>
-                                                        <span className="font-mono text-dark fw-bold">{selectedAlert.vehicle_id}</span>
+                                                    <div className="flex justify-between">
+                                                        <span className="text-muted-foreground">Vehicle ID:</span>
+                                                        <span className="font-mono text-foreground font-semibold">{selectedAlert.vehicle_id}</span>
                                                     </div>
 
                                                     {selectedAlert.scanned_vehicle_numberplate && (
-                                                        <div className="d-flex justify-content-between">
-                                                            <span className="text-muted">Scanned Plate:</span>
-                                                            <span className="badge bg-warning text-dark font-mono">
+                                                        <div className="flex justify-between">
+                                                            <span className="text-muted-foreground">Scanned Plate:</span>
+                                                            <span className="ind-number-plate" style={{ fontSize: '10px' }}>
                                                                 {selectedAlert.scanned_vehicle_numberplate}
                                                             </span>
                                                         </div>
                                                     )}
 
-                                                    <div className="d-flex justify-content-between">
-                                                        <span className="text-muted">Camera Ch:</span>
-                                                        <span className="font-mono text-dark">Channel {selectedAlert.camera_id}</span>
+                                                    <div className="flex justify-between">
+                                                        <span className="text-muted-foreground">Camera Ch:</span>
+                                                        <span className="font-mono text-foreground">Channel {selectedAlert.camera_id}</span>
                                                     </div>
 
-                                                    <div className="d-flex justify-content-between">
-                                                        <span className="text-muted">Location:</span>
-                                                        <span className="text-dark fw-semibold text-truncate" style={{ maxWidth: '140px' }}>
+                                                    <div className="flex justify-between">
+                                                        <span className="text-muted-foreground">Location:</span>
+                                                        <span className="text-foreground font-medium truncate" style={{ maxWidth: '140px' }}>
                                                             {selectedAlert.location}
                                                         </span>
                                                     </div>
 
-                                                    <div className="d-flex justify-content-between">
-                                                        <span className="text-muted">Created:</span>
-                                                        <span className="font-mono text-dark">{selectedAlert.createtime}</span>
+                                                    <div className="flex justify-between">
+                                                        <span className="text-muted-foreground">Created:</span>
+                                                        <span className="font-mono text-foreground">{selectedAlert.createtime}</span>
                                                     </div>
 
                                                     {selectedAlert.closedtime && (
-                                                        <div className="d-flex justify-content-between">
-                                                            <span className="text-muted">Closed At:</span>
-                                                            <span className="font-mono text-success">{selectedAlert.closedtime}</span>
+                                                        <div className="flex justify-between">
+                                                            <span className="text-muted-foreground">Closed At:</span>
+                                                            <span className="font-mono text-emerald-600">{selectedAlert.closedtime}</span>
                                                         </div>
                                                     )}
                                                 </div>
                                             </div>
-
-                                            {/* Google Maps Shortcut */}
-                                            {/* {selectedAlert.lat && selectedAlert.lon && (
-                                                <div className="mt-3 pt-2 border-top">
-                                                    <a
-                                                        href={`https://maps.google.com/?q=${selectedAlert.lat},${selectedAlert.lon}`}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-1.5"
-                                                        style={{ fontSize: '11px', fontWeight: 600 }}
-                                                    >
-                                                        <span>Open GPS on Satellite Map</span>
-                                                        <span>↗</span>
-                                                    </a>
-                                                </div>
-                                            )} */}
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* 6. Form: Alert ID, Comments, Status & Closed Fields */}
+                                {/* 6. Form: Status & Closed Fields */}
                                 <form onSubmit={handleSaveAlert}>
-                                    <div className="card border p-3 bg-white shadow-2xs rounded-3">
-                                        <h6 className="fw-bold text-dark mb-3 pb-2 border-bottom d-flex align-items-center gap-2">
-                                            <IconShieldAlert size={16} className="text-primary" />
+                                    <div className="rounded-lg border border-border p-3 bg-card shadow-2xs">
+                                        <h6 className="font-semibold text-xs text-foreground mb-2.5 pb-1.5 border-b border-border flex items-center gap-1.5">
+                                            <IconShieldAlert size={14} className="text-foreground" />
                                             <span>Investigate & Update Alert Status</span>
                                         </h6>
 
-                                        <div className="row g-3">
+                                        <div className="row g-2.5">
                                             {/* Alert ID Display (Readonly) */}
                                             <div className="col-12 col-md-3">
-                                                <label className="form-label small fw-bold text-muted mb-1">Alert ID</label>
+                                                <label className="text-[11px] font-medium text-muted-foreground mb-1 block">Alert ID</label>
                                                 <input
                                                     type="text"
-                                                    className="form-control form-control-sm font-mono fw-bold bg-light"
+                                                    className="w-full h-7 px-2 text-xs font-mono font-medium rounded-md border border-input bg-muted/40 text-muted-foreground"
                                                     value={`#${selectedAlert.id}`}
                                                     disabled
                                                 />
@@ -1026,27 +1024,27 @@ export default function AiAlerts() {
 
                                             {/* Status / Closed Field */}
                                             <div className="col-12 col-md-4">
-                                                <label className="form-label small fw-bold text-muted mb-1">
-                                                    Alert Status <span className="text-danger">*</span>
+                                                <label className="text-[11px] font-medium text-muted-foreground mb-1 block">
+                                                    Alert Status <span className="text-red-500">*</span>
                                                 </label>
                                                 <select
-                                                    className="form-select form-select-sm fw-bold text-dark"
+                                                    className="w-full h-7 px-2 text-xs font-medium rounded-md border border-input bg-background text-foreground outline-none focus:ring-1 focus:ring-ring cursor-pointer"
                                                     value={editStatus}
                                                     onChange={(e) => setEditStatus(e.target.value)}
                                                 >
-                                                    <option value="O">🔴 Open (Under Active Surveillance)</option>
-                                                    <option value="C">🟢 Closed (Investigated & Resolved)</option>
+                                                    <option value="O">Active Open (Under Surveillance)</option>
+                                                    <option value="C">Closed (Investigated & Cleared)</option>
                                                 </select>
                                             </div>
 
                                             {/* Closed By / Investigating Officer */}
                                             <div className="col-12 col-md-5">
-                                                <label className="form-label small fw-bold text-muted mb-1">
+                                                <label className="text-[11px] font-medium text-muted-foreground mb-1 block">
                                                     Investigating Officer (Closed By)
                                                 </label>
                                                 <input
                                                     type="text"
-                                                    className="form-control form-control-sm"
+                                                    className="w-full h-7 px-2 text-xs rounded-md border border-input bg-background text-foreground outline-none focus:ring-1 focus:ring-ring"
                                                     value={editClosedBy}
                                                     onChange={(e) => setEditClosedBy(e.target.value)}
                                                     placeholder="Officer Name / Badge"
@@ -1055,30 +1053,48 @@ export default function AiAlerts() {
 
                                             {/* Comments / Resolution Remarks */}
                                             <div className="col-12">
-                                                <label className="form-label small fw-bold text-muted mb-1">
-                                                    Officer Remarks / Investigation Comments <span className="text-danger">*</span>
+                                                <label className="text-[11px] font-medium text-muted-foreground mb-1 block">
+                                                    Officer Remarks / Investigation Comments <span className="text-red-500">*</span>
                                                 </label>
                                                 <textarea
-                                                    rows={3}
-                                                    className="form-control form-control-sm"
+                                                    rows={2}
+                                                    className="w-full p-2 text-xs rounded-md border border-input bg-background text-foreground outline-none focus:ring-1 focus:ring-ring"
                                                     value={editComment}
                                                     onChange={(e) => setEditComment(e.target.value)}
                                                     placeholder="Enter investigation observations, action taken, ground verification notes..."
                                                     required
                                                 />
-                                                <div className="form-text text-muted" style={{ fontSize: '11px' }}>
-                                                    These comments and closure records are permanently logged into the central police surveillance database.
+                                                <div className="text-muted-foreground text-[10.5px] mt-1">
+                                                    Logged permanently into the central police surveillance database.
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Modal Footer Controls */}
-                                    <div className="d-flex justify-content-between align-items-center mt-3 pt-2">
+                                    <div className="flex justify-between items-center mt-3 pt-2">
                                         <button
                                             type="button"
-                                            className="btn btn-secondary btn-sm px-3"
                                             onClick={() => setIsModalOpen(false)}
+                                            style={{
+                                                height: '34px',
+                                                padding: '0 14px',
+                                                borderRadius: '7px',
+                                                border: '1px solid #e4e4e7',
+                                                backgroundColor: '#ffffff',
+                                                color: '#18181b',
+                                                fontSize: '12px',
+                                                fontWeight: 500,
+                                                cursor: 'pointer',
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                gap: '6px',
+                                                transition: 'background-color 0.15s ease',
+                                                whiteSpace: 'nowrap',
+                                            }}
+                                            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f4f4f5'}
+                                            onMouseLeave={e => e.currentTarget.style.backgroundColor = '#ffffff'}
                                         >
                                             Cancel
                                         </button>
@@ -1086,16 +1102,36 @@ export default function AiAlerts() {
                                         <button
                                             type="submit"
                                             disabled={isSaving}
-                                            className="btn btn-primary btn-sm px-4 fw-bold d-flex align-items-center gap-1.5 shadow-sm"
+                                            style={{
+                                                height: '34px',
+                                                padding: '0 16px',
+                                                borderRadius: '7px',
+                                                border: 'none',
+                                                backgroundColor: isSaving ? '#52525b' : '#18181b',
+                                                color: '#ffffff',
+                                                fontSize: '12px',
+                                                fontWeight: 600,
+                                                cursor: isSaving ? 'not-allowed' : 'pointer',
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                gap: '7px',
+                                                boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                                                transition: 'background-color 0.15s ease',
+                                                whiteSpace: 'nowrap',
+                                                opacity: isSaving ? 0.75 : 1,
+                                            }}
+                                            onMouseEnter={e => { if (!isSaving) e.currentTarget.style.backgroundColor = '#27272a'; }}
+                                            onMouseLeave={e => { if (!isSaving) e.currentTarget.style.backgroundColor = '#18181b'; }}
                                         >
                                             {isSaving ? (
                                                 <>
-                                                    <span className="spinner-border spinner-border-sm" role="status" />
-                                                    <span>Saving to Server...</span>
+                                                    <span className="spinner-border spinner-border-sm" role="status" style={{ width: '12px', height: '12px', borderWidth: '2px', borderColor: '#ffffff transparent #ffffff #ffffff' }} />
+                                                    <span>Saving...</span>
                                                 </>
                                             ) : (
                                                 <>
-                                                    <IconCheckCircle size={15} />
+                                                    <IconCheckCircle size={13} style={{ color: '#ffffff', flexShrink: 0 }} />
                                                     <span>Save & Update Alert</span>
                                                 </>
                                             )}

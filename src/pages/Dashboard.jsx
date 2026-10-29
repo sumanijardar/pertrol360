@@ -395,118 +395,118 @@ export default function Dashboard({ stationFilter = 'ALL' }) {
       {/* ============================================================ */}
       {/* ROW 1: LIVE BACKEND KEY PERFORMANCE INDICATORS (5 CARDS)     */}
       {/* ============================================================ */}
-      <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-5 g-2 mb-4">
+      <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-5 g-2.5 mb-4">
         {/* Card 1: Active Fleet Units */}
         <div className="col">
-          <div className="card shadow-sm border-0 border-top border-3 border-primary h-100 p-2.5 bg-white kpi-count-card">
+          <div className="card shadow-2xs border border-border rounded-lg h-100 p-3 bg-card kpi-count-card">
             <div className="d-flex justify-content-between align-items-center">
               <div className="d-flex align-items-center gap-2">
-                <span className="text-primary d-flex"><IconCar size={15} /></span>
-                <span className="small text-secondary fw-bold text-uppercase" style={{ fontSize: '10px', letterSpacing: '0.04em' }}>Patrol Fleet</span>
+                <span className="text-muted-foreground d-flex"><IconCar size={15} /></span>
+                <span className="small text-muted-foreground fw-bold text-uppercase" style={{ fontSize: '10px', letterSpacing: '0.04em' }}>Patrol Fleet</span>
               </div>
-              <span className="badge bg-success-subtle text-success border border-success-subtle font-mono" style={{ fontSize: '9.5px' }}>
+              <span className="badge bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 font-mono" style={{ fontSize: '9.5px' }}>
                 {activeRate}% ACTIVE
               </span>
             </div>
             <div className="d-flex align-items-baseline gap-2 mt-1">
-              <span className="fs-4 fw-bold font-mono text-dark">{vehicleActive}</span>
-              <span className="small text-muted fw-semibold">/ {vehicleTotal} units</span>
+              <span className="fs-4 fw-bold font-mono text-foreground">{vehicleActive}</span>
+              <span className="small text-muted-foreground fw-medium">/ {vehicleTotal} units</span>
             </div>
-            <div className="d-flex justify-content-between border-top pt-1 mt-1 small text-muted text-nowrap" style={{ fontSize: '9.5px' }}>
-              <span>Database: <strong className="text-primary">{stats?.system_health?.database_status || 'ONLINE'}</strong></span>
-              <span>Jetson: <strong className="text-success">{stats?.system_health?.jetson_temperature || '46.5°C'}</strong></span>
+            <div className="d-flex justify-content-between border-top border-border pt-1 mt-1 small text-muted-foreground text-nowrap" style={{ fontSize: '9.5px' }}>
+              <span>Database: <strong className="text-foreground">{stats?.system_health?.database_status || 'ONLINE'}</strong></span>
+              <span>Jetson: <strong className="text-emerald-600">{stats?.system_health?.jetson_temperature || '46.5°C'}</strong></span>
             </div>
           </div>
         </div>
 
         {/* Card 2: ANPR Scans Today */}
         <div className="col">
-          <div className="card shadow-sm border-0 border-top border-3 border-info h-100 p-2.5 bg-white kpi-count-card">
+          <div className="card shadow-2xs border border-border rounded-lg h-100 p-3 bg-card kpi-count-card">
             <div className="d-flex justify-content-between align-items-center">
               <div className="d-flex align-items-center gap-2">
-                <span className="text-info d-flex"><IconShieldAlert size={15} /></span>
-                <span className="small text-secondary fw-bold text-uppercase" style={{ fontSize: '10px', letterSpacing: '0.04em' }}>ANPR Plates</span>
+                <span className="text-muted-foreground d-flex"><IconShieldAlert size={15} /></span>
+                <span className="small text-muted-foreground fw-bold text-uppercase" style={{ fontSize: '10px', letterSpacing: '0.04em' }}>ANPR Plates</span>
               </div>
-              <span className="badge bg-danger-subtle text-danger border border-danger-subtle font-mono" style={{ fontSize: '9.5px' }}>
+              <span className="badge bg-red-500/10 text-red-600 border border-red-500/20 font-mono" style={{ fontSize: '9.5px' }}>
                 {stolenHits} STOLEN HITS
               </span>
             </div>
             <div className="d-flex align-items-baseline gap-2 mt-1">
-              <span className="fs-4 fw-bold font-mono text-info">{Number(anprScanned).toLocaleString()}</span>
-              <span className="small text-muted fw-semibold">scanned</span>
+              <span className="fs-4 fw-bold font-mono text-foreground">{Number(anprScanned).toLocaleString()}</span>
+              <span className="small text-muted-foreground fw-medium">scanned</span>
             </div>
-            <div className="d-flex justify-content-between border-top pt-1 mt-1 small text-muted text-nowrap" style={{ fontSize: '9.5px' }}>
-              <span>Watchlist: <strong className="text-danger">{watchlistCount} Synced</strong></span>
-              <span>Latency: <strong className="text-success">{stats?.system_health?.avg_inference_latency || '22ms'}</strong></span>
+            <div className="d-flex justify-content-between border-top border-border pt-1 mt-1 small text-muted-foreground text-nowrap" style={{ fontSize: '9.5px' }}>
+              <span>Watchlist: <strong className="text-red-600">{watchlistCount} Synced</strong></span>
+              <span>Latency: <strong className="text-emerald-600">{stats?.system_health?.avg_inference_latency || '22ms'}</strong></span>
             </div>
           </div>
         </div>
 
         {/* Card 3: Threat & Weapon Detections */}
         <div className="col">
-          <div className="card shadow-sm border-0 border-top border-3 border-danger h-100 p-2.5 bg-white kpi-count-card">
+          <div className="card shadow-2xs border border-border rounded-lg h-100 p-3 bg-card kpi-count-card">
             <div className="d-flex justify-content-between align-items-center">
               <div className="d-flex align-items-center gap-2">
-                <span className="text-danger d-flex"><IconCrosshair size={15} /></span>
-                <span className="small text-danger fw-bold text-uppercase" style={{ fontSize: '10px', letterSpacing: '0.04em' }}>Threats</span>
+                <span className="text-muted-foreground d-flex"><IconCrosshair size={15} /></span>
+                <span className="small text-muted-foreground fw-bold text-uppercase" style={{ fontSize: '10px', letterSpacing: '0.04em' }}>Threats</span>
               </div>
-              <span className={`badge font-mono ${unackedWeapons > 0 ? 'bg-danger text-white' : 'bg-success-subtle text-success border border-success-subtle'}`} style={{ fontSize: '9.5px' }}>
+              <span className={`badge font-mono ${unackedWeapons > 0 ? 'bg-red-500/10 text-red-600 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-700 border border-emerald-500/20'}`} style={{ fontSize: '9.5px' }}>
                 {unackedWeapons > 0 ? `${unackedWeapons} UNACK'D` : 'RESOLVED'}
               </span>
             </div>
             <div className="d-flex align-items-baseline gap-2 mt-1">
-              <span className="fs-4 fw-bold font-mono text-danger">{weaponsTotal}</span>
-              <span className="small text-danger fw-bold">Weapon Pings</span>
+              <span className="fs-4 fw-bold font-mono text-foreground">{weaponsTotal}</span>
+              <span className="small text-muted-foreground fw-medium">Weapon Pings</span>
             </div>
-            <div className="d-flex justify-content-between border-top pt-1 mt-1 small text-muted text-nowrap" style={{ fontSize: '9.5px' }}>
+            <div className="d-flex justify-content-between border-top border-border pt-1 mt-1 small text-muted-foreground text-nowrap" style={{ fontSize: '9.5px' }}>
               <span>Firearm & Blade</span>
-              <span className="text-primary fw-bold">{stats?.system_health?.edge_ai_fps || 30} FPS Edge</span>
+              <span className="text-foreground fw-semibold">{stats?.system_health?.edge_ai_fps || 30} FPS Edge</span>
             </div>
           </div>
         </div>
 
         {/* Card 4: Fire & Crowd Hazards */}
         <div className="col">
-          <div className="card shadow-sm border-0 border-top border-3 border-warning h-100 p-2.5 bg-white kpi-count-card">
+          <div className="card shadow-2xs border border-border rounded-lg h-100 p-3 bg-card kpi-count-card">
             <div className="d-flex justify-content-between align-items-center">
               <div className="d-flex align-items-center gap-2">
-                <span className="text-warning d-flex"><IconFlame size={15} /></span>
-                <span className="small text-secondary fw-bold text-uppercase" style={{ fontSize: '10px', letterSpacing: '0.04em' }}>Safety Hazards</span>
+                <span className="text-muted-foreground d-flex"><IconFlame size={15} /></span>
+                <span className="small text-muted-foreground fw-bold text-uppercase" style={{ fontSize: '10px', letterSpacing: '0.04em' }}>Safety Hazards</span>
               </div>
-              <span className="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle font-mono" style={{ fontSize: '9.5px' }}>
+              <span className="badge bg-amber-500/10 text-amber-700 border border-amber-500/20 font-mono" style={{ fontSize: '9.5px' }}>
                 FIRE & CROWD
               </span>
             </div>
             <div className="d-flex align-items-baseline gap-2 mt-1">
-              <span className="fs-4 fw-bold font-mono text-warning-emphasis">{totalHazards}</span>
-              <span className="small text-muted fw-semibold">Incidents</span>
+              <span className="fs-4 fw-bold font-mono text-foreground">{totalHazards}</span>
+              <span className="small text-muted-foreground fw-medium">Incidents</span>
             </div>
-            <div className="d-flex justify-content-between border-top pt-1 mt-1 small text-muted text-nowrap" style={{ fontSize: '9.5px' }}>
-              <span>Smoke: <strong className="text-dark">{fireHazards}</strong></span>
-              <span>Crowd: <strong className="text-dark">{crowdAlerts}</strong></span>
+            <div className="d-flex justify-content-between border-top border-border pt-1 mt-1 small text-muted-foreground text-nowrap" style={{ fontSize: '9.5px' }}>
+              <span>Smoke: <strong className="text-foreground">{fireHazards}</strong></span>
+              <span>Crowd: <strong className="text-foreground">{crowdAlerts}</strong></span>
             </div>
           </div>
         </div>
 
         {/* Card 5: Surveillance Cameras & RTSP Feeds */}
         <div className="col">
-          <div className="card shadow-sm border-0 border-top border-3 border-secondary h-100 p-2.5 bg-white kpi-count-card">
+          <div className="card shadow-2xs border border-border rounded-lg h-100 p-3 bg-card kpi-count-card">
             <div className="d-flex justify-content-between align-items-center">
               <div className="d-flex align-items-center gap-2">
-                <span className="text-secondary d-flex"><IconVideo size={15} /></span>
-                <span className="small text-secondary fw-bold text-uppercase" style={{ fontSize: '10px', letterSpacing: '0.04em' }}>Surveillance</span>
+                <span className="text-muted-foreground d-flex"><IconVideo size={15} /></span>
+                <span className="small text-muted-foreground fw-bold text-uppercase" style={{ fontSize: '10px', letterSpacing: '0.04em' }}>Surveillance</span>
               </div>
-              <span className="badge bg-success-subtle text-success border border-success-subtle font-mono" style={{ fontSize: '9.5px' }}>
+              <span className="badge bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 font-mono" style={{ fontSize: '9.5px' }}>
                 {cameraOnline} STREAMING
               </span>
             </div>
             <div className="d-flex align-items-baseline gap-2 mt-1">
-              <span className="fs-4 fw-bold font-mono text-primary">{cameraOnline}</span>
-              <span className="small text-muted fw-semibold">/ {cameraTotal} cams</span>
+              <span className="fs-4 fw-bold font-mono text-foreground">{cameraOnline}</span>
+              <span className="small text-muted-foreground fw-medium">/ {cameraTotal} cams</span>
             </div>
-            <div className="d-flex justify-content-between border-top pt-1 mt-1 small text-muted text-nowrap" style={{ fontSize: '9.5px' }}>
-              <span>FRS Confirmed: <strong className="text-success">{stats?.frs?.confirmed_hits ?? 1}</strong></span>
-              <span>Watchlist: <strong className="text-info">{stats?.frs?.watchlist_count ?? 3}</strong></span>
+            <div className="d-flex justify-content-between border-top border-border pt-1 mt-1 small text-muted-foreground text-nowrap" style={{ fontSize: '9.5px' }}>
+              <span>FRS Confirmed: <strong className="text-emerald-600">{stats?.frs?.confirmed_hits ?? 1}</strong></span>
+              <span>Watchlist: <strong className="text-foreground">{stats?.frs?.watchlist_count ?? 3}</strong></span>
             </div>
           </div>
         </div>
@@ -525,7 +525,7 @@ export default function Dashboard({ stationFilter = 'ALL' }) {
                 <span className="text-primary d-flex"><IconRadar size={15} /></span>
                 <span>Fleet GPS Radar & Threat Coordinates</span>
               </div>
-              <span className="badge bg-primary-subtle text-primary border border-primary-subtle font-mono" style={{ fontSize: '10px' }}>{filteredVehicles.length} Units Tracked</span>
+              <span className="badge bg-muted text-foreground border border-border font-mono" style={{ fontSize: '10px' }}>{filteredVehicles.length} Units Tracked</span>
             </div>
             <div className="card-body p-1.5 flex-grow-1 d-flex flex-column position-relative overflow-hidden">
               <TacticalMapWidget
@@ -586,7 +586,7 @@ export default function Dashboard({ stationFilter = 'ALL' }) {
                 <span className="text-primary d-flex"><IconActivity size={16} /></span>
                 <span>24-Hour Threat & ANPR Detection Timeline</span>
               </div>
-              <span className="badge bg-info-subtle text-info border border-info-subtle font-mono">
+              <span className="badge bg-blue-500/10 text-blue-700 border border-blue-500/20 font-mono">
                 {anprScanned > 0 ? `${Number(anprScanned).toLocaleString()} Scans Scaled` : 'Realtime Telemetry'}
               </span>
             </div>
@@ -601,10 +601,10 @@ export default function Dashboard({ stationFilter = 'ALL' }) {
           <div className="card shadow-sm border-0 flex-grow-1 d-flex flex-column">
             <div className="card-header bg-white border-bottom py-2 px-3 d-flex justify-content-between align-items-center">
               <div className="d-flex align-items-center gap-2 fw-bold text-dark small">
-                <span className="text-danger d-flex"><IconCrosshair size={16} /></span>
+                <span className="text-muted-foreground d-flex"><IconCrosshair size={16} /></span>
                 <span>Threat Distribution Ratio</span>
               </div>
-              <span className="badge bg-danger-subtle text-danger border border-danger-subtle font-mono">
+              <span className="badge bg-red-500/10 text-red-700 border border-red-500/20 font-mono">
                 {totalThreatIncidents} Incidents
               </span>
             </div>
@@ -624,10 +624,10 @@ export default function Dashboard({ stationFilter = 'ALL' }) {
           <div className="card shadow-sm border-0 flex-grow-1 d-flex flex-column">
             <div className="card-header bg-white border-bottom py-2 px-3 d-flex justify-content-between align-items-center">
               <div className="d-flex align-items-center gap-2 fw-bold text-dark small">
-                <span className="text-success d-flex"><IconCar size={16} /></span>
+                <span className="text-muted-foreground d-flex"><IconCar size={16} /></span>
                 <span>Jetson Thermal Health</span>
               </div>
-              <span className="badge bg-success-subtle text-success border border-success-subtle font-mono">
+              <span className="badge bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 font-mono">
                 {vehicleActive} Online / {vehicleTotal} Fleet
               </span>
             </div>
@@ -642,10 +642,10 @@ export default function Dashboard({ stationFilter = 'ALL' }) {
           <div className="card shadow-sm border-0 flex-grow-1 d-flex flex-column">
             <div className="card-header bg-white border-bottom py-2 px-3 d-flex justify-content-between align-items-center">
               <div className="d-flex align-items-center gap-2 fw-bold text-dark small">
-                <span className="text-primary d-flex"><IconCar size={16} /></span>
+                <span className="text-muted-foreground d-flex"><IconCar size={16} /></span>
                 <span>Vehicle Classification</span>
               </div>
-              <span className="badge bg-primary-subtle text-primary border border-primary-subtle font-mono">
+              <span className="badge bg-muted text-foreground border border-border font-mono">
                 {Number(anprScanned).toLocaleString()} Plates
               </span>
             </div>
@@ -661,10 +661,10 @@ export default function Dashboard({ stationFilter = 'ALL' }) {
           <div className="card shadow-sm border-0 flex-grow-1 d-flex flex-column">
             <div className="card-header bg-white border-bottom py-2 px-3 d-flex justify-content-between align-items-center">
               <div className="d-flex align-items-center gap-2 fw-bold text-dark small">
-                <span className="text-warning d-flex"><IconShieldAlert size={16} /></span>
+                <span className="text-muted-foreground d-flex"><IconShieldAlert size={16} /></span>
                 <span>Crowd Density vs Limits</span>
               </div>
-              <span className={`badge ${crowdAlerts > 0 ? 'bg-danger-subtle text-danger border border-danger-subtle' : 'bg-warning-subtle text-warning border border-warning-subtle'} font-mono`}>
+              <span className={`badge ${crowdAlerts > 0 ? 'bg-red-500/10 text-red-700 border border-red-500/20' : 'bg-amber-500/10 text-amber-700 border border-amber-500/20'} font-mono`}>
                 {crowdAlerts > 0 ? `${crowdAlerts} Surge Alert${crowdAlerts > 1 ? 's' : ''}` : 'Limit: 40'}
               </span>
             </div>

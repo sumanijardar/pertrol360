@@ -794,11 +794,11 @@ export default function PoliceMaster() {
                     <div className="d-flex align-items-center gap-2 ms-auto flex-wrap">
                         <button
                             type="button"
-                            className="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1 py-1 px-2.5"
+                            className="btn btn-outline-secondary btn-sm d-inline-flex align-items-center justify-content-center gap-2 px-3 shadow-sm"
                             onClick={fetchOfficersApi}
                             disabled={isLoading}
                             title="Refresh from API"
-                            style={{ fontSize: '12px' }}
+                            style={{ height: '32px', fontSize: '12px' }}
                         >
                             <svg
                                 width="13"
@@ -825,7 +825,8 @@ export default function PoliceMaster() {
                             label="Export Officers Excel"
                         />
                         <button
-                            className="btn btn-primary btn-sm d-inline-flex align-items-center gap-1 shadow-sm fw-bold px-3 py-1"
+                            className="btn btn-primary btn-sm d-inline-flex align-items-center justify-content-center gap-2 shadow-sm fw-bold px-3"
+                            style={{ height: '32px' }}
                             onClick={handleOpenAddModal}
                         >
                             <span>+</span>
@@ -1000,7 +1001,7 @@ export default function PoliceMaster() {
                     pageSize={pageSize}
                     onPageChange={setCurrentPage}
                     onPageSizeChange={setPageSize}
-                    pageSizeOptions={[5, 10, 20, 50]}
+                    pageSizeOptions={[20, 50, 100, 500]}
                 />
             </div>
 

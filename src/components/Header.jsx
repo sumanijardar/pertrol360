@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { IconBell, IconAlertTriangle } from './common/Icons';
-import { getCurrentUser } from '../services/api';
+import { IconBell, IconAlertTriangle, IconChevronDown, IconLogout, IconShieldAlert } from './common/Icons';
+import { getCurrentUser, logout } from '../services/api';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 
 export default function Header({ onToggleSidebar, isSidebarCollapsed, onSelectStation, currentStation = 'ALL' }) {
   const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString());
   const [showNotifications, setShowNotifications] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(3);
+  const [isAdminDropdownOpen, setIsAdminDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -17,6 +19,29 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onSelectSt
   useEffect(() => {
     setUser(getCurrentUser());
   }, []);
+
+  // Close dropdown on outside click or escape
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsAdminDropdownOpen(false);
+      }
+    };
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setIsAdminDropdownOpen(false);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
+  // Close dropdown on route change
+  useEffect(() => {
+    setIsAdminDropdownOpen(false);
+  }, [location.pathname]);
 
   const userName = user?.name || user?.officer_name || user?.email?.split('@')[0] || 'Admin Officer';
   const userRank = user?.rank || (user?.role === 'admin' ? 'Super Admin' : 'Sector Commander');
@@ -94,13 +119,13 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onSelectSt
           </div>
         </Button>
 
-        <nav aria-label="breadcrumb" className="flex items-center text-xs">
-          <ol className="flex items-center gap-1.5 list-none m-0 p-0">
-            <li className="text-muted-foreground font-medium text-[11px] tracking-wide uppercase">
+        <nav aria-label="breadcrumb" className="flex items-center text-xs truncate">
+          <ol className="flex items-center gap-1.5 list-none m-0 p-0 truncate">
+            <li className="hidden sm:inline text-muted-foreground font-medium text-[11px] tracking-wide uppercase truncate">
               Ahmedabad Police
             </li>
-            <li className="text-muted-foreground/60 text-[11px]">/</li>
-            <li className="text-foreground font-semibold text-xs tracking-tight">
+            <li className="hidden sm:inline text-muted-foreground/60 text-[11px]">/</li>
+            <li className="text-foreground font-semibold text-xs tracking-tight truncate">
               {getPageTitle(location.pathname)}
             </li>
           </ol>
@@ -110,14 +135,37 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onSelectSt
       {/* Right Controls */}
       <div className="flex items-center gap-2 ms-auto">
         {/* Jurisdiction Station Filter */}
-        <div className="flex items-center rounded-md border border-border bg-background shadow-2xs h-7 overflow-hidden">
-          <span className="bg-muted px-2 py-0.5 text-[10.5px] font-medium text-muted-foreground border-e border-border select-none">
+        {/* <div
+          className="hidden sm:inline-flex items-center overflow-hidden"
+          style={{
+            height: '32px',
+            borderRadius: '6px',
+            border: '1px solid #e4e4e7',
+            backgroundColor: '#ffffff',
+          }}
+        >
+          <span
+            className="px-2.5 text-[11px] font-semibold select-none flex items-center h-full"
+            style={{
+              backgroundColor: '#f4f4f5',
+              borderRight: '1px solid #e4e4e7',
+              color: '#71717a',
+            }}
+          >
             Station
           </span>
           <select
             value={currentStation}
             onChange={(e) => onSelectStation && onSelectStation(e.target.value)}
-            className="h-full bg-transparent px-2 text-xs font-medium text-foreground outline-none border-0 cursor-pointer"
+            className="bg-transparent px-2.5 text-xs font-medium outline-none cursor-pointer"
+            style={{
+              height: '100%',
+              border: 'none',
+              outline: 'none',
+              color: '#18181b',
+              fontSize: '12px',
+              backgroundColor: 'transparent',
+            }}
           >
             <option value="ALL">All Stations (Citywide)</option>
             <option value="Navrangpura">Navrangpura</option>
@@ -126,50 +174,338 @@ export default function Header({ onToggleSidebar, isSidebarCollapsed, onSelectSt
             <option value="SG Highway">SG Highway</option>
             <option value="Ellis Bridge">Ellis Bridge</option>
           </select>
-        </div>
+        </div> */}
 
         {/* Live Clock Badge */}
-        <Badge
-          variant="outline"
-          className="font-mono text-[11px] font-semibold h-7 px-2.5 gap-1.5 bg-background shadow-2xs text-foreground"
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          <span>{currentTime}</span>
-        </Badge>
-
-        {/* Officer Command Profile */}
         <div
-          className="flex items-center gap-2 ps-2.5 pe-1.5 py-1 rounded-full border border-border bg-accent/40 hover:bg-accent/70 transition-colors shadow-2xs cursor-default"
-          title={`Active Officer: ${userRank} ${userName} ${userBadge} ${userStation ? `• Station: ${userStation}` : ''}`}
+          className="hidden md:inline-flex items-center gap-2.5 font-mono text-[11px] font-semibold px-3 select-none"
+          style={{
+            height: '32px',
+            borderRadius: '6px',
+            border: '1px solid #e4e4e7',
+            backgroundColor: '#ffffff',
+            color: '#18181b',
+          }}
         >
-          <div className="hidden md:flex flex-col text-end leading-tight">
-            <div className="flex items-center justify-end gap-1.5">
-              <span className="font-semibold text-foreground text-xs tracking-tight">
-                {userName}
-              </span>
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500" title="Active On Duty" />
-            </div>
-            <div className="flex items-center justify-end gap-1">
-              <span className="text-[10px] text-muted-foreground font-medium">
-                {userRank}
-              </span>
-              {userBadge && (
-                <span className="text-[9.5px] text-muted-foreground/80 font-mono">
-                  {userBadge}
-                </span>
-              )}
-            </div>
-          </div>
+          <span
+            style={{
+              width: '6px',
+              height: '6px',
+              borderRadius: '50%',
+              backgroundColor: '#10b981',
+            }}
+            className="animate-pulse"
+          />
+          <span>{currentTime}</span>
+        </div>
 
-          <div className="relative">
-            <div className="w-7 h-7 rounded-full flex items-center justify-center text-white font-semibold text-[11px] bg-primary shadow-xs border border-background">
-              {initials}
-            </div>
+        {/* Admin Command Profile Dropdown */}
+        <div className="relative" ref={dropdownRef}>
+          <button
+            type="button"
+            onClick={() => setIsAdminDropdownOpen(prev => !prev)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              height: '34px',
+              padding: '2px 4px 2px 12px',
+              borderRadius: '9999px',
+              border: '1px solid #e4e4e7',
+              backgroundColor: '#ffffff',
+              cursor: 'pointer',
+              outline: 'none',
+              boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+              transition: 'background-color 0.15s ease, border-color 0.15s ease',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f4f4f5')}
+            onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#ffffff')}
+            title="Click to view Admin Details"
+          >
             <span
-              className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-background"
-              title="Surveillance Session Active"
+              style={{
+                fontSize: '12px',
+                fontWeight: 600,
+                color: '#18181b',
+                letterSpacing: '-0.01em',
+              }}
+            >
+              Admin
+            </span>
+            <IconChevronDown
+              size={13}
+              style={{
+                color: '#71717a',
+                transform: isAdminDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                transition: 'transform 0.2s ease',
+              }}
             />
-          </div>
+
+            <div style={{ position: 'relative', width: '28px', height: '28px', flexShrink: 0 }}>
+              <div
+                style={{
+                  width: '28px',
+                  height: '28px',
+                  borderRadius: '50%',
+                  backgroundColor: '#18181b',
+                  color: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                }}
+              >
+                {initials}
+              </div>
+              <span
+                style={{
+                  position: 'absolute',
+                  bottom: '-1px',
+                  right: '-1px',
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  backgroundColor: '#10b981',
+                  border: '1.5px solid #ffffff',
+                }}
+                title="Active On Duty"
+              />
+            </div>
+          </button>
+
+          {/* Admin Details Dropdown Card */}
+          {isAdminDropdownOpen && (
+            <div
+              style={{
+                position: 'absolute',
+                right: 0,
+                top: 'calc(100% + 8px)',
+                width: '300px',
+                backgroundColor: '#ffffff',
+                borderRadius: '12px',
+                border: '1px solid #e4e4e7',
+                boxShadow: '0 12px 28px -4px rgba(0, 0, 0, 0.12), 0 4px 8px -2px rgba(0, 0, 0, 0.06)',
+                padding: '14px',
+                zIndex: 1050,
+                animation: 'fadeIn 0.15s ease-out',
+              }}
+            >
+              {/* Profile Header Box */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '10px 12px',
+                  borderRadius: '8px',
+                  backgroundColor: '#f4f4f5',
+                  border: '1px solid #e4e4e7',
+                  marginBottom: '12px',
+                }}
+              >
+                <div
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    backgroundColor: '#18181b',
+                    color: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 700,
+                    fontSize: '13px',
+                    flexShrink: 0,
+                  }}
+                >
+                  {initials}
+                </div>
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span
+                      style={{
+                        fontSize: '13px',
+                        fontWeight: 700,
+                        color: '#18181b',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {userName}
+                    </span>
+                    <span
+                      style={{
+                        width: '7px',
+                        height: '7px',
+                        borderRadius: '50%',
+                        backgroundColor: '#10b981',
+                        flexShrink: 0,
+                      }}
+                      title="On Duty"
+                    />
+                  </div>
+                  <div
+                    style={{
+                      fontSize: '11px',
+                      color: '#71717a',
+                      fontWeight: 500,
+                      marginTop: '1px',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {userRank}
+                  </div>
+                  {userBadge && (
+                    <div style={{ marginTop: '3px' }}>
+                      <span
+                        style={{
+                          fontSize: '10px',
+                          fontFamily: 'monospace',
+                          color: '#52525b',
+                          backgroundColor: '#e4e4e7',
+                          padding: '1px 5px',
+                          borderRadius: '4px',
+                        }}
+                      >
+                        Badge: {userBadge}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Metadata Rows */}
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px',
+                  padding: '0 4px',
+                  marginBottom: '14px',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    fontSize: '11px',
+                  }}
+                >
+                  <span style={{ color: '#71717a', fontWeight: 500 }}>Jurisdiction:</span>
+                  <span style={{ color: '#18181b', fontWeight: 600 }}>
+                    {userStation || 'Navrangpura Police Station'}
+                  </span>
+                </div>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    fontSize: '11px',
+                  }}
+                >
+                  <span style={{ color: '#71717a', fontWeight: 500 }}>Session Status:</span>
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      backgroundColor: '#ecfdf5',
+                      border: '1px solid #a7f3d0',
+                      color: '#059669',
+                      padding: '2px 8px',
+                      borderRadius: '9999px',
+                      fontSize: '10.5px',
+                      fontWeight: 600,
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: '6px',
+                        height: '6px',
+                        borderRadius: '50%',
+                        backgroundColor: '#10b981',
+                      }}
+                    />
+                    Active • On Duty
+                  </span>
+                </div>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    fontSize: '11px',
+                  }}
+                >
+                  <span style={{ color: '#71717a', fontWeight: 500 }}>Role Clearance:</span>
+                  <span
+                    style={{
+                      fontFamily: 'monospace',
+                      fontSize: '10.5px',
+                      fontWeight: 700,
+                      backgroundColor: '#f4f4f5',
+                      border: '1px solid #e4e4e7',
+                      color: '#18181b',
+                      padding: '2px 6px',
+                      borderRadius: '4px',
+                    }}
+                  >
+                    {user?.role === 'admin' ? 'SUPER_ADMIN' : 'COMMANDER'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div
+                style={{
+                  height: '1px',
+                  backgroundColor: '#e4e4e7',
+                  margin: '0 0 12px 0',
+                }}
+              />
+
+              {/* Logout Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsAdminDropdownOpen(false);
+                  logout();
+                  localStorage.removeItem('token');
+                  localStorage.removeItem('user');
+                  sessionStorage.clear();
+                  navigate('/login');
+                }}
+                style={{
+                  width: '100%',
+                  height: '34px',
+                  borderRadius: '8px',
+                  backgroundColor: '#dc2626',
+                  color: '#ffffff',
+                  border: '1px solid #dc2626',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  boxShadow: '0 1px 2px rgba(220, 38, 38, 0.2)',
+                  transition: 'background-color 0.15s ease',
+                }}
+                onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#b91c1c')}
+                onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#dc2626')}
+              >
+                <IconLogout size={13} style={{ color: '#ffffff' }} />
+                <span>Logout from Session</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>

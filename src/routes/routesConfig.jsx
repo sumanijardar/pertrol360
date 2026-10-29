@@ -78,8 +78,6 @@ export const NAV_SECTIONS = [
         label: 'Dashboard',
         icon: <IconDashboard size={17} />,
         element: Dashboard,
-        badge: 'LIVE',
-        badgeClass: 'bg-success-subtle text-success border border-success-subtle',
         isDefault: true
       },
       {
@@ -87,8 +85,7 @@ export const NAV_SECTIONS = [
         label: 'Patrolling',
         icon: <IconCar size={17} />,
         element: PatrollingList,
-        badge: '5-GRID',
-        badgeClass: 'bg-primary-subtle text-primary border border-primary-subtle'
+
       }
     ]
   },
@@ -99,8 +96,6 @@ export const NAV_SECTIONS = [
         path: '/reports/wanted-suspects',
         label: 'Wanted Suspects',
         icon: <IconAlertTriangle size={16} />,
-        badge: 'WANTED',
-        badgeClass: 'bg-danger-subtle text-danger border border-danger-subtle',
         element: WantedSuspectList
       },
       {
@@ -108,16 +103,12 @@ export const NAV_SECTIONS = [
         label: 'Weapon Detection',
         icon: <IconCrosshair size={17} />,
         element: WeaponsDetectionList,
-        badge: 'THREAT',
-        badgeClass: 'bg-danger-subtle text-danger border border-danger-subtle'
       },
       {
         path: '/ai-alerts',
         label: 'Ai Alerts',
         icon: <IconCrosshair size={17} />,
-        element: AiAlerts,
-        badge: 'LIVE',
-        badgeClass: 'bg-danger-subtle text-danger border border-danger-subtle'
+        element: AiAlerts
       }
     ]
   }

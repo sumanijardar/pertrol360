@@ -629,7 +629,8 @@ export default function VahicalList() {
         </div>
         <div className="d-flex align-items-center gap-2">
           <button
-            className="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1.5 shadow-sm px-3"
+            className="btn btn-outline-secondary btn-sm d-inline-flex align-items-center justify-content-center gap-2 shadow-sm px-3"
+            style={{ height: '32px' }}
             onClick={fetchVehiclesApi}
             disabled={isLoading}
             title="Refresh fleet data from server"
@@ -919,7 +920,7 @@ export default function VahicalList() {
           pageSize={pageSize}
           onPageChange={setCurrentPage}
           onPageSizeChange={setPageSize}
-          pageSizeOptions={[5, 10, 20, 50]}
+          pageSizeOptions={[20, 50, 100, 500]}
         />
       </div>
 
