@@ -538,10 +538,10 @@ export default function AiAlerts() {
             <div className="rounded-lg border border-border bg-card shadow-2xs mb-4 overflow-hidden">
                 <div className="table-responsive">
                     <table className="table table-hover align-middle mb-0 text-nowrap" style={{ minWidth: '1150px' }}>
-                        <thead style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e4e4e7' }}>
+                        <thead style={{ backgroundColor: '#f4f4f5', borderBottom: '1px solid #e4e4e7' }}>
                             <tr
                                 className="text-uppercase"
-                                style={{ fontSize: '10.5px', fontWeight: 600, color: '#71717a', letterSpacing: '0.04em' }}
+                                style={{ fontSize: '10.5px', fontWeight: 700, color: '#18181b', letterSpacing: '0.04em' }}
                             >
                                 <th className="py-2.5 px-3 text-center" style={{ width: '50px' }}>
                                     #

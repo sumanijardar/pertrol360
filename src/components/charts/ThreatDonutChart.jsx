@@ -102,7 +102,7 @@ export default function ThreatDonutChart({ data }) {
             width: '74px'
           }}
         >
-          <div style={{ fontSize: '8px', textTransform: 'uppercase', color: '#64748b', fontWeight: 700, letterSpacing: '0.04em' }}>
+          <div style={{ fontSize: '8.5px', textTransform: 'uppercase', color: '#18181b', fontWeight: 800, letterSpacing: '0.04em' }}>
             {activeItem ? activeItem.label.split(' ')[0] : 'TOTAL'}
           </div>
           <div
@@ -117,7 +117,7 @@ export default function ThreatDonutChart({ data }) {
           >
             {activeItem ? activeItem.count : totalIncidents}
           </div>
-          <div style={{ fontSize: '8px', color: '#94a3b8', fontWeight: 600 }}>
+          <div style={{ fontSize: '8.5px', color: '#52525b', fontWeight: 700 }}>
             {activeItem ? `${activeItem.percentage}%` : 'Incidents'}
           </div>
         </div>
@@ -138,8 +138,8 @@ export default function ThreatDonutChart({ data }) {
                 justifyContent: 'space-between',
                 padding: '4px 8px',
                 borderRadius: '5px',
-                background: isSelected ? '#f8fafc' : '#ffffff',
-                border: `1px solid ${isSelected ? item.color : '#e2e8f0'}`,
+                background: isSelected ? '#f4f4f5' : '#ffffff',
+                border: `1px solid ${isSelected ? item.color : '#e4e4e7'}`,
                 cursor: 'pointer',
                 transition: 'all 0.15s ease'
               }}
@@ -157,8 +157,8 @@ export default function ThreatDonutChart({ data }) {
                 <span
                   style={{
                     fontSize: '11px',
-                    color: isSelected ? '#0f172a' : '#334155',
-                    fontWeight: isSelected ? 700 : 500,
+                    color: '#09090b',
+                    fontWeight: isSelected ? 700 : 600,
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis'
@@ -171,7 +171,7 @@ export default function ThreatDonutChart({ data }) {
                 <span style={{ fontSize: '11px', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", color: item.color }}>
                   {item.count}
                 </span>
-                <span style={{ fontSize: '9px', color: '#64748b', background: '#f1f5f9', padding: '1px 4px', borderRadius: '3px', fontWeight: 600 }}>
+                <span style={{ fontSize: '9px', color: '#18181b', background: '#e4e4e7', padding: '1px 5px', borderRadius: '3px', fontWeight: 700 }}>
                   {item.percentage}%
                 </span>
               </div>

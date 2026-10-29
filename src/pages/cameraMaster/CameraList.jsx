@@ -768,7 +768,7 @@ export default function CameraList({ stationFilter = 'ALL' }) {
             </div>
           ) : (
             <table className="table table-hover align-middle mb-0 text-nowrap">
-              <thead className="table-light text-uppercase font-mono" style={{ fontSize: '11px', letterSpacing: '0.04em' }}>
+              <thead className="table-light text-uppercase font-mono" style={{ fontSize: '11px', letterSpacing: '0.04em', color: '#18181b', fontWeight: 700 }}>
                 <tr>
                   {CAMERA_INVENTORY_COLUMNS.map((col) => (
                     <th

@@ -143,9 +143,9 @@ export default function TacticalMapWidget({ vehicles = [], selectedVehicleId, on
             <text
               x={z.cx}
               y={z.cy}
-              fill="#475569"
+              fill="#18181b"
               fontSize="8.5"
-              fontWeight="700"
+              fontWeight="800"
               textAnchor="middle"
               fontFamily="'JetBrains Mono', monospace"
               letterSpacing="0.05em"
@@ -161,25 +161,33 @@ export default function TacticalMapWidget({ vehicles = [], selectedVehicleId, on
         className="d-flex align-items-center justify-content-between p-2 position-relative"
         style={{ zIndex: 10, pointerEvents: 'auto' }}
       >
-        <div className="d-flex align-items-center gap-2 bg-white bg-opacity-95 px-2 py-1 rounded shadow-sm border">
+        <div className="d-flex align-items-center gap-2 bg-white bg-opacity-95 px-2 py-1 rounded shadow-sm border" style={{ borderColor: '#e4e4e7' }}>
           <span className="spinner-grow spinner-grow-sm text-success" role="status" style={{ width: '8px', height: '8px' }} />
-          <span className="fw-bold text-dark small" style={{ fontSize: '11px' }}>
+          <span className="fw-bold small" style={{ fontSize: '11px', color: '#09090b' }}>
             GPS TELEMETRY RADAR: AHMEDABAD METRO
           </span>
-          <span className="text-muted font-mono d-none d-sm-inline" style={{ fontSize: '10px' }}>
+          <span className="font-mono d-none d-sm-inline" style={{ fontSize: '10px', color: '#52525b', fontWeight: 600 }}>
             23.037°N, 72.561°E
           </span>
         </div>
 
         {/* Tactical Layer Switcher */}
-        <div className="btn-group btn-group-sm bg-white shadow-sm border rounded p-0" role="group">
+        <div className="btn-group btn-group-sm bg-white shadow-sm border rounded p-0.5" role="group" style={{ borderColor: '#e4e4e7' }}>
           {['TACTICAL', 'SATELLITE', 'HEATMAP'].map(mode => (
             <button
               key={mode}
               type="button"
               onClick={() => setMapMode(mode)}
-              className={`btn btn-sm py-0 px-2 fw-bold ${mapMode === mode ? 'btn-primary' : 'btn-light text-secondary'}`}
-              style={{ fontSize: '10px', height: '26px' }}
+              className="btn btn-sm py-0 px-2.5 fw-bold"
+              style={{
+                fontSize: '10px',
+                height: '26px',
+                backgroundColor: mapMode === mode ? '#18181b' : '#ffffff',
+                color: mapMode === mode ? '#ffffff' : '#18181b',
+                border: 'none',
+                borderRadius: '4px',
+                transition: 'all 0.15s ease'
+              }}
             >
               {mode}
             </button>

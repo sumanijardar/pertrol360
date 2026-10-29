@@ -457,7 +457,56 @@ nav[aria-label="Table pagination"] button {
   }
 }
 
-/* Mira Style Subtle Badges */
+/* Mira Style Subtle Badges & High Contrast Text Overrides */
+.badge {
+  --bs-badge-color: #18181b;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* Force dark readable text when text-* utility is used on badge */
+.badge.text-dark,
+.badge.text-foreground,
+.badge[class*="text-foreground"] {
+  color: #18181b !important;
+}
+.badge[class*="text-emerald"],
+.badge[class*="text-success"] {
+  color: #047857 !important;
+}
+.badge[class*="text-red"],
+.badge[class*="text-danger"] {
+  color: #b91c1c !important;
+}
+.badge[class*="text-amber"],
+.badge[class*="text-warning"] {
+  color: #b45309 !important;
+}
+.badge[class*="text-blue"],
+.badge[class*="text-primary"],
+.badge[class*="text-info"] {
+  color: #1d4ed8 !important;
+}
+.badge[class*="text-muted"] {
+  color: #52525b !important;
+}
+
+/* High contrast overrides for Bootstrap muted and dark text */
+.text-muted,
+.text-secondary {
+  color: #52525b !important;
+}
+
+.text-dark {
+  color: #09090b !important;
+}
+
+.card-header {
+  background-color: var(--card) !important;
+  color: var(--foreground) !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+
 .badge-tactical {
   display: inline-flex;
   align-items: center;
@@ -471,33 +520,33 @@ nav[aria-label="Table pagination"] button {
 }
 
 .badge-critical {
-  background: #fef2f2;
-  color: #b91c1c;
-  border: 1px solid #fecaca;
+  background: #fef2f2 !important;
+  color: #b91c1c !important;
+  border: 1px solid #fecaca !important;
 }
 
 .badge-warning {
-  background: #fffbeb;
-  color: #b45309;
-  border: 1px solid #fde68a;
+  background: #fffbeb !important;
+  color: #b45309 !important;
+  border: 1px solid #fde68a !important;
 }
 
 .badge-success {
-  background: #ecfdf5;
-  color: #047857;
-  border: 1px solid #a7f3d0;
+  background: #ecfdf5 !important;
+  color: #047857 !important;
+  border: 1px solid #a7f3d0 !important;
 }
 
 .badge-info {
-  background: #eff6ff;
-  color: #1d4ed8;
-  border: 1px solid #bfdbfe;
+  background: #eff6ff !important;
+  color: #1d4ed8 !important;
+  border: 1px solid #bfdbfe !important;
 }
 
 .badge-neutral {
-  background: #f4f4f5;
-  color: #18181b;
-  border: 1px solid #e4e4e7;
+  background: #f4f4f5 !important;
+  color: #18181b !important;
+  border: 1px solid #e4e4e7 !important;
 }
 
 /* Indian High Security License Plate */

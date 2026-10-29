@@ -55,33 +55,33 @@ export default function TimelineActivityChart({ data }) {
     <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
       {/* 1. Header Legend & Filter Controls (Isolated from SVG) */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', color: '#475569', fontWeight: 600 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: '#18181b', fontWeight: 700 }}>
             <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#0284c7', display: 'inline-block' }} />
             <span>ANPR Scans</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', color: '#475569', fontWeight: 600 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: '#18181b', fontWeight: 700 }}>
             <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#dc2626', display: 'inline-block' }} />
             <span>Threat Incidents</span>
           </div>
         </div>
 
         {/* Filter Pills */}
-        <div style={{ display: 'flex', background: '#f1f5f9', borderRadius: '5px', padding: '2px', border: '1px solid #e2e8f0' }}>
+        <div style={{ display: 'flex', background: '#f4f4f5', borderRadius: '5px', padding: '2px', border: '1px solid #e4e4e7' }}>
           {['ALL', 'ANPR', 'THREATS'].map((filter) => (
             <button
               key={filter}
               onClick={() => setActiveFilter(filter)}
               style={{
-                background: activeFilter === filter ? '#ffffff' : 'transparent',
-                color: activeFilter === filter ? '#0284c7' : '#64748b',
+                background: activeFilter === filter ? '#18181b' : 'transparent',
+                color: activeFilter === filter ? '#ffffff' : '#52525b',
                 border: 'none',
                 padding: '2px 8px',
                 fontSize: '10px',
                 fontWeight: 700,
                 borderRadius: '3px',
                 cursor: 'pointer',
-                boxShadow: activeFilter === filter ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
+                boxShadow: activeFilter === filter ? '0 1px 2px rgba(0,0,0,0.12)' : 'none',
                 transition: 'all 0.12s ease'
               }}
             >
@@ -127,8 +127,9 @@ export default function TimelineActivityChart({ data }) {
                   x={padding.left - 6}
                   y={y + 3}
                   textAnchor="end"
-                  fill="#94a3b8"
+                  fill="#52525b"
                   fontSize="8.5"
+                  fontWeight="600"
                   fontFamily="'JetBrains Mono', monospace"
                 >
                   {Math.round(maxAnpr * (1 - pct))}
@@ -147,11 +148,12 @@ export default function TimelineActivityChart({ data }) {
                 x={x}
                 y={height - 6}
                 textAnchor="middle"
-                fill="#94a3b8"
+                fill="#52525b"
                 fontSize="8.5"
+                fontWeight="700"
                 fontFamily="'JetBrains Mono', monospace"
               >
-                {d.hour}
+                {d.time || d.hour}
               </text>
             );
           })}
@@ -246,25 +248,25 @@ export default function TimelineActivityChart({ data }) {
               position: 'absolute',
               top: '4px',
               left: `${Math.min(Math.max(10, (hoveredIndex / (data.length - 1)) * 85), 68)}%`,
-              background: '#ffffff',
-              border: '1px solid #cbd5e1',
+              background: '#18181b',
+              border: '1px solid #27272a',
               borderRadius: '5px',
               padding: '6px 10px',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
               pointerEvents: 'none',
               zIndex: 10,
               fontSize: '10px',
               minWidth: '120px'
             }}
           >
-            <div style={{ color: '#0f172a', fontWeight: 700, borderBottom: '1px solid #e2e8f0', paddingBottom: '3px', marginBottom: '3px' }}>
-              Time: {activePoint.hour}
+            <div style={{ color: '#fafafa', fontWeight: 700, borderBottom: '1px solid #27272a', paddingBottom: '3px', marginBottom: '3px' }}>
+              Time: {activePoint.time || activePoint.hour}
             </div>
-            <div style={{ color: '#0284c7', display: 'flex', justifyContent: 'space-between', fontWeight: 600 }}>
+            <div style={{ color: '#38bdf8', display: 'flex', justifyContent: 'space-between', fontWeight: 600 }}>
               <span>ANPR:</span>
               <strong style={{ fontFamily: "'JetBrains Mono', monospace" }}>{activePoint.anprCount}</strong>
             </div>
-            <div style={{ color: '#dc2626', display: 'flex', justifyContent: 'space-between', marginTop: '1px', fontWeight: 600 }}>
+            <div style={{ color: '#f87171', display: 'flex', justifyContent: 'space-between', marginTop: '1px', fontWeight: 600 }}>
               <span>Threats:</span>
               <strong style={{ fontFamily: "'JetBrains Mono', monospace" }}>{activePoint.threats + activePoint.fire + activePoint.crowdSurges}</strong>
             </div>

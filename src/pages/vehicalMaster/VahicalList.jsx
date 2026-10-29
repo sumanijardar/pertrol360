@@ -856,8 +856,8 @@ export default function VahicalList() {
         {/* Data Table Container with Horizontal Scroll (Bootstrap 5 table-responsive) */}
         <div className="table-responsive">
           <table className="table table-hover align-middle mb-0 text-nowrap" style={{ minWidth: '1200px' }}>
-            <thead style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-              <tr className="text-uppercase small" style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', letterSpacing: '0.04em' }}>
+            <thead style={{ backgroundColor: '#f4f4f5', borderBottom: '1px solid #e4e4e7' }}>
+              <tr className="text-uppercase small" style={{ fontSize: '11px', fontWeight: 700, color: '#18181b', letterSpacing: '0.04em' }}>
                 {VEHICLE_COLUMNS.map((col, idx) => (
                   <th
                     key={col.key || idx}
@@ -1296,7 +1296,7 @@ export default function VahicalList() {
                       </div>
                       <div>
                         <div className="fw-bold text-white fs-6 mb-0.5">{selectedVehicle.vehicle_model}</div>
-                        <div className="text-slate-400 small" style={{ color: '#94a3b8', fontSize: '12px' }}>
+                        <div className="small" style={{ color: '#d4d4d8', fontSize: '12px', fontWeight: 500 }}>
                           📍 {selectedVehicle.police_station}
                         </div>
                       </div>

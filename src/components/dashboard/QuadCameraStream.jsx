@@ -279,10 +279,13 @@ export default function QuadCameraStream({ vehicle }) {
       {/* 1. Stream Layout Toggle & Status Header */}
       <div className="d-flex justify-content-between align-items-center">
         <div className="d-flex align-items-center gap-2">
-          <span className="badge bg-danger-subtle text-danger border border-danger-subtle fw-bold" style={{ fontSize: '10px' }}>
+          <span
+            className="badge font-mono fw-bold"
+            style={{ fontSize: '10px', backgroundColor: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca' }}
+          >
             ● 4-CHANNEL CCTV
           </span>
-          <span className="text-dark small fw-bold font-mono">
+          <span className="small fw-bold font-mono" style={{ color: '#09090b' }}>
             {vehicle.registration_number}
           </span>
         </div>
@@ -291,16 +294,30 @@ export default function QuadCameraStream({ vehicle }) {
           <button
             type="button"
             onClick={() => setIsQuadView(true)}
-            className={`btn btn-sm py-0 px-2 fw-bold ${isQuadView ? 'btn-primary' : 'btn-outline-secondary'}`}
-            style={{ fontSize: '10px', height: '26px' }}
+            className="btn btn-sm py-0 px-2.5 fw-bold"
+            style={{
+              fontSize: '10px',
+              height: '26px',
+              backgroundColor: isQuadView ? '#18181b' : '#ffffff',
+              color: isQuadView ? '#ffffff' : '#18181b',
+              border: '1px solid ' + (isQuadView ? '#18181b' : '#e4e4e7'),
+              transition: 'all 0.15s ease'
+            }}
           >
             Quad 2x2
           </button>
           <button
             type="button"
             onClick={() => setIsQuadView(false)}
-            className={`btn btn-sm py-0 px-2 fw-bold ${!isQuadView ? 'btn-primary' : 'btn-outline-secondary'}`}
-            style={{ fontSize: '10px', height: '26px' }}
+            className="btn btn-sm py-0 px-2.5 fw-bold"
+            style={{
+              fontSize: '10px',
+              height: '26px',
+              backgroundColor: !isQuadView ? '#18181b' : '#ffffff',
+              color: !isQuadView ? '#ffffff' : '#18181b',
+              border: '1px solid ' + (!isQuadView ? '#18181b' : '#e4e4e7'),
+              transition: 'all 0.15s ease'
+            }}
           >
             Single Cam
           </button>

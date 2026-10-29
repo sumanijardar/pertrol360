@@ -37,9 +37,9 @@ export default function CrowdHourlyChart({ crowdAlerts = 0, threshold = 40 }) {
 
   return (
     <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: '#64748b' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: '#52525b', fontWeight: 600 }}>
         <span>Edge Crowd Density (Camera Vision AI)</span>
-        <span style={{ color: numAlerts > 0 ? '#dc2626' : '#10b981', fontFamily: "'JetBrains Mono', monospace", fontWeight: 700 }}>
+        <span style={{ color: numAlerts > 0 ? '#b91c1c' : '#047857', fontFamily: "'JetBrains Mono', monospace", fontWeight: 700 }}>
           {numAlerts > 0 ? `${numAlerts} Surge Alert${numAlerts > 1 ? 's' : ''} (> ${threshold})` : `All Clear (< ${threshold} heads)`}
         </span>
       </div>
@@ -75,7 +75,7 @@ export default function CrowdHourlyChart({ crowdAlerts = 0, threshold = 40 }) {
               onMouseEnter={() => setHoveredIdx(i)}
               onMouseLeave={() => setHoveredIdx(null)}
             >
-              <span style={{ fontSize: '9px', fontFamily: "'JetBrains Mono', monospace", color: isOver ? '#dc2626' : '#0284c7', fontWeight: 700, marginBottom: '2px' }}>
+              <span style={{ fontSize: '9.5px', fontFamily: "'JetBrains Mono', monospace", color: isOver ? '#b91c1c' : '#18181b', fontWeight: 800, marginBottom: '2px' }}>
                 {d.count}
               </span>
               <div
@@ -90,7 +90,7 @@ export default function CrowdHourlyChart({ crowdAlerts = 0, threshold = 40 }) {
                   transition: 'all 0.15s ease'
                 }}
               />
-              <span style={{ position: 'absolute', bottom: -18, fontSize: '8px', color: '#64748b', fontFamily: "'JetBrains Mono', monospace", fontWeight: 600 }}>
+              <span style={{ position: 'absolute', bottom: -18, fontSize: '8.5px', color: '#18181b', fontFamily: "'JetBrains Mono', monospace", fontWeight: 700 }}>
                 {d.time}
               </span>
             </div>
@@ -99,11 +99,11 @@ export default function CrowdHourlyChart({ crowdAlerts = 0, threshold = 40 }) {
       </div>
 
       {hoveredIdx !== null ? (
-        <div style={{ fontSize: '10px', color: '#0f172a', textAlign: 'center', background: '#f8fafc', border: '1px solid #e2e8f0', padding: '4px 8px', borderRadius: '4px', fontWeight: 500 }}>
+        <div style={{ fontSize: '10px', color: '#09090b', textAlign: 'center', background: '#f4f4f5', border: '1px solid #e4e4e7', padding: '4px 8px', borderRadius: '4px', fontWeight: 600 }}>
           {crowdData[hoveredIdx].time}: <strong style={{ color: '#0284c7' }}>{crowdData[hoveredIdx].count} people</strong> detected @ {crowdData[hoveredIdx].location} ({crowdData[hoveredIdx].exceeded ? 'BREACHED' : 'NORMAL'})
         </div>
       ) : (
-        <div style={{ fontSize: '10px', color: '#64748b', textAlign: 'center' }}>
+        <div style={{ fontSize: '10px', color: '#52525b', textAlign: 'center', fontWeight: 600 }}>
           Real-time head-count stream via Vehicle Cam Flank sensors
         </div>
       )}

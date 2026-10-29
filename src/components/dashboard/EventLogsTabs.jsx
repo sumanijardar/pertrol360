@@ -195,48 +195,29 @@ export default function EventLogsTabs({
 
         {/* 3. Filter Pills */}
         <div className="d-flex align-items-center gap-1.5 mb-3 flex-wrap">
-          <button
-            type="button"
-            onClick={() => { setActiveFilter('ALL'); setCurrentPage(1); }}
-            className={`btn btn-sm rounded-pill px-3 py-0.5 fw-semibold ${activeFilter === 'ALL' ? 'btn-dark text-white' : 'btn-light border text-secondary'}`}
-            style={{ fontSize: '11px' }}
-          >
-            All ({counts.all})
-          </button>
-          <button
-            type="button"
-            onClick={() => { setActiveFilter('PLATES'); setCurrentPage(1); }}
-            className={`btn btn-sm rounded-pill px-3 py-0.5 fw-semibold ${activeFilter === 'PLATES' ? 'btn-dark text-white' : 'btn-light border text-secondary'}`}
-            style={{ fontSize: '11px' }}
-          >
-            Plates ({counts.plates})
-          </button>
-          <button
-            type="button"
-            onClick={() => { setActiveFilter('WANTED'); setCurrentPage(1); }}
-            className={`btn btn-sm rounded-pill px-3 py-0.5 fw-semibold ${activeFilter === 'WANTED' ? 'btn-dark text-white' : 'btn-light border text-secondary'}`}
-            style={{ fontSize: '11px' }}
-          >
-            Wanted ({counts.wanted})
-          </button>
-          <button
-            type="button"
-            onClick={() => { setActiveFilter('WEAPONS'); setCurrentPage(1); }}
-            className={`btn btn-sm rounded-pill px-3 py-0.5 fw-semibold ${activeFilter === 'WEAPONS' ? 'btn-dark text-white' : 'btn-light border text-secondary'}`}
-            style={{ fontSize: '11px' }}
-          >
-            Weapons ({counts.weapons})
-          </button>
-          {counts.hazards > 0 && (
+          {[
+            { id: 'ALL', label: `All (${counts.all})` },
+            { id: 'PLATES', label: `Plates (${counts.plates})` },
+            { id: 'WANTED', label: `Wanted (${counts.wanted})` },
+            { id: 'WEAPONS', label: `Weapons (${counts.weapons})` },
+            ...(counts.hazards > 0 ? [{ id: 'HAZARDS', label: `Hazards (${counts.hazards})` }] : [])
+          ].map(tab => (
             <button
+              key={tab.id}
               type="button"
-              onClick={() => { setActiveFilter('HAZARDS'); setCurrentPage(1); }}
-              className={`btn btn-sm rounded-pill px-3 py-0.5 fw-semibold ${activeFilter === 'HAZARDS' ? 'btn-dark text-white' : 'btn-light border text-secondary'}`}
-              style={{ fontSize: '11px' }}
+              onClick={() => { setActiveFilter(tab.id); setCurrentPage(1); }}
+              className="btn btn-sm rounded-pill px-3 py-1 fw-semibold"
+              style={{
+                fontSize: '11px',
+                backgroundColor: activeFilter === tab.id ? '#18181b' : '#ffffff',
+                color: activeFilter === tab.id ? '#ffffff' : '#18181b',
+                border: '1px solid ' + (activeFilter === tab.id ? '#18181b' : '#e4e4e7'),
+                transition: 'all 0.15s ease'
+              }}
             >
-              Hazards ({counts.hazards})
+              {tab.label}
             </button>
-          )}
+          ))}
         </div>
 
         {/* 4. Alert Cards Stream */}
@@ -282,20 +263,20 @@ export default function EventLogsTabs({
 
                 {/* Card Middle: Headline & Case details */}
                 <div className="mb-2">
-                  <div className="fw-bold text-dark" style={{ fontSize: '13px' }}>
+                  <div className="fw-bold" style={{ fontSize: '13px', color: '#09090b' }}>
                     {alert.headline}
                   </div>
-                  <div className="text-muted small" style={{ fontSize: '11.5px' }}>
+                  <div className="small" style={{ fontSize: '11.5px', color: '#52525b', fontWeight: 500 }}>
                     {alert.subtitle}
                   </div>
                 </div>
 
                 {/* Card Bottom: Camera & Status */}
-                <div className="d-flex justify-content-between align-items-center pt-2 border-top" style={{ fontSize: '11px' }}>
-                  <span className="text-muted font-mono">
+                <div className="d-flex justify-content-between align-items-center pt-2 border-top" style={{ fontSize: '11px', borderColor: '#e4e4e7' }}>
+                  <span className="font-mono" style={{ color: '#52525b', fontWeight: 600 }}>
                     {alert.timeInfo}
                   </span>
-                  <span className="fw-semibold font-mono" style={{ color: alert.statusColor }}>
+                  <span className="fw-bold font-mono" style={{ color: alert.statusColor }}>
                     {alert.statusText}
                   </span>
                 </div>

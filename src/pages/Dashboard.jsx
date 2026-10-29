@@ -212,7 +212,7 @@ export default function Dashboard({ stationFilter = 'ALL' }) {
 
   // 3. Dynamic Jetson Fleet Telemetry Data
   const dynamicJetsonHardware = useMemo(() => {
-    if (!vehicles || vehicles.length === 0) return JETSON_FLEET_HARDWARE;
+    if (!vehicles || vehicles.length === 0) return [];
     const defaultTemp = parseFloat(stats?.system_health?.jetson_temperature) || 46.5;
 
     return vehicles.map((v, i) => ({
@@ -276,13 +276,16 @@ export default function Dashboard({ stationFilter = 'ALL' }) {
         <div>
           <div className="d-flex align-items-center gap-2">
             <span className="text-primary d-inline-flex"><IconActivity size={22} /></span>
-            <h1 className="h5 fw-bold text-dark mb-0">Tactical Command & Threat Radar</h1>
-            <span className="badge bg-success-subtle text-success border border-success-subtle font-mono small d-inline-flex align-items-center gap-1">
-              <span className="rounded-circle bg-success" style={{ width: '6px', height: '6px', animation: 'pulseGlow 1.5s infinite' }} />
+            <h1 className="h5 fw-bold mb-0" style={{ color: '#09090b' }}>Tactical Command & Threat Radar</h1>
+            <span
+              className="badge font-mono small d-inline-flex align-items-center gap-1"
+              style={{ backgroundColor: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0' }}
+            >
+              <span className="rounded-circle" style={{ width: '6px', height: '6px', backgroundColor: '#059669', animation: 'pulseGlow 1.5s infinite' }} />
               LIVE TELEMETRY
             </span>
           </div>
-          <p className="text-muted small mb-0 mt-0.5" style={{ fontSize: '12px' }}>
+          <p className="small mb-0 mt-0.5" style={{ fontSize: '12px', color: '#52525b' }}>
             Multi-sensor edge intelligence, live CCTV streams, ANPR hotlist matches & emergency dispatch
           </p>
         </div>
@@ -293,26 +296,32 @@ export default function Dashboard({ stationFilter = 'ALL' }) {
           {stats?.system_health && (
             <div className="d-flex align-items-center gap-2 bg-white px-2.5 py-1 rounded-3 border shadow-sm small font-mono">
               <div className="d-flex align-items-center gap-1">
-                <span className="text-muted" style={{ fontSize: '10px' }}>AI FPS:</span>
-                <span className="badge bg-success-subtle text-success border border-success-subtle px-1.5 py-0.5 fw-bold" style={{ fontSize: '10.5px' }}>
+                <span style={{ fontSize: '10px', color: '#52525b', fontWeight: 600 }}>AI FPS:</span>
+                <span
+                  className="badge font-mono px-1.5 py-0.5 fw-bold"
+                  style={{ fontSize: '10.5px', backgroundColor: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0' }}
+                >
                   {stats.system_health.edge_ai_fps || 30} FPS
                 </span>
               </div>
-              <div className="border-start ps-2 d-flex align-items-center gap-1">
-                <span className="text-muted" style={{ fontSize: '10px' }}>Latency:</span>
-                <strong className="text-dark" style={{ fontSize: '10.5px' }}>
+              <div className="border-start ps-2 d-flex align-items-center gap-1" style={{ borderColor: '#e4e4e7' }}>
+                <span style={{ fontSize: '10px', color: '#52525b', fontWeight: 600 }}>Latency:</span>
+                <strong style={{ fontSize: '10.5px', color: '#09090b' }}>
                   {stats.system_health.avg_inference_latency || '22ms'}
                 </strong>
               </div>
-              <div className="border-start ps-2 d-flex align-items-center gap-1">
-                <span className="text-muted" style={{ fontSize: '10px' }}>Jetson:</span>
-                <strong className="text-primary" style={{ fontSize: '10.5px' }}>
+              <div className="border-start ps-2 d-flex align-items-center gap-1" style={{ borderColor: '#e4e4e7' }}>
+                <span style={{ fontSize: '10px', color: '#52525b', fontWeight: 600 }}>Jetson:</span>
+                <strong style={{ fontSize: '10.5px', color: '#1d4ed8' }}>
                   {stats.system_health.jetson_temperature || '46.5 C'}
                 </strong>
               </div>
-              <div className="border-start ps-2 d-flex align-items-center gap-1">
-                <span className="text-muted" style={{ fontSize: '10px' }}>DB:</span>
-                <span className="badge bg-success text-white px-1.5 py-0.5 fw-bold" style={{ fontSize: '10px' }}>
+              <div className="border-start ps-2 d-flex align-items-center gap-1" style={{ borderColor: '#e4e4e7' }}>
+                <span style={{ fontSize: '10px', color: '#52525b', fontWeight: 600 }}>DB:</span>
+                <span
+                  className="badge font-mono px-1.5 py-0.5 fw-bold"
+                  style={{ fontSize: '10px', backgroundColor: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0' }}
+                >
                   {stats.system_health.database_status || 'ONLINE'}
                 </span>
               </div>
@@ -320,7 +329,7 @@ export default function Dashboard({ stationFilter = 'ALL' }) {
           )}
 
           {lastUpdated && (
-            <span className="text-muted small font-mono d-none d-md-inline" style={{ fontSize: '11px' }}>
+            <span className="small font-mono d-none d-md-inline" style={{ fontSize: '11px', color: '#52525b', fontWeight: 600 }}>
               Synced: {lastUpdated}
             </span>
           )}
@@ -328,8 +337,8 @@ export default function Dashboard({ stationFilter = 'ALL' }) {
             type="button"
             onClick={fetchDashboardStats}
             disabled={isLoadingStats}
-            className="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1.5 shadow-sm fw-semibold"
-            style={{ height: '32px', fontSize: '12px' }}
+            className="btn btn-sm d-flex align-items-center gap-1.5 shadow-sm fw-semibold"
+            style={{ height: '32px', fontSize: '12px', backgroundColor: '#ffffff', color: '#18181b', border: '1px solid #e4e4e7' }}
             title="Refresh dashboard metrics from server"
           >
             <span className={isLoadingStats ? 'spinner-border spinner-border-sm' : ''}>↻</span>
@@ -401,20 +410,20 @@ export default function Dashboard({ stationFilter = 'ALL' }) {
           <div className="card shadow-2xs border border-border rounded-lg h-100 p-3 bg-card kpi-count-card">
             <div className="d-flex justify-content-between align-items-center">
               <div className="d-flex align-items-center gap-2">
-                <span className="text-muted-foreground d-flex"><IconCar size={15} /></span>
-                <span className="small text-muted-foreground fw-bold text-uppercase" style={{ fontSize: '10px', letterSpacing: '0.04em' }}>Patrol Fleet</span>
+                <span className="d-flex" style={{ color: '#18181b' }}><IconCar size={18} /></span>
+                <span className="small fw-bold text-uppercase" style={{ fontSize: '10.5px', letterSpacing: '0.04em', color: '#18181b' }}>Patrol Fleet</span>
               </div>
-              <span className="badge bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 font-mono" style={{ fontSize: '9.5px' }}>
+              <span className="badge font-mono" style={{ fontSize: '9.5px', backgroundColor: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0' }}>
                 {activeRate}% ACTIVE
               </span>
             </div>
             <div className="d-flex align-items-baseline gap-2 mt-1">
-              <span className="fs-4 fw-bold font-mono text-foreground">{vehicleActive}</span>
-              <span className="small text-muted-foreground fw-medium">/ {vehicleTotal} units</span>
+              <span className="fs-4 fw-bold font-mono" style={{ color: '#09090b' }}>{vehicleActive}</span>
+              <span className="small fw-semibold" style={{ color: '#52525b' }}>/ {vehicleTotal} units</span>
             </div>
-            <div className="d-flex justify-content-between border-top border-border pt-1 mt-1 small text-muted-foreground text-nowrap" style={{ fontSize: '9.5px' }}>
-              <span>Database: <strong className="text-foreground">{stats?.system_health?.database_status || 'ONLINE'}</strong></span>
-              <span>Jetson: <strong className="text-emerald-600">{stats?.system_health?.jetson_temperature || '46.5°C'}</strong></span>
+            <div className="d-flex justify-content-between border-top border-border pt-1 mt-1 small text-nowrap" style={{ fontSize: '9.5px', color: '#52525b' }}>
+              <span>Database: <strong style={{ color: '#09090b' }}>{stats?.system_health?.database_status || 'ONLINE'}</strong></span>
+              <span>Jetson: <strong style={{ color: '#047857' }}>{stats?.system_health?.jetson_temperature || '46.5°C'}</strong></span>
             </div>
           </div>
         </div>
@@ -424,20 +433,20 @@ export default function Dashboard({ stationFilter = 'ALL' }) {
           <div className="card shadow-2xs border border-border rounded-lg h-100 p-3 bg-card kpi-count-card">
             <div className="d-flex justify-content-between align-items-center">
               <div className="d-flex align-items-center gap-2">
-                <span className="text-muted-foreground d-flex"><IconShieldAlert size={15} /></span>
-                <span className="small text-muted-foreground fw-bold text-uppercase" style={{ fontSize: '10px', letterSpacing: '0.04em' }}>ANPR Plates</span>
+                <span className="d-flex" style={{ color: '#18181b' }}><IconShieldAlert size={18} /></span>
+                <span className="small fw-bold text-uppercase" style={{ fontSize: '10.5px', letterSpacing: '0.04em', color: '#18181b' }}>ANPR Plates</span>
               </div>
-              <span className="badge bg-red-500/10 text-red-600 border border-red-500/20 font-mono" style={{ fontSize: '9.5px' }}>
+              <span className="badge font-mono" style={{ fontSize: '9.5px', backgroundColor: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca' }}>
                 {stolenHits} STOLEN HITS
               </span>
             </div>
             <div className="d-flex align-items-baseline gap-2 mt-1">
-              <span className="fs-4 fw-bold font-mono text-foreground">{Number(anprScanned).toLocaleString()}</span>
-              <span className="small text-muted-foreground fw-medium">scanned</span>
+              <span className="fs-4 fw-bold font-mono" style={{ color: '#09090b' }}>{Number(anprScanned).toLocaleString()}</span>
+              <span className="small fw-semibold" style={{ color: '#52525b' }}>scanned</span>
             </div>
-            <div className="d-flex justify-content-between border-top border-border pt-1 mt-1 small text-muted-foreground text-nowrap" style={{ fontSize: '9.5px' }}>
-              <span>Watchlist: <strong className="text-red-600">{watchlistCount} Synced</strong></span>
-              <span>Latency: <strong className="text-emerald-600">{stats?.system_health?.avg_inference_latency || '22ms'}</strong></span>
+            <div className="d-flex justify-content-between border-top border-border pt-1 mt-1 small text-nowrap" style={{ fontSize: '9.5px', color: '#52525b' }}>
+              <span>Watchlist: <strong style={{ color: '#b91c1c' }}>{watchlistCount} Synced</strong></span>
+              <span>Latency: <strong style={{ color: '#047857' }}>{stats?.system_health?.avg_inference_latency || '22ms'}</strong></span>
             </div>
           </div>
         </div>
@@ -447,20 +456,28 @@ export default function Dashboard({ stationFilter = 'ALL' }) {
           <div className="card shadow-2xs border border-border rounded-lg h-100 p-3 bg-card kpi-count-card">
             <div className="d-flex justify-content-between align-items-center">
               <div className="d-flex align-items-center gap-2">
-                <span className="text-muted-foreground d-flex"><IconCrosshair size={15} /></span>
-                <span className="small text-muted-foreground fw-bold text-uppercase" style={{ fontSize: '10px', letterSpacing: '0.04em' }}>Threats</span>
+                <span className="d-flex" style={{ color: '#18181b' }}><IconCrosshair size={18} /></span>
+                <span className="small fw-bold text-uppercase" style={{ fontSize: '10.5px', letterSpacing: '0.04em', color: '#18181b' }}>Threats</span>
               </div>
-              <span className={`badge font-mono ${unackedWeapons > 0 ? 'bg-red-500/10 text-red-600 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-700 border border-emerald-500/20'}`} style={{ fontSize: '9.5px' }}>
+              <span
+                className="badge font-mono"
+                style={{
+                  fontSize: '9.5px',
+                  backgroundColor: unackedWeapons > 0 ? '#fef2f2' : '#ecfdf5',
+                  color: unackedWeapons > 0 ? '#b91c1c' : '#047857',
+                  border: unackedWeapons > 0 ? '1px solid #fecaca' : '1px solid #a7f3d0'
+                }}
+              >
                 {unackedWeapons > 0 ? `${unackedWeapons} UNACK'D` : 'RESOLVED'}
               </span>
             </div>
             <div className="d-flex align-items-baseline gap-2 mt-1">
-              <span className="fs-4 fw-bold font-mono text-foreground">{weaponsTotal}</span>
-              <span className="small text-muted-foreground fw-medium">Weapon Pings</span>
+              <span className="fs-4 fw-bold font-mono" style={{ color: '#09090b' }}>{weaponsTotal}</span>
+              <span className="small fw-semibold" style={{ color: '#52525b' }}>Weapon Pings</span>
             </div>
-            <div className="d-flex justify-content-between border-top border-border pt-1 mt-1 small text-muted-foreground text-nowrap" style={{ fontSize: '9.5px' }}>
+            <div className="d-flex justify-content-between border-top border-border pt-1 mt-1 small text-nowrap" style={{ fontSize: '9.5px', color: '#52525b' }}>
               <span>Firearm & Blade</span>
-              <span className="text-foreground fw-semibold">{stats?.system_health?.edge_ai_fps || 30} FPS Edge</span>
+              <span className="fw-semibold" style={{ color: '#09090b' }}>{stats?.system_health?.edge_ai_fps || 30} FPS Edge</span>
             </div>
           </div>
         </div>
@@ -470,20 +487,20 @@ export default function Dashboard({ stationFilter = 'ALL' }) {
           <div className="card shadow-2xs border border-border rounded-lg h-100 p-3 bg-card kpi-count-card">
             <div className="d-flex justify-content-between align-items-center">
               <div className="d-flex align-items-center gap-2">
-                <span className="text-muted-foreground d-flex"><IconFlame size={15} /></span>
-                <span className="small text-muted-foreground fw-bold text-uppercase" style={{ fontSize: '10px', letterSpacing: '0.04em' }}>Safety Hazards</span>
+                <span className="d-flex" style={{ color: '#18181b' }}><IconFlame size={18} /></span>
+                <span className="small fw-bold text-uppercase" style={{ fontSize: '10.5px', letterSpacing: '0.04em', color: '#18181b' }}>Safety Hazards</span>
               </div>
-              <span className="badge bg-amber-500/10 text-amber-700 border border-amber-500/20 font-mono" style={{ fontSize: '9.5px' }}>
+              <span className="badge font-mono" style={{ fontSize: '9.5px', backgroundColor: '#fffbeb', color: '#b45309', border: '1px solid #fde68a' }}>
                 FIRE & CROWD
               </span>
             </div>
             <div className="d-flex align-items-baseline gap-2 mt-1">
-              <span className="fs-4 fw-bold font-mono text-foreground">{totalHazards}</span>
-              <span className="small text-muted-foreground fw-medium">Incidents</span>
+              <span className="fs-4 fw-bold font-mono" style={{ color: '#09090b' }}>{totalHazards}</span>
+              <span className="small fw-semibold" style={{ color: '#52525b' }}>Incidents</span>
             </div>
-            <div className="d-flex justify-content-between border-top border-border pt-1 mt-1 small text-muted-foreground text-nowrap" style={{ fontSize: '9.5px' }}>
-              <span>Smoke: <strong className="text-foreground">{fireHazards}</strong></span>
-              <span>Crowd: <strong className="text-foreground">{crowdAlerts}</strong></span>
+            <div className="d-flex justify-content-between border-top border-border pt-1 mt-1 small text-nowrap" style={{ fontSize: '9.5px', color: '#52525b' }}>
+              <span>Smoke: <strong style={{ color: '#09090b' }}>{fireHazards}</strong></span>
+              <span>Crowd: <strong style={{ color: '#09090b' }}>{crowdAlerts}</strong></span>
             </div>
           </div>
         </div>
@@ -493,20 +510,20 @@ export default function Dashboard({ stationFilter = 'ALL' }) {
           <div className="card shadow-2xs border border-border rounded-lg h-100 p-3 bg-card kpi-count-card">
             <div className="d-flex justify-content-between align-items-center">
               <div className="d-flex align-items-center gap-2">
-                <span className="text-muted-foreground d-flex"><IconVideo size={15} /></span>
-                <span className="small text-muted-foreground fw-bold text-uppercase" style={{ fontSize: '10px', letterSpacing: '0.04em' }}>Surveillance</span>
+                <span className="d-flex" style={{ color: '#18181b' }}><IconVideo size={18} /></span>
+                <span className="small fw-bold text-uppercase" style={{ fontSize: '10.5px', letterSpacing: '0.04em', color: '#18181b' }}>Surveillance</span>
               </div>
-              <span className="badge bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 font-mono" style={{ fontSize: '9.5px' }}>
+              <span className="badge font-mono" style={{ fontSize: '9.5px', backgroundColor: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0' }}>
                 {cameraOnline} STREAMING
               </span>
             </div>
             <div className="d-flex align-items-baseline gap-2 mt-1">
-              <span className="fs-4 fw-bold font-mono text-foreground">{cameraOnline}</span>
-              <span className="small text-muted-foreground fw-medium">/ {cameraTotal} cams</span>
+              <span className="fs-4 fw-bold font-mono" style={{ color: '#09090b' }}>{cameraOnline}</span>
+              <span className="small fw-semibold" style={{ color: '#52525b' }}>/ {cameraTotal} cams</span>
             </div>
-            <div className="d-flex justify-content-between border-top border-border pt-1 mt-1 small text-muted-foreground text-nowrap" style={{ fontSize: '9.5px' }}>
-              <span>FRS Confirmed: <strong className="text-emerald-600">{stats?.frs?.confirmed_hits ?? 1}</strong></span>
-              <span>Watchlist: <strong className="text-foreground">{stats?.frs?.watchlist_count ?? 3}</strong></span>
+            <div className="d-flex justify-content-between border-top border-border pt-1 mt-1 small text-nowrap" style={{ fontSize: '9.5px', color: '#52525b' }}>
+              <span>FRS Confirmed: <strong style={{ color: '#047857' }}>{stats?.frs?.confirmed_hits ?? 1}</strong></span>
+              <span>Watchlist: <strong style={{ color: '#09090b' }}>{stats?.frs?.watchlist_count ?? 3}</strong></span>
             </div>
           </div>
         </div>
@@ -520,12 +537,14 @@ export default function Dashboard({ stationFilter = 'ALL' }) {
         {/* Tactical GPS Radar Grid */}
         <div className="col-12 col-xl-8 d-flex flex-column">
           <div className="card shadow-sm border-0 flex-grow-1 d-flex flex-column" style={{ height: '360px', minHeight: '360px' }}>
-            <div className="card-header bg-white border-bottom py-1.5 px-3 d-flex justify-content-between align-items-center">
-              <div className="d-flex align-items-center gap-2 fw-bold text-dark small">
-                <span className="text-primary d-flex"><IconRadar size={15} /></span>
+            <div className="card-header bg-card border-bottom py-1.5 px-3 d-flex justify-content-between align-items-center">
+              <div className="d-flex align-items-center gap-2 fw-bold text-foreground small">
+                <span className="text-primary d-flex"><IconRadar size={18} /></span>
                 <span>Fleet GPS Radar & Threat Coordinates</span>
               </div>
-              <span className="badge bg-muted text-foreground border border-border font-mono" style={{ fontSize: '10px' }}>{filteredVehicles.length} Units Tracked</span>
+              <span className="badge font-mono" style={{ fontSize: '10px', backgroundColor: '#f4f4f5', color: '#18181b', border: '1px solid #e4e4e7' }}>
+                {filteredVehicles.length} Units Tracked
+              </span>
             </div>
             <div className="card-body p-1.5 flex-grow-1 d-flex flex-column position-relative overflow-hidden">
               <TacticalMapWidget
@@ -549,9 +568,9 @@ export default function Dashboard({ stationFilter = 'ALL' }) {
         {/* Selected Patrol Van Quad-Camera Matrix */}
         <div className="col-12 col-xl-4 d-flex flex-column">
           <div className="card shadow-sm border-0 flex-grow-1 d-flex flex-column" style={{ height: '360px', minHeight: '360px' }}>
-            <div className="card-header bg-white border-bottom py-1.5 px-3 d-flex justify-content-between align-items-center">
-              <div className="d-flex align-items-center gap-2 fw-bold text-dark small">
-                <span className="text-danger d-flex"><IconVideo size={15} /></span>
+            <div className="card-header bg-card border-bottom py-1.5 px-3 d-flex justify-content-between align-items-center">
+              <div className="d-flex align-items-center gap-2 fw-bold text-foreground small">
+                <span className="text-danger d-flex"><IconVideo size={18} /></span>
                 <span>4-Channel AI Camera Matrix</span>
               </div>
               <select
@@ -581,12 +600,12 @@ export default function Dashboard({ stationFilter = 'ALL' }) {
         {/* Chart 1: 24h Activity Timeline */}
         <div className="col-12 col-xl-8 d-flex flex-column">
           <div className="card shadow-sm border-0 flex-grow-1 d-flex flex-column">
-            <div className="card-header bg-white border-bottom py-2 px-3 d-flex justify-content-between align-items-center">
-              <div className="d-flex align-items-center gap-2 fw-bold text-dark small">
-                <span className="text-primary d-flex"><IconActivity size={16} /></span>
+            <div className="card-header bg-card border-bottom py-2 px-3 d-flex justify-content-between align-items-center">
+              <div className="d-flex align-items-center gap-2 fw-bold text-foreground small">
+                <span className="text-primary d-flex"><IconActivity size={18} /></span>
                 <span>24-Hour Threat & ANPR Detection Timeline</span>
               </div>
-              <span className="badge bg-blue-500/10 text-blue-700 border border-blue-500/20 font-mono">
+              <span className="badge font-mono" style={{ fontSize: '10.5px', backgroundColor: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe' }}>
                 {anprScanned > 0 ? `${Number(anprScanned).toLocaleString()} Scans Scaled` : 'Realtime Telemetry'}
               </span>
             </div>
@@ -599,12 +618,12 @@ export default function Dashboard({ stationFilter = 'ALL' }) {
         {/* Chart 2: Threat Distribution Donut */}
         <div className="col-12 col-xl-4 d-flex flex-column">
           <div className="card shadow-sm border-0 flex-grow-1 d-flex flex-column">
-            <div className="card-header bg-white border-bottom py-2 px-3 d-flex justify-content-between align-items-center">
-              <div className="d-flex align-items-center gap-2 fw-bold text-dark small">
-                <span className="text-muted-foreground d-flex"><IconCrosshair size={16} /></span>
+            <div className="card-header bg-card border-bottom py-2 px-3 d-flex justify-content-between align-items-center">
+              <div className="d-flex align-items-center gap-2 fw-bold text-foreground small">
+                <span className="d-flex" style={{ color: '#18181b' }}><IconCrosshair size={18} /></span>
                 <span>Threat Distribution Ratio</span>
               </div>
-              <span className="badge bg-red-500/10 text-red-700 border border-red-500/20 font-mono">
+              <span className="badge font-mono" style={{ fontSize: '10.5px', backgroundColor: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca' }}>
                 {totalThreatIncidents} Incidents
               </span>
             </div>
@@ -622,12 +641,12 @@ export default function Dashboard({ stationFilter = 'ALL' }) {
         {/* Chart 3: Jetson Edge AI Fleet Telemetry */}
         <div className="col-12 col-md-4 d-flex flex-column">
           <div className="card shadow-sm border-0 flex-grow-1 d-flex flex-column">
-            <div className="card-header bg-white border-bottom py-2 px-3 d-flex justify-content-between align-items-center">
-              <div className="d-flex align-items-center gap-2 fw-bold text-dark small">
-                <span className="text-muted-foreground d-flex"><IconCar size={16} /></span>
+            <div className="card-header bg-card border-bottom py-2 px-3 d-flex justify-content-between align-items-center">
+              <div className="d-flex align-items-center gap-2 fw-bold text-foreground small">
+                <span className="d-flex" style={{ color: '#18181b' }}><IconCar size={18} /></span>
                 <span>Jetson Thermal Health</span>
               </div>
-              <span className="badge bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 font-mono">
+              <span className="badge font-mono" style={{ fontSize: '10.5px', backgroundColor: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0' }}>
                 {vehicleActive} Online / {vehicleTotal} Fleet
               </span>
             </div>
@@ -640,12 +659,12 @@ export default function Dashboard({ stationFilter = 'ALL' }) {
         {/* Chart 4: ANPR Vehicle Types */}
         <div className="col-12 col-md-4 d-flex flex-column">
           <div className="card shadow-sm border-0 flex-grow-1 d-flex flex-column">
-            <div className="card-header bg-white border-bottom py-2 px-3 d-flex justify-content-between align-items-center">
-              <div className="d-flex align-items-center gap-2 fw-bold text-dark small">
-                <span className="text-muted-foreground d-flex"><IconCar size={16} /></span>
+            <div className="card-header bg-card border-bottom py-2 px-3 d-flex justify-content-between align-items-center">
+              <div className="d-flex align-items-center gap-2 fw-bold text-foreground small">
+                <span className="d-flex" style={{ color: '#18181b' }}><IconCar size={18} /></span>
                 <span>Vehicle Classification</span>
               </div>
-              <span className="badge bg-muted text-foreground border border-border font-mono">
+              <span className="badge font-mono" style={{ fontSize: '10.5px', backgroundColor: '#f4f4f5', color: '#18181b', border: '1px solid #e4e4e7' }}>
                 {Number(anprScanned).toLocaleString()} Plates
               </span>
             </div>
@@ -659,12 +678,20 @@ export default function Dashboard({ stationFilter = 'ALL' }) {
         {/* Chart 5: Crowd Hourly Density */}
         <div className="col-12 col-md-4 d-flex flex-column">
           <div className="card shadow-sm border-0 flex-grow-1 d-flex flex-column">
-            <div className="card-header bg-white border-bottom py-2 px-3 d-flex justify-content-between align-items-center">
-              <div className="d-flex align-items-center gap-2 fw-bold text-dark small">
-                <span className="text-muted-foreground d-flex"><IconShieldAlert size={16} /></span>
+            <div className="card-header bg-card border-bottom py-2 px-3 d-flex justify-content-between align-items-center">
+              <div className="d-flex align-items-center gap-2 fw-bold text-foreground small">
+                <span className="d-flex" style={{ color: '#18181b' }}><IconShieldAlert size={18} /></span>
                 <span>Crowd Density vs Limits</span>
               </div>
-              <span className={`badge ${crowdAlerts > 0 ? 'bg-red-500/10 text-red-700 border border-red-500/20' : 'bg-amber-500/10 text-amber-700 border border-amber-500/20'} font-mono`}>
+              <span
+                className="badge font-mono"
+                style={{
+                  fontSize: '10.5px',
+                  backgroundColor: crowdAlerts > 0 ? '#fef2f2' : '#fffbeb',
+                  color: crowdAlerts > 0 ? '#b91c1c' : '#b45309',
+                  border: crowdAlerts > 0 ? '1px solid #fecaca' : '1px solid #fde68a'
+                }}
+              >
                 {crowdAlerts > 0 ? `${crowdAlerts} Surge Alert${crowdAlerts > 1 ? 's' : ''}` : 'Limit: 40'}
               </span>
             </div>

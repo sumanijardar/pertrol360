@@ -10,14 +10,14 @@ export default function JetsonFleetTelemetryChart({ data }) {
   return (
     <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '14px' }}>
       {/* Header Info Banner */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '11px', color: '#64748b' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '11px', color: '#52525b' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <span>Fleet Units: <strong style={{ color: '#0f172a' }}>{data.length} Jetson Boxes</strong></span>
-          <span style={{ color: '#059669', fontWeight: 600 }}>● Normal (&lt;55°C)</span>
-          <span style={{ color: '#d97706', fontWeight: 600 }}>● Warm (55-60°C)</span>
-          <span style={{ color: '#dc2626', fontWeight: 600 }}>● Thermal Throttle (&gt;60°C)</span>
+          <span>Fleet Units: <strong style={{ color: '#09090b' }}>{data.length} Jetson Boxes</strong></span>
+          <span style={{ color: '#047857', fontWeight: 700 }}>● Normal (&lt;55°C)</span>
+          <span style={{ color: '#b45309', fontWeight: 700 }}>● Warm (55-60°C)</span>
+          <span style={{ color: '#b91c1c', fontWeight: 700 }}>● Throttle (&gt;60°C)</span>
         </div>
-        <div style={{ fontFamily: "'JetBrains Mono', monospace", color: '#0284c7', fontSize: '11px', fontWeight: 600 }}>
+        <div style={{ fontFamily: "'JetBrains Mono', monospace", color: '#18181b', fontSize: '11px', fontWeight: 700 }}>
           Avg Fleet Temp: {data && data.length > 0 ? (data.reduce((sum, item) => sum + (Number(item.temp) || 0), 0) / data.length).toFixed(1) : '0.0'}°C
         </div>
       </div>
@@ -120,10 +120,10 @@ export default function JetsonFleetTelemetryChart({ data }) {
                 style={{
                   position: 'absolute',
                   bottom: '-20px',
-                  fontSize: '9px',
+                  fontSize: '9.5px',
                   fontFamily: "'JetBrains Mono', monospace",
-                  color: isHovered ? '#0284c7' : '#64748b',
-                  fontWeight: isHovered ? 700 : 600,
+                  color: '#18181b',
+                  fontWeight: 700,
                   whiteSpace: 'nowrap'
                 }}
               >
@@ -135,24 +135,24 @@ export default function JetsonFleetTelemetryChart({ data }) {
       </div>
 
       {/* Floating or Bottom Telemetry Detail Bar */}
-      <div style={{ background: '#f8fafc', borderRadius: '6px', padding: '8px 12px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+      <div style={{ background: '#f4f4f5', borderRadius: '6px', padding: '8px 12px', border: '1px solid #e4e4e7', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
         {hoveredVan !== null ? (
           <>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span className="badge badge-info">{data[hoveredVan].id}</span>
-              <span style={{ fontSize: '11px', color: '#1e293b', fontWeight: 600 }}>{data[hoveredVan].model}</span>
+              <span style={{ fontSize: '11px', color: '#09090b', fontWeight: 700 }}>{data[hoveredVan].model}</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px', fontSize: '11px', fontFamily: "'JetBrains Mono', monospace" }}>
-              <span style={{ color: '#475569' }}>Battery: <strong style={{ color: '#059669' }}>{data[hoveredVan].volt}V</strong></span>
-              <span style={{ color: '#475569' }}>Speed: <strong style={{ color: '#0284c7' }}>{data[hoveredVan].speed} km/h</strong></span>
-              <span style={{ color: '#475569' }}>Signal: <strong style={{ color: '#7c3aed' }}>{data[hoveredVan].signal} dBm</strong></span>
-              <span style={{ color: data[hoveredVan].temp > 60 ? '#dc2626' : '#059669', fontWeight: 700 }}>
+              <span style={{ color: '#52525b' }}>Battery: <strong style={{ color: '#047857' }}>{data[hoveredVan].volt}V</strong></span>
+              <span style={{ color: '#52525b' }}>Speed: <strong style={{ color: '#18181b' }}>{data[hoveredVan].speed} km/h</strong></span>
+              <span style={{ color: '#52525b' }}>Signal: <strong style={{ color: '#18181b' }}>{data[hoveredVan].signal} dBm</strong></span>
+              <span style={{ color: data[hoveredVan].temp > 60 ? '#b91c1c' : '#047857', fontWeight: 800 }}>
                 Status: {data[hoveredVan].status}
               </span>
             </div>
           </>
         ) : (
-          <div style={{ fontSize: '11px', color: '#64748b', textAlign: 'center', width: '100%' }}>
+          <div style={{ fontSize: '11px', color: '#52525b', fontWeight: 600, textAlign: 'center', width: '100%' }}>
             Hover over any patrol unit column to inspect real-time Jetson Edge AI telemetry, battery voltage & cellular dBm
           </div>
         )}
