@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import Footer from './Footer';
+import { isAuthenticated } from '../services/api';
 
 export default function Layout({ children, onStationChange, currentStation = 'ALL' }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -38,8 +39,8 @@ export default function Layout({ children, onStationChange, currentStation = 'AL
     }
   };
 
-  // If on Login page, render clean full-screen view without admin shell
-  if (location.pathname === '/login') {
+  // If unauthenticated or on Login page, render clean full-screen view without admin shell
+  if (!isAuthenticated() || location.pathname === '/login') {
     return <main className="w-full min-h-screen bg-background text-foreground">{children}</main>;
   }
 

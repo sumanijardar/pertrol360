@@ -164,6 +164,9 @@ export function logout() {
   localStorage.removeItem('patrol360_user');
   localStorage.removeItem('patrol360_role');
   localStorage.removeItem('patrol360_authenticated');
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  sessionStorage.clear();
 }
 
 /**
@@ -171,7 +174,7 @@ export function logout() {
  */
 export function getCurrentUser() {
   try {
-    const raw = localStorage.getItem('patrol360_user');
+    const raw = localStorage.getItem('patrol360_user') || localStorage.getItem('user');
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
@@ -189,7 +192,9 @@ export function getUserRole() {
  * Check if session is authenticated
  */
 export function isAuthenticated() {
-  return localStorage.getItem('patrol360_authenticated') === 'true' && !!localStorage.getItem('patrol360_token');
+  const token = localStorage.getItem('patrol360_token') || localStorage.getItem('token');
+  const isAuth = localStorage.getItem('patrol360_authenticated') === 'true' || !!localStorage.getItem('token');
+  return Boolean(token && isAuth);
 }
 
 /* ==========================================================================

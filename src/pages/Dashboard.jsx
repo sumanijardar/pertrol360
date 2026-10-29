@@ -294,7 +294,7 @@ export default function Dashboard({ stationFilter = 'ALL' }) {
         <div className="d-flex align-items-center gap-2 flex-wrap">
           {/* Edge AI System Health Telemetry Strip */}
           {stats?.system_health && (
-            <div className="d-flex align-items-center gap-2 bg-white px-2.5 py-1 rounded-3 border shadow-sm small font-mono">
+            <div className="d-flex align-items-center gap-2 bg-white px-3 py-2 rounded-3 border shadow-sm small font-mono">
               <div className="d-flex align-items-center gap-1">
                 <span style={{ fontSize: '10px', color: '#52525b', fontWeight: 600 }}>AI FPS:</span>
                 <span

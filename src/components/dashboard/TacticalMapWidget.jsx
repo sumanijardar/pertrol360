@@ -173,7 +173,8 @@ export default function TacticalMapWidget({ vehicles = [], selectedVehicleId, on
 
         {/* Tactical Layer Switcher */}
         <div className="btn-group btn-group-sm bg-white shadow-sm border rounded p-0.5" role="group" style={{ borderColor: '#e4e4e7' }}>
-          {['TACTICAL', 'SATELLITE', 'HEATMAP'].map(mode => (
+          {/* {['TACTICAL', 'SATELLITE', 'HEATMAP'].map(mode => ( */}
+          {['TACTICAL'].map(mode => (
             <button
               key={mode}
               type="button"

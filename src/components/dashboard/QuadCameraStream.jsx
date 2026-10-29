@@ -26,7 +26,7 @@ export default function QuadCameraStream({ vehicle }) {
     { camera_id: `${vehicle.vehicle_id || 'VEH'}_CAM_01`, mount_position: 'FRONT', resolution: '4K (3840x2160)', fps: 30, bitrate_kbps: 4096, is_streaming: true, rtsp_url: 'rtsp://192.168.1.101/live' },
     { camera_id: `${vehicle.vehicle_id || 'VEH'}_CAM_02`, mount_position: 'REAR', resolution: '1080p (1920x1080)', fps: 30, bitrate_kbps: 2048, is_streaming: true, rtsp_url: 'rtsp://192.168.1.102/live' },
     { camera_id: `${vehicle.vehicle_id || 'VEH'}_CAM_03`, mount_position: 'LEFT', resolution: '1080p (1920x1080)', fps: 30, bitrate_kbps: 2048, is_streaming: true, rtsp_url: 'rtsp://192.168.1.103/live' },
-    { camera_id: `${vehicle.vehicle_id || 'VEH'}_CAM_04`, mount_position: 'RIGHT', resolution: '1080p (1920x1080)', fps: 30, bitrate_kbps: 2048, is_streaming: true, rtsp_url: 'rtsp://192.168.1.104/live' }
+    // { camera_id: `${vehicle.vehicle_id || 'VEH'}_CAM_04`, mount_position: 'RIGHT', resolution: '1080p (1920x1080)', fps: 30, bitrate_kbps: 2048, is_streaming: true, rtsp_url: 'rtsp://192.168.1.104/live' }
   ];
   const cameras = (vehicle.cameras && vehicle.cameras.length > 0) ? vehicle.cameras : DEFAULT_CAMERAS;
   const activeCam = cameras[activeCamIndex] || cameras[0] || DEFAULT_CAMERAS[0];
