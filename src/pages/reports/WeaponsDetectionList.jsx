@@ -740,7 +740,7 @@ export default function WeaponsDetectionList() {
                     pageSize={pageSize}
                     onPageChange={setCurrentPage}
                     onPageSizeChange={setPageSize}
-                    pageSizeOptions={[5, 10, 20, 50]}
+                    pageSizeOptions={[20, 50, 100, 500]}
                 />
             </div>
 

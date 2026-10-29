@@ -17,19 +17,6 @@ function ProtectedRoute({ children }) {
   return children;
 }
 
-/**
- * Public Route Guard: If already authenticated, redirect to /dashboard
- */
-function PublicRoute({ children }) {
-  const authed = isAuthenticated();
-
-  if (authed) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  return children;
-}
-
 // 404 Fallback Page
 function NotFoundPage() {
   const authed = isAuthenticated();
@@ -55,36 +42,24 @@ function NotFoundPage() {
 
 export default function AppRoutes({ stationFilter }) {
   const routes = getAllRoutes();
-  const authed = isAuthenticated();
 
   return (
     <Routes>
-      {/* Root redirect: If authenticated go to /dashboard, otherwise go directly to /login */}
-      <Route
-        path="/"
-        element={
-          authed ? (
-            <Navigate to="/dashboard" replace />
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
-      />
+      {/* Root redirect: ALWAYS show /login first when project starts or is opened */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
 
-      {/* Dynamically generated routes with strict authentication protection */}
+      {/* Dynamically generated routes */}
       {routes.map((r) => {
         const Component = r.element;
-        const isPublic = r.path === '/login';
+        const isLogin = r.path === '/login';
 
         return (
           <Route
             key={r.path}
             path={r.path}
             element={
-              isPublic ? (
-                <PublicRoute>
-                  <Component stationFilter={stationFilter} />
-                </PublicRoute>
+              isLogin ? (
+                <Component />
               ) : (
                 <ProtectedRoute>
                   <Component stationFilter={stationFilter} />

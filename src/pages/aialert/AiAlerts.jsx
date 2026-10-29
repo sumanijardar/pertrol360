@@ -128,7 +128,7 @@ export default function AiAlerts() {
                         setAvailableTypes(extractedTypes);
                     }
                 })
-                .catch(() => {});
+                .catch(() => { });
         } catch (err) {
             console.warn('Could not fetch overall system metrics:', err);
         }
@@ -611,14 +611,14 @@ export default function AiAlerts() {
                                             {/* Alert ID */}
                                             <td className="py-2.5 px-3">
                                                 <span
-                                                    className="font-mono font-medium px-1.5 py-0.5 rounded shadow-2xs text-[10.5px]"
+                                                    className="font-mono font-medium px-2 py-0.5 rounded shadow-2xs text-[10.5px]"
                                                     style={{
                                                         backgroundColor: '#18181b',
                                                         color: '#ffffff',
                                                         letterSpacing: '0.03em'
                                                     }}
                                                 >
-                                                    #{item.id}
+                                                    {item.id}
                                                 </span>
                                             </td>
 
@@ -835,11 +835,10 @@ export default function AiAlerts() {
                             <div className="modal-header py-2.5 px-3.5 border-b border-border bg-muted/30 flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <div
-                                        className={`w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0 ${
-                                            selectedAlert.status === 'C'
-                                                ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20'
-                                                : 'bg-red-500/10 text-red-600 border border-red-500/20'
-                                        }`}
+                                        className={`w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0 ${selectedAlert.status === 'C'
+                                            ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20'
+                                            : 'bg-red-500/10 text-red-600 border border-red-500/20'
+                                            }`}
                                     >
                                         <IconCrosshair size={15} />
                                     </div>
@@ -943,11 +942,10 @@ export default function AiAlerts() {
                                                         Incident Details
                                                     </span>
                                                     <span
-                                                        className={`px-2 py-0.2 rounded-full font-mono text-[10px] font-semibold ${
-                                                            selectedAlert.status === 'C'
-                                                                ? 'bg-emerald-500/10 text-emerald-700 border border-emerald-500/20'
-                                                                : 'bg-red-500/10 text-red-600 border border-red-500/20'
-                                                        }`}
+                                                        className={`px-2 py-0.2 rounded-full font-mono text-[10px] font-semibold ${selectedAlert.status === 'C'
+                                                            ? 'bg-emerald-500/10 text-emerald-700 border border-emerald-500/20'
+                                                            : 'bg-red-500/10 text-red-600 border border-red-500/20'
+                                                            }`}
                                                     >
                                                         {selectedAlert.status === 'C' ? 'RESOLVED' : 'ACTIVE'}
                                                     </span>
