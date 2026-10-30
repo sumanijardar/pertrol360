@@ -5,11 +5,24 @@ import axios from 'axios';
  * Defined in .env as VITE_API_BASE_URL.
  * If you ever need to change the API server, change it in .env only!
  */
-export const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ||
-  (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? 'http://localhost/vehicle_gov/backend/public'
-    : 'https://sarsspl.com/patrol360/backend/public');
+export const LIVE_API_BASE_URL = 'https://patrol360.sarsspl.com/backend/public';
+
+export const API_BASE_URL = (() => {
+  const envUrl = import.meta.env?.VITE_API_BASE_URL;
+  if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
+    return envUrl.replace(/\/+$/, '');
+  }
+  if (typeof window !== 'undefined' && window.location?.hostname) {
+    const host = window.location.hostname;
+    if (host.includes('patrol360.sarsspl.com')) {
+      return `${window.location.origin}/backend/public`;
+    }
+    if (host.includes('sarsspl.com')) {
+      return `${window.location.origin}/patrol360/backend/public`;
+    }
+  }
+  return LIVE_API_BASE_URL;
+})();
 
 // Primary Axios Client Instance
 const api = axios.create({
