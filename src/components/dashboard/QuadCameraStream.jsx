@@ -7,6 +7,7 @@ import {
   IconX,
   IconVideo
 } from '../common/Icons';
+import { API_BASE_URL } from '../../services/api';
 
 export default function QuadCameraStream({ vehicle }) {
   const [activeCamIndex, setActiveCamIndex] = useState(0);
@@ -44,16 +45,64 @@ export default function QuadCameraStream({ vehicle }) {
   const activeCam = cameras[activeCamIndex] || cameras[0] || null;
   const modalActiveCam = cameras[previewCamIndex] || cameras[0] || null;
 
-  // Resolve streaming URL for a camera
+  // Append timestamp parameter safely for cache busting
+  const withTimestamp = (url, key) => {
+    if (!url) return '';
+    const sep = url.includes('?') ? '&' : '?';
+    return `${url}${sep}_t=${key}`;
+  };
+
+  // Resolve streaming URL for a camera (uses HTTPS backend proxy on HTTPS to avoid ERR_SSL_PROTOCOL_ERROR)
   const getStreamUrl = (cam) => {
     if (!cam) return null;
-    if (cam.live_view_url) return cam.live_view_url;
+    const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
+
+    // 1. If on HTTPS, prioritize backend proxy route to eliminate SSL/mixed-content errors
+    if (isHttps) {
+      if (cam.id) {
+        return `${API_BASE_URL}/api/cameras/${cam.id}/stream`;
+      }
+      if (cam.camera_id) {
+        return `${API_BASE_URL}/api/cameras/${encodeURIComponent(cam.camera_id)}/stream`;
+      }
+      if (cam.ip && cam.username && cam.password) {
+        const port = cam.rtsp_port || '554';
+        const dvr = cam.dvrname || 'Hikvision';
+        const ch = cam.channel || 1;
+        const nameParam = `${cam.username}-${cam.password}-${cam.ip}-${port}-${dvr}-${ch}`;
+        return `${API_BASE_URL}/api/cameras/stream?name=${encodeURIComponent(nameParam)}`;
+      }
+      if (cam.stream_url) {
+        return `${API_BASE_URL}${cam.stream_url.startsWith('/') ? '' : '/'}${cam.stream_url}`;
+      }
+    }
+
+    // 2. If API provided stream_url
+    if (cam.stream_url && isHttps) {
+      return `${API_BASE_URL}${cam.stream_url.startsWith('/') ? '' : '/'}${cam.stream_url}`;
+    }
+
+    // 3. On HTTP (localhost)
+    if (cam.live_view_url && !isHttps) {
+      return cam.live_view_url;
+    }
+
     if (cam.ip && cam.username && cam.password) {
       const port = cam.rtsp_port || '554';
       const dvr = cam.dvrname || 'Hikvision';
       const ch = cam.channel || 1;
-      return `http://223.182.122.63:7000/?name=${cam.username}-${cam.password}-${cam.ip}-${port}-${dvr}-${ch}`;
+      const nameParam = `${cam.username}-${cam.password}-${cam.ip}-${port}-${dvr}-${ch}`;
+      if (isHttps) {
+        return `${API_BASE_URL}/api/cameras/stream?name=${encodeURIComponent(nameParam)}`;
+      }
+      return `http://223.182.122.63:7000/?name=${nameParam}`;
     }
+
+    // Fallback: If camera ID exists, use proxy
+    if (cam.id || cam.camera_id) {
+      return `${API_BASE_URL}/api/cameras/${cam.id || cam.camera_id}/stream`;
+    }
+
     return null;
   };
 
@@ -183,7 +232,7 @@ export default function QuadCameraStream({ vehicle }) {
         {/* Real Live MJPEG Stream or Tactical HUD Fallback */}
         {streamUrl && !hasError ? (
           <img
-            src={`${streamUrl}&_t=${streamKey}`}
+            src={withTimestamp(streamUrl, streamKey)}
             alt={cam.camera_name || cam.camera_id}
             className="w-100 h-100"
             style={{ objectFit: 'cover' }}
@@ -577,7 +626,7 @@ export default function QuadCameraStream({ vehicle }) {
                 >
                   {getStreamUrl(modalActiveCam) && !streamErrors[modalActiveCam.camera_id] ? (
                     <img
-                      src={`${getStreamUrl(modalActiveCam)}&_t=${streamKey}`}
+                      src={withTimestamp(getStreamUrl(modalActiveCam), streamKey)}
                       alt={modalActiveCam.camera_id}
                       className="rounded shadow"
                       style={{
