@@ -305,6 +305,15 @@ export async function getVehiclesApi({ page = 1, limit = 50, search = '' } = {})
 * Create new vehicle record
 * @param {object} vehicleData
 */
+/**
+ * Fetch single vehicle by id or vehicle_id (/api/vehicles/:id)
+ * @param {string|number} id
+ */
+export async function getVehicleByIdApi(id) {
+  const response = await api.get(`/api/vehicles/${id}`);
+  return response.data;
+}
+
 export async function createVehicleApi(vehicleData) {
   const response = await api.post('/api/vehicles', vehicleData);
   return response.data;
