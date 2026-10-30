@@ -645,23 +645,54 @@ export default function OfficerCockpit() {
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                           RTSP STREAM OK
                         </div>
+
+                        {/* Live Stream Port 7000 Overlay Badge if Available */}
+                        {cam.live_view_url ? (
+                          <a
+                            href={cam.live_view_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="absolute bottom-2 right-2 flex items-center gap-1.5 bg-blue-600/95 hover:bg-blue-500 border border-blue-300 text-white px-2 py-0.5 rounded text-[10px] font-mono font-bold transition shadow-xs z-10 no-underline"
+                            title={`Open Live Camera Feed (Port 7000): ${cam.live_view_url}`}
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+                            LIVE FEED (PORT 7000) ↗
+                          </a>
+                        ) : null}
                       </div>
 
                       {/* Footer */}
                       <div className="bg-slate-900 px-3.5 py-2.5 border-t border-slate-800 flex justify-between items-center text-xs">
                         <div className="flex flex-col truncate pr-2">
                           <strong className="text-white text-xs truncate">{cam.camera_name}</strong>
-                          <span className="text-[10px] text-slate-400 font-mono truncate">{cam.rtsp_url}</span>
+                          <span className="text-[10px] text-slate-400 font-mono truncate">
+                            {cam.dvrname ? `${cam.dvrname} • ` : ''}
+                            {cam.ip ? `${cam.ip}:${cam.rtsp_port || 554} Ch${cam.channel || 1} • ` : ''}
+                            {cam.rtsp_url}
+                          </span>
                         </div>
-                        <button
-                          onClick={() => {
-                            navigator.clipboard.writeText(cam.rtsp_url);
-                            toast.info('RTSP streaming URL copied to clipboard', 'Copied');
-                          }}
-                          className="bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1 rounded text-[11px] font-medium border border-slate-700 cursor-pointer flex-shrink-0"
-                        >
-                          Copy RTSP
-                        </button>
+                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                          {cam.live_view_url && (
+                            <a
+                              href={cam.live_view_url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="bg-blue-600 hover:bg-blue-500 text-white px-2.5 py-1 rounded text-[11px] font-semibold flex items-center gap-1 cursor-pointer no-underline border border-blue-400"
+                              title={`Open Live Stream: ${cam.live_view_url}`}
+                            >
+                              Live View ↗
+                            </a>
+                          )}
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(cam.rtsp_url);
+                              toast.info('RTSP streaming URL copied to clipboard', 'Copied');
+                            }}
+                            className="bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1 rounded text-[11px] font-medium border border-slate-700 cursor-pointer flex-shrink-0"
+                          >
+                            Copy RTSP
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}

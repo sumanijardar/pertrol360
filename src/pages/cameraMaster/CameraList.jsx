@@ -91,20 +91,26 @@ export const CAMERA_INVENTORY_COLUMNS = [
   },
   {
     key: 'rtsp_url',
-    label: 'RTSP Stream URL',
+    label: 'RTSP & DVR Stream',
     align: 'left',
-    width: '220px',
+    width: '230px',
     render: (row) => (
       <div>
         <div
           className="fw-semibold text-dark font-mono text-truncate"
-          style={{ fontSize: '11.5px', maxWidth: '210px' }}
+          style={{ fontSize: '11.5px', maxWidth: '220px' }}
           title={row.rtsp_url}
         >
           {row.rtsp_url || 'N/A'}
         </div>
-        <div className="text-muted small" style={{ fontSize: '10.5px' }}>
-          RTSP / H.264 • Port 554
+        <div className="text-muted small font-mono" style={{ fontSize: '10.5px' }}>
+          {row.ip ? (
+            <span className="text-primary fw-semibold">
+              {row.dvrname || 'DVR'} • {row.ip}:{row.rtsp_port || 554} (Ch {row.channel || 1})
+            </span>
+          ) : (
+            'RTSP / H.264 • Port 554'
+          )}
         </div>
       </div>
     )
@@ -164,6 +170,19 @@ export const CAMERA_INVENTORY_COLUMNS = [
     width: '120px',
     render: (row, handlers) => (
       <div className="d-flex justify-content-center align-items-center gap-1">
+        {row.live_view_url && (
+          <a
+            href={row.live_view_url}
+            target="_blank"
+            rel="noreferrer"
+            className="btn btn-sm btn-outline-success py-0 px-2 fw-semibold d-inline-flex align-items-center gap-1 no-underline"
+            style={{ fontSize: '11px', height: '26px' }}
+            title={`Open Live Camera Feed (Port 7000): ${row.live_view_url}`}
+          >
+            <span className="rounded-circle bg-success" style={{ width: '6px', height: '6px' }} />
+            Live (7000) ↗
+          </a>
+        )}
         <button
           type="button"
           onClick={() => handlers.handleOpenEditModal(row)}
@@ -217,7 +236,14 @@ export default function CameraList({ stationFilter = 'ALL' }) {
     rtsp_url: '',
     resolution: '1920x1080',
     fps: 25,
-    is_streaming: true
+    is_streaming: true,
+    username: '',
+    password: '',
+    dvrname: '',
+    ip: '',
+    dvr_port: '80',
+    rtsp_port: '554',
+    channel: 1
   });
 
   // Fetch live cameras and vehicles from backend
@@ -351,7 +377,14 @@ export default function CameraList({ stationFilter = 'ALL' }) {
       rtsp_url: `rtsp://admin:12345@192.168.1.${100 + maxNum + 1}:554/stream1`,
       resolution: '1920x1080',
       fps: 25,
-      is_streaming: true
+      is_streaming: true,
+      username: 'admin',
+      password: '',
+      dvrname: 'Hikvision',
+      ip: '223.182.122.63',
+      dvr_port: '80',
+      rtsp_port: '554',
+      channel: 1
     });
     setIsFormModalOpen(true);
   };
@@ -368,7 +401,14 @@ export default function CameraList({ stationFilter = 'ALL' }) {
       rtsp_url: cam.rtsp_url || '',
       resolution: cam.resolution || '1920x1080',
       fps: cam.fps || 25,
-      is_streaming: Boolean(cam.is_streaming)
+      is_streaming: Boolean(cam.is_streaming),
+      username: cam.username || '',
+      password: cam.password || '',
+      dvrname: cam.dvrname || '',
+      ip: cam.ip || '',
+      dvr_port: cam.dvr_port || '80',
+      rtsp_port: cam.rtsp_port || '554',
+      channel: cam.channel ?? 1
     });
     setIsFormModalOpen(true);
   };
@@ -448,7 +488,14 @@ export default function CameraList({ stationFilter = 'ALL' }) {
           rtsp_url: formData.rtsp_url.trim(),
           resolution: formData.resolution || '1920x1080',
           fps: parseInt(formData.fps, 10) || 25,
-          is_streaming: formData.is_streaming ? 1 : 0
+          is_streaming: formData.is_streaming ? 1 : 0,
+          username: formData.username?.trim() || null,
+          password: formData.password || null,
+          dvrname: formData.dvrname?.trim() || null,
+          ip: formData.ip?.trim() || null,
+          dvr_port: formData.dvr_port ? String(formData.dvr_port).trim() : '80',
+          rtsp_port: formData.rtsp_port ? String(formData.rtsp_port).trim() : '554',
+          channel: formData.channel ? parseInt(formData.channel, 10) : 1
         };
 
         const res = await createCameraApi(payload);
@@ -470,7 +517,14 @@ export default function CameraList({ stationFilter = 'ALL' }) {
           rtsp_url: formData.rtsp_url.trim(),
           resolution: formData.resolution || '1920x1080',
           fps: parseInt(formData.fps, 10) || 25,
-          is_streaming: formData.is_streaming ? 1 : 0
+          is_streaming: formData.is_streaming ? 1 : 0,
+          username: formData.username?.trim() || null,
+          password: formData.password || null,
+          dvrname: formData.dvrname?.trim() || null,
+          ip: formData.ip?.trim() || null,
+          dvr_port: formData.dvr_port ? String(formData.dvr_port).trim() : '80',
+          rtsp_port: formData.rtsp_port ? String(formData.rtsp_port).trim() : '554',
+          channel: formData.channel ? parseInt(formData.channel, 10) : 1
         };
 
         const res = await updateCameraApi(currentCamera.id || currentCamera.camera_id, payload);
@@ -1125,6 +1179,149 @@ export default function CameraList({ stationFilter = 'ALL' }) {
                           <span className="input-group-text bg-light text-muted font-mono" style={{ fontSize: '11px' }}>
                             Frames / Second (Recommended: 25 - 30)
                           </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* --- Section 2b: DVR Gateway & Port 7000 Live Streaming Parameters --- */}
+                  <div className="mb-4">
+                    <div className="d-flex align-items-center justify-content-between pb-2 mb-3 border-bottom">
+                      <div className="d-flex align-items-center gap-2">
+                        <span className="text-success d-inline-flex"><IconVideo size={16} /></span>
+                        <span className="fw-bold small text-uppercase text-secondary" style={{ letterSpacing: '0.04em', fontSize: '11.5px' }}>
+                          2b. DVR Gateway & Port 7000 Live Streaming
+                        </span>
+                      </div>
+                      <span className="badge bg-success-subtle text-success border border-success-subtle font-mono" style={{ fontSize: '10px' }}>
+                        LIVE GATEWAY: PORT 7000
+                      </span>
+                    </div>
+
+                    <div className="row g-3">
+                      {/* DVR Unit / Manufacturer Name */}
+                      <div className="col-12 col-md-4">
+                        <label className="form-label small fw-bold text-dark mb-1">
+                          DVR Name / Brand
+                        </label>
+                        <input
+                          type="text"
+                          className="form-control form-control-sm font-mono"
+                          placeholder="e.g. Hikvision"
+                          value={formData.dvrname || ''}
+                          onChange={(e) => setFormData({ ...formData, dvrname: e.target.value })}
+                          disabled={isSubmitting}
+                          style={{ borderColor: '#cbd5e1' }}
+                        />
+                      </div>
+
+                      {/* DVR IP Address */}
+                      <div className="col-12 col-md-4">
+                        <label className="form-label small fw-bold text-dark mb-1">
+                          DVR IP Address
+                        </label>
+                        <input
+                          type="text"
+                          className="form-control form-control-sm font-mono"
+                          placeholder="e.g. 223.182.122.63"
+                          value={formData.ip || ''}
+                          onChange={(e) => setFormData({ ...formData, ip: e.target.value })}
+                          disabled={isSubmitting}
+                          style={{ borderColor: '#cbd5e1' }}
+                        />
+                      </div>
+
+                      {/* Channel Number */}
+                      <div className="col-12 col-md-4">
+                        <label className="form-label small fw-bold text-dark mb-1">
+                          Channel (1-16)
+                        </label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="64"
+                          className="form-control form-control-sm font-mono"
+                          placeholder="1"
+                          value={formData.channel ?? ''}
+                          onChange={(e) => setFormData({ ...formData, channel: e.target.value ? parseInt(e.target.value, 10) : '' })}
+                          disabled={isSubmitting}
+                          style={{ borderColor: '#cbd5e1' }}
+                        />
+                      </div>
+
+                      {/* DVR Username */}
+                      <div className="col-12 col-md-3">
+                        <label className="form-label small fw-bold text-dark mb-1">
+                          DVR Username
+                        </label>
+                        <input
+                          type="text"
+                          className="form-control form-control-sm font-mono"
+                          placeholder="e.g. admin"
+                          value={formData.username || ''}
+                          onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                          disabled={isSubmitting}
+                          style={{ borderColor: '#cbd5e1' }}
+                        />
+                      </div>
+
+                      {/* DVR Password */}
+                      <div className="col-12 col-md-3">
+                        <label className="form-label small fw-bold text-dark mb-1">
+                          DVR Password
+                        </label>
+                        <input
+                          type="text"
+                          className="form-control form-control-sm font-mono"
+                          placeholder="e.g. ZTKBEV"
+                          value={formData.password || ''}
+                          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                          disabled={isSubmitting}
+                          style={{ borderColor: '#cbd5e1' }}
+                        />
+                      </div>
+
+                      {/* DVR Web Port */}
+                      <div className="col-12 col-md-3">
+                        <label className="form-label small fw-bold text-dark mb-1">
+                          DVR Web Port
+                        </label>
+                        <input
+                          type="text"
+                          className="form-control form-control-sm font-mono"
+                          placeholder="80"
+                          value={formData.dvr_port || ''}
+                          onChange={(e) => setFormData({ ...formData, dvr_port: e.target.value })}
+                          disabled={isSubmitting}
+                          style={{ borderColor: '#cbd5e1' }}
+                        />
+                      </div>
+
+                      {/* RTSP Port */}
+                      <div className="col-12 col-md-3">
+                        <label className="form-label small fw-bold text-dark mb-1">
+                          RTSP Port
+                        </label>
+                        <input
+                          type="text"
+                          className="form-control form-control-sm font-mono"
+                          placeholder="554"
+                          value={formData.rtsp_port || ''}
+                          onChange={(e) => setFormData({ ...formData, rtsp_port: e.target.value })}
+                          disabled={isSubmitting}
+                          style={{ borderColor: '#cbd5e1' }}
+                        />
+                      </div>
+
+                      {/* Live Calculated Streaming Gateway URL */}
+                      <div className="col-12">
+                        <div className="p-2.5 rounded bg-light border font-mono small" style={{ fontSize: '11px' }}>
+                          <span className="text-secondary fw-bold">Live Stream Gateway URL Preview (Port 7000):</span>
+                          <div className="text-primary mt-1 text-break fw-semibold">
+                            {formData.ip && formData.username && formData.password
+                              ? `http://223.182.122.63:7000/?name=${formData.username}-${formData.password}-${formData.ip}-${formData.rtsp_port || '554'}-${formData.dvrname || 'Hikvision'}-${formData.channel || 1}`
+                              : 'http://223.182.122.63:7000/?name={user}-{pass}-{ip}-{port}-{dvrname}-{channel}'}
+                          </div>
                         </div>
                       </div>
                     </div>

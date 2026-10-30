@@ -20,31 +20,58 @@ export default function QuadCameraStream({ vehicle }) {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
+  // Stream health and reload states
+  const [streamErrors, setStreamErrors] = useState({});
+  const [streamLoading, setStreamLoading] = useState({});
+  const [streamKey, setStreamKey] = useState(Date.now());
+
   if (!vehicle) return null;
 
+  // Default fallback if no cameras exist in vehicle
   const DEFAULT_CAMERAS = [
-    { camera_id: `${vehicle.vehicle_id || 'VEH'}_CAM_01`, mount_position: 'FRONT', resolution: '4K (3840x2160)', fps: 30, bitrate_kbps: 4096, is_streaming: true, rtsp_url: 'rtsp://192.168.1.101/live' },
-    { camera_id: `${vehicle.vehicle_id || 'VEH'}_CAM_02`, mount_position: 'REAR', resolution: '1080p (1920x1080)', fps: 30, bitrate_kbps: 2048, is_streaming: true, rtsp_url: 'rtsp://192.168.1.102/live' },
-    { camera_id: `${vehicle.vehicle_id || 'VEH'}_CAM_03`, mount_position: 'LEFT', resolution: '1080p (1920x1080)', fps: 30, bitrate_kbps: 2048, is_streaming: true, rtsp_url: 'rtsp://192.168.1.103/live' },
-    // { camera_id: `${vehicle.vehicle_id || 'VEH'}_CAM_04`, mount_position: 'RIGHT', resolution: '1080p (1920x1080)', fps: 30, bitrate_kbps: 2048, is_streaming: true, rtsp_url: 'rtsp://192.168.1.104/live' }
+    { camera_id: `${vehicle.vehicle_id || 'VEH'}_CAM_01`, camera_name: 'Front ANPR Cam', mount_position: 'FRONT', resolution: '1920x1080', fps: 25, is_streaming: true, rtsp_url: 'rtsp://192.168.1.101:554/stream1' },
+    { camera_id: `${vehicle.vehicle_id || 'VEH'}_CAM_02`, camera_name: 'Rear Traffic Cam', mount_position: 'REAR', resolution: '1920x1080', fps: 25, is_streaming: true, rtsp_url: 'rtsp://192.168.1.102:554/stream1' },
+    { camera_id: `${vehicle.vehicle_id || 'VEH'}_CAM_03`, camera_name: 'Left Flank Cam', mount_position: 'LEFT', resolution: '1920x1080', fps: 25, is_streaming: true, rtsp_url: 'rtsp://192.168.1.103:554/stream1' },
+    { camera_id: `${vehicle.vehicle_id || 'VEH'}_CAM_04`, camera_name: 'Right Flank Cam', mount_position: 'RIGHT', resolution: '1920x1080', fps: 25, is_streaming: true, rtsp_url: 'rtsp://192.168.1.104:554/stream1' }
   ];
-  const cameras = (vehicle.cameras && vehicle.cameras.length > 0) ? vehicle.cameras : DEFAULT_CAMERAS;
-  const activeCam = cameras[activeCamIndex] || cameras[0] || DEFAULT_CAMERAS[0];
-  const modalActiveCam = cameras[previewCamIndex] || cameras[0] || DEFAULT_CAMERAS[0];
 
-  const camImages = {
-    FRONT: 'https://images.unsplash.com/photo-1502877338535-766e1452684a?w=800&auto=format&fit=crop&q=80',
-    REAR: 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=800&auto=format&fit=crop&q=80',
-    LEFT: 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=800&auto=format&fit=crop&q=80',
-    RIGHT: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&auto=format&fit=crop&q=80'
+  // Dynamically populate cameras from vehicle
+  const cameras = (Array.isArray(vehicle.cameras) && vehicle.cameras.length > 0)
+    ? vehicle.cameras
+    : (Array.isArray(vehicle.cameras) ? [] : DEFAULT_CAMERAS);
+
+  const cameraCount = cameras.length;
+  const activeCam = cameras[activeCamIndex] || cameras[0] || null;
+  const modalActiveCam = cameras[previewCamIndex] || cameras[0] || null;
+
+  // Resolve streaming URL for a camera
+  const getStreamUrl = (cam) => {
+    if (!cam) return null;
+    if (cam.live_view_url) return cam.live_view_url;
+    if (cam.ip && cam.username && cam.password) {
+      const port = cam.rtsp_port || '554';
+      const dvr = cam.dvrname || 'Hikvision';
+      const ch = cam.channel || 1;
+      return `http://223.182.122.63:7000/?name=${cam.username}-${cam.password}-${cam.ip}-${port}-${dvr}-${ch}`;
+    }
+    return null;
   };
 
-  // High-resolution image sources for modal preview
-  const camImagesHD = {
-    FRONT: 'https://images.unsplash.com/photo-1502877338535-766e1452684a?w=1600&auto=format&fit=crop&q=90',
-    REAR: 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=1600&auto=format&fit=crop&q=90',
-    LEFT: 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=1600&auto=format&fit=crop&q=90',
-    RIGHT: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=1600&auto=format&fit=crop&q=90'
+  const handleStreamLoad = (camId) => {
+    setStreamLoading((prev) => ({ ...prev, [camId]: false }));
+    setStreamErrors((prev) => ({ ...prev, [camId]: false }));
+  };
+
+  const handleStreamError = (camId) => {
+    setStreamLoading((prev) => ({ ...prev, [camId]: false }));
+    setStreamErrors((prev) => ({ ...prev, [camId]: true }));
+  };
+
+  const handleRetryStream = (camId, e) => {
+    if (e) e.stopPropagation();
+    setStreamErrors((prev) => ({ ...prev, [camId]: false }));
+    setStreamLoading((prev) => ({ ...prev, [camId]: true }));
+    setStreamKey(Date.now());
   };
 
   const openPreviewModal = (camIdx) => {
@@ -113,45 +140,107 @@ export default function QuadCameraStream({ vehicle }) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isModalOpen]);
 
+  // Determine height based on camera count and layout
+  const getFeedMaxHeight = (count, isGrid) => {
+    if (!isGrid) return '310px';
+    if (count === 1) return '310px';
+    if (count === 2) return '230px';
+    if (count === 3) return '190px';
+    if (count === 4) return '155px';
+    return '140px';
+  };
+
+  // Render a single camera stream block
   const renderSingleCamera = (cam, idx, isGrid) => {
-    const isFront = cam.mount_position === 'FRONT';
-    const isRear = cam.mount_position === 'REAR';
+    if (!cam) return null;
     const isSelected = activeCamIndex === idx;
+    const streamUrl = getStreamUrl(cam);
+    const hasError = streamErrors[cam.camera_id];
+    const maxHeight = getFeedMaxHeight(cameraCount, isGrid);
 
     return (
       <div
-        key={cam.camera_id}
+        key={cam.camera_id || idx}
         onClick={() => {
-          if (isGrid) {
+          if (isGrid && cameraCount > 1) {
             setActiveCamIndex(idx);
             setIsQuadView(false);
           } else {
             openPreviewModal(idx);
           }
         }}
-        className="position-relative w-100 rounded overflow-hidden shadow-sm camera-feed-box"
+        className="position-relative w-100 rounded overflow-hidden shadow-xs camera-feed-box"
         style={{
           aspectRatio: '16/9',
-          maxHeight: isGrid ? '142px' : '290px',
-          backgroundColor: '#0f172a',
-          border: `1.5px solid ${isSelected ? '#0d6efd' : '#334155'}`,
+          maxHeight: maxHeight,
+          backgroundColor: '#050b14',
+          border: `1.5px solid ${isSelected ? '#0284c7' : '#1e293b'}`,
           cursor: 'pointer',
           transition: 'all 0.15s ease'
         }}
-        title={isGrid ? "Click to switch to Single Cam view" : "Click image to open Zoom preview modal"}
+        title={isGrid ? 'Click to focus Single Cam view' : 'Click to open Zoom preview modal'}
       >
-        <img
-          src={camImages[cam.mount_position] || camImages.FRONT}
-          alt={cam.camera_id}
-          className="w-100 h-100"
-          style={{ objectFit: 'cover', opacity: 0.88 }}
-        />
+        {/* Real Live MJPEG Stream or Tactical HUD Fallback */}
+        {streamUrl && !hasError ? (
+          <img
+            src={`${streamUrl}&_t=${streamKey}`}
+            alt={cam.camera_name || cam.camera_id}
+            className="w-100 h-100"
+            style={{ objectFit: 'cover' }}
+            onLoad={() => handleStreamLoad(cam.camera_id)}
+            onError={() => handleStreamError(cam.camera_id)}
+          />
+        ) : (
+          <div className="w-100 h-100 d-flex flex-column align-items-center justify-content-center p-2 text-center" style={{ backgroundColor: '#070d18' }}>
+            <svg width="100%" height="100%" viewBox="0 0 400 200" className="w-100 h-100 select-none position-absolute top-0 start-0 opacity-20 pointer-events-none">
+              <circle cx="200" cy="100" r="32" fill="none" stroke="#0284c7" strokeWidth="1.5" strokeDasharray="4 2" />
+              <line x1="160" y1="100" x2="240" y2="100" stroke="#0284c7" strokeWidth="1" />
+              <line x1="200" y1="60" x2="200" y2="140" stroke="#0284c7" strokeWidth="1" />
+            </svg>
+            <div className="z-1 d-flex flex-column align-items-center">
+              <div className="rounded-circle p-2 mb-1 text-sky-400 d-flex align-items-center justify-content-center" style={{ background: 'rgba(2, 132, 199, 0.15)' }}>
+                <IconVideo size={20} />
+              </div>
+              <strong className="text-white font-mono small mb-0.5">
+                {cam.camera_name || `${cam.mount_position} CAMERA`}
+              </strong>
+              <span className="text-slate-400 font-mono text-truncate px-2 mb-2" style={{ fontSize: '10px', maxWidth: '240px' }}>
+                {cam.rtsp_url || 'RTSP Stream Standby'}
+              </span>
+              <div className="d-flex align-items-center gap-1.5 flex-wrap justify-content-center">
+                {streamUrl && (
+                  <button
+                    type="button"
+                    onClick={(e) => handleRetryStream(cam.camera_id, e)}
+                    className="btn btn-sm btn-outline-primary py-0 px-2 font-mono fw-bold"
+                    style={{ fontSize: '10px', height: '22px' }}
+                  >
+                    ↻ Retry Feed
+                  </button>
+                )}
+                {streamUrl && (
+                  <a
+                    href={streamUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="btn btn-sm btn-outline-success py-0 px-2 font-mono fw-bold no-underline d-inline-flex align-items-center gap-1"
+                    style={{ fontSize: '10px', height: '22px' }}
+                    title={`Open Stream: ${streamUrl}`}
+                  >
+                    Port 7000 ↗
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
-        {/* Tactical Scanline overlay */}
+        {/* Tactical Scanlines overlay */}
         <div
           className="position-absolute top-0 start-0 w-100 h-100"
           style={{
-            background: 'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%)',
+            background: 'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%)',
             backgroundSize: '100% 3px',
             pointerEvents: 'none'
           }}
@@ -159,24 +248,25 @@ export default function QuadCameraStream({ vehicle }) {
 
         {/* Top Camera HUD Overlay */}
         <div
-          className="position-absolute top-0 start-0 end-0 d-flex justify-content-between align-items-center p-1 font-mono"
-          style={{ zIndex: 4, fontSize: '8px' }}
+          className="position-absolute top-0 start-0 end-0 d-flex justify-content-between align-items-center p-1.5 font-mono"
+          style={{ zIndex: 4, fontSize: '9px' }}
         >
-          <div className="d-flex align-items-center gap-1 bg-dark bg-opacity-75 px-1 py-0 rounded text-white">
+          <div className="d-flex align-items-center gap-1 bg-dark bg-opacity-80 px-1.5 py-0.5 rounded text-white border border-slate-700">
             <span
-              className="rounded-circle bg-danger"
-              style={{ width: '5px', height: '5px', animation: 'pulseGlow 1.5s infinite' }}
+              className="rounded-circle bg-emerald-400"
+              style={{ width: '6px', height: '6px', animation: 'pulseGlow 1.5s infinite' }}
             />
             <strong className="text-white">{cam.mount_position}</strong>
-            <span className="text-white-50">[{cam.camera_id}]</span>
+            <span className="text-slate-300">[{cam.camera_id}]</span>
+            {cam.channel && <span className="text-sky-300 ms-0.5">Ch{cam.channel}</span>}
           </div>
 
           <div className="d-flex align-items-center gap-1">
-            <span className="bg-dark bg-opacity-75 text-success px-1 py-0 rounded">
-              {cam.fps} FPS
+            <span className="bg-dark bg-opacity-80 text-emerald-400 px-1.5 py-0.5 rounded border border-slate-700">
+              {cam.fps || 25} FPS
             </span>
-            <span className="bg-dark bg-opacity-75 text-info px-1 py-0 rounded d-none d-sm-inline">
-              {cam.resolution}
+            <span className="bg-dark bg-opacity-80 text-sky-400 px-1.5 py-0.5 rounded border border-slate-700 d-none d-sm-inline">
+              {cam.resolution || '1080p'}
             </span>
             {/* Quick Expand Icon button */}
             <button
@@ -185,89 +275,44 @@ export default function QuadCameraStream({ vehicle }) {
                 e.stopPropagation();
                 openPreviewModal(idx);
               }}
-              className="btn btn-dark btn-sm p-0 px-1 border-0 bg-opacity-75 text-white d-flex align-items-center"
-              style={{ fontSize: '8px', height: '16px' }}
+              className="btn btn-dark btn-sm p-0 px-1.5 border border-slate-700 bg-opacity-80 text-white d-flex align-items-center"
+              style={{ fontSize: '9px', height: '19px' }}
               title="Expand & Zoom Preview"
             >
-              <IconMaximize2 size={10} />
+              <IconMaximize2 size={11} />
             </button>
           </div>
         </div>
 
-        {/* AI Bounding Box Overlays */}
-        {isFront && (
-          <div
-            className="position-absolute"
-            style={{
-              top: '38%',
-              left: '28%',
-              width: '44%',
-              height: '38%',
-              border: '2px solid #ef4444',
-              borderRadius: '2px',
-              zIndex: 3,
-              pointerEvents: 'none',
-              animation: 'pulseGlow 2s infinite ease-in-out'
-            }}
-          >
-            <div
-              className="position-absolute bg-danger text-white font-mono fw-bold px-1"
-              style={{
-                top: '-15px',
-                left: '-1px',
-                fontSize: '8px',
-                whiteSpace: 'nowrap'
-              }}
-            >
-              STOLEN: GJ01AB1234 (99.4%)
-            </div>
-          </div>
-        )}
-
-        {isRear && (
-          <div
-            className="position-absolute"
-            style={{
-              top: '32%',
-              left: '42%',
-              width: '32%',
-              height: '34%',
-              border: '1.5px solid #10b981',
-              borderRadius: '2px',
-              zIndex: 3,
-              pointerEvents: 'none'
-            }}
-          >
-            <div
-              className="position-absolute bg-success text-white font-mono px-1"
-              style={{
-                top: '-14px',
-                left: '-1px',
-                fontSize: '7.5px'
-              }}
-            >
-              PLATE: GJ01EF8899 (98.7%)
-            </div>
-          </div>
-        )}
-
         {/* Bottom Stream Status */}
         <div
-          className="position-absolute bottom-0 start-0 end-0 d-flex justify-content-between align-items-center px-1 py-0 font-mono text-white"
+          className="position-absolute bottom-0 start-0 end-0 d-flex justify-content-between align-items-center px-2 py-0.5 font-mono text-white"
           style={{
             zIndex: 4,
-            background: 'rgba(0,0,0,0.7)',
-            fontSize: '8px'
+            background: 'rgba(2, 6, 23, 0.85)',
+            fontSize: '9px'
           }}
         >
-          <span className="text-truncate" style={{ maxWidth: '65%' }}>
-            AI: {cam.ai_mode || 'YOLOv8 Realtime'}
+          <span className="text-truncate text-slate-300" style={{ maxWidth: '65%' }}>
+            {cam.dvrname ? `${cam.dvrname} • ` : ''}
+            {cam.ip ? `${cam.ip} • ` : ''}
+            {cam.camera_name || 'RTSP Stream'}
           </span>
-          <div className="d-flex align-items-center gap-1">
-            <span className="text-info d-none d-sm-inline" style={{ fontSize: '7px' }}>
-              🔍 Click to Zoom
-            </span>
-            <span className="text-success fw-bold">RTSP ● LIVE</span>
+          <div className="d-flex align-items-center gap-1.5 flex-shrink-0">
+            {streamUrl && (
+              <a
+                href={streamUrl}
+                target="_blank"
+                rel="noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="text-sky-400 hover:text-sky-300 text-decoration-none fw-bold"
+                style={{ fontSize: '8.5px' }}
+                title={`Open Live Stream (Port 7000): ${streamUrl}`}
+              >
+                7000 ↗
+              </a>
+            )}
+            <span className="text-emerald-400 fw-bold">● LIVE</span>
           </div>
         </div>
       </div>
@@ -277,75 +322,99 @@ export default function QuadCameraStream({ vehicle }) {
   return (
     <div className="d-flex flex-column justify-content-between w-100 h-100 gap-2">
       {/* 1. Stream Layout Toggle & Status Header */}
-      <div className="d-flex justify-content-between align-items-center">
+      <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
         <div className="d-flex align-items-center gap-2">
           <span
             className="badge font-mono fw-bold"
             style={{ fontSize: '10px', backgroundColor: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca' }}
           >
-            ● 4-CHANNEL CCTV
+            ● {cameraCount > 0 ? `${cameraCount}-CHANNEL RTSP CCTV` : 'STANDBY'}
           </span>
           <span className="small fw-bold font-mono" style={{ color: '#09090b' }}>
             {vehicle.registration_number}
           </span>
         </div>
 
-        <div className="btn-group btn-group-sm" role="group">
-          <button
-            type="button"
-            onClick={() => setIsQuadView(true)}
-            className="btn btn-sm py-0 px-2.5 fw-bold"
-            style={{
-              fontSize: '10px',
-              height: '26px',
-              backgroundColor: isQuadView ? '#18181b' : '#ffffff',
-              color: isQuadView ? '#ffffff' : '#18181b',
-              border: '1px solid ' + (isQuadView ? '#18181b' : '#e4e4e7'),
-              transition: 'all 0.15s ease'
-            }}
-          >
-            Quad 2x2
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsQuadView(false)}
-            className="btn btn-sm py-0 px-2.5 fw-bold"
-            style={{
-              fontSize: '10px',
-              height: '26px',
-              backgroundColor: !isQuadView ? '#18181b' : '#ffffff',
-              color: !isQuadView ? '#ffffff' : '#18181b',
-              border: '1px solid ' + (!isQuadView ? '#18181b' : '#e4e4e7'),
-              transition: 'all 0.15s ease'
-            }}
-          >
-            Single Cam
-          </button>
-        </div>
+        {cameraCount > 0 && (
+          <div className="btn-group btn-group-sm" role="group">
+            <button
+              type="button"
+              onClick={() => setIsQuadView(true)}
+              className="btn btn-sm py-0 px-2.5 fw-bold"
+              style={{
+                fontSize: '10px',
+                height: '26px',
+                backgroundColor: isQuadView ? '#18181b' : '#ffffff',
+                color: isQuadView ? '#ffffff' : '#18181b',
+                border: '1px solid ' + (isQuadView ? '#18181b' : '#e4e4e7'),
+                transition: 'all 0.15s ease'
+              }}
+            >
+              {cameraCount === 4 ? 'Quad 2x2' : (cameraCount > 1 ? `Grid (${cameraCount})` : 'Full View')}
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsQuadView(false)}
+              className="btn btn-sm py-0 px-2.5 fw-bold"
+              style={{
+                fontSize: '10px',
+                height: '26px',
+                backgroundColor: !isQuadView ? '#18181b' : '#ffffff',
+                color: !isQuadView ? '#ffffff' : '#18181b',
+                border: '1px solid ' + (!isQuadView ? '#18181b' : '#e4e4e7'),
+                transition: 'all 0.15s ease'
+              }}
+            >
+              Single Cam
+            </button>
+          </div>
+        )}
       </div>
 
       {/* 2. Video Grid / Single View */}
       <div className="flex-grow-1 d-flex flex-column justify-content-center">
-        {isQuadView ? (
+        {cameraCount === 0 ? (
+          <div className="p-4 text-center text-muted font-mono bg-light rounded border my-2">
+            <IconVideo size={32} className="text-secondary mb-2" />
+            <div className="fw-bold text-dark small">No Cameras Configured</div>
+            <div className="text-secondary" style={{ fontSize: '11px' }}>
+              No 360° cameras are currently assigned to {vehicle.registration_number || vehicle.vehicle_id}.
+            </div>
+          </div>
+        ) : isQuadView ? (
           <div className="row g-2">
-            {cameras.map((cam, idx) => (
-              <div key={cam.camera_id} className="col-6">
-                {renderSingleCamera(cam, idx, true)}
-              </div>
-            ))}
+            {cameras.map((cam, idx) => {
+              // Dynamic column layout based on total camera count
+              let colClass = 'col-6';
+              if (cameraCount === 1) colClass = 'col-12';
+              else if (cameraCount === 2) colClass = 'col-12 col-md-6';
+              else if (cameraCount === 3) colClass = 'col-12 col-md-4';
+              else if (cameraCount === 4) colClass = 'col-6';
+              else if (cameraCount === 5) {
+                colClass = idx < 2 ? 'col-12 col-md-6' : 'col-12 col-md-4';
+              } else {
+                colClass = 'col-12 col-md-6 col-lg-4';
+              }
+
+              return (
+                <div key={cam.camera_id || idx} className={colClass}>
+                  {renderSingleCamera(cam, idx, true)}
+                </div>
+              );
+            })}
           </div>
         ) : (
           <div className="d-flex flex-column gap-2">
             {renderSingleCamera(activeCam, activeCamIndex, false)}
-            <div className="d-flex gap-1 justify-content-center">
+            <div className="d-flex gap-1 justify-content-center flex-wrap">
               {cameras.map((c, idx) => (
                 <button
-                  key={c.camera_id}
+                  key={c.camera_id || idx}
                   onClick={() => setActiveCamIndex(idx)}
                   className={`btn btn-sm py-0 px-2 font-mono fw-bold ${activeCamIndex === idx ? 'btn-primary' : 'btn-light border text-dark'}`}
                   style={{ fontSize: '10px' }}
                 >
-                  {c.mount_position}
+                  {c.mount_position} {c.channel ? `(Ch${c.channel})` : ''}
                 </button>
               ))}
             </div>
@@ -359,9 +428,9 @@ export default function QuadCameraStream({ vehicle }) {
           <span>SPD: <strong className="text-primary">{vehicle.telemetry?.speed_kmph ?? (vehicle.speed_kmph || (vehicle.is_active ? 42.0 : 0.0))} km/h</strong></span>
           <span>BAT: <strong className="text-success">{vehicle.telemetry?.battery_voltage ?? 13.2}V</strong></span>
           <span>TEMP: <strong className={(vehicle.telemetry?.jetson_temperature_c ?? 46) > 50 ? 'text-warning' : 'text-success'}>{vehicle.telemetry?.jetson_temperature_c ?? 46}°C</strong></span>
-          <span>LTE: <strong className="text-purple">{vehicle.telemetry?.network_signal_dbm ?? -65} dBm</strong></span>
+          <span>LTE: <strong className="text-primary">{vehicle.telemetry?.network_signal_dbm ?? -65} dBm</strong></span>
         </div>
-        <div className="text-truncate">
+        <div className="text-truncate font-mono">
           Driver: <strong className="text-dark">{(vehicle.assigned_driver_officer || vehicle.assigned_officer_name || vehicle.driver_officer_id || 'Active Crew').split(' (')[0]}</strong>
         </div>
       </div>
@@ -396,15 +465,16 @@ export default function QuadCameraStream({ vehicle }) {
                   <div className="d-flex align-items-center gap-1">
                     <strong className="text-white">{modalActiveCam.mount_position} CAMERA</strong>
                     <span className="text-secondary font-mono small">[{modalActiveCam.camera_id}]</span>
+                    {modalActiveCam.channel && <span className="badge bg-primary-subtle text-primary border border-primary-subtle font-mono">Channel {modalActiveCam.channel}</span>}
                   </div>
                   <span className="badge bg-secondary-subtle text-light border border-secondary font-mono" style={{ fontSize: '11px' }}>
                     {vehicle.registration_number}
                   </span>
                   <span className="text-success font-mono small ms-1">
-                    {modalActiveCam.fps} FPS
+                    {modalActiveCam.fps || 25} FPS
                   </span>
                   <span className="text-info font-mono small">
-                    {modalActiveCam.resolution}
+                    {modalActiveCam.resolution || '1080p'}
                   </span>
                 </div>
 
@@ -452,7 +522,7 @@ export default function QuadCameraStream({ vehicle }) {
                   <div className="btn-group btn-group-sm d-none d-lg-flex" role="group">
                     {cameras.map((c, idx) => (
                       <button
-                        key={c.camera_id}
+                        key={c.camera_id || idx}
                         type="button"
                         onClick={() => {
                           setPreviewCamIndex(idx);
@@ -461,7 +531,7 @@ export default function QuadCameraStream({ vehicle }) {
                         className={`btn btn-sm py-1 px-2 font-mono fw-bold ${previewCamIndex === idx ? 'btn-primary' : 'btn-outline-secondary text-light'}`}
                         style={{ fontSize: '10px' }}
                       >
-                        {c.mount_position}
+                        {c.mount_position} {c.channel ? `(Ch${c.channel})` : ''}
                       </button>
                     ))}
                   </div>
@@ -479,7 +549,7 @@ export default function QuadCameraStream({ vehicle }) {
                 </div>
               </div>
 
-              {/* Modal Body: Interactive Zoomable Image Viewport */}
+              {/* Modal Body: Interactive Zoomable Live Stream Viewport */}
               <div
                 className="modal-body p-0 position-relative overflow-hidden d-flex justify-content-center align-items-center"
                 style={{
@@ -496,7 +566,7 @@ export default function QuadCameraStream({ vehicle }) {
                 onMouseLeave={handleMouseUp}
                 onDoubleClick={handleResetZoom}
               >
-                {/* Image Container with Scaled & Translated Transform */}
+                {/* Live Stream / Image Container with Scaled & Translated Transform */}
                 <div
                   className="w-100 h-100 d-flex justify-content-center align-items-center position-relative"
                   style={{
@@ -505,72 +575,35 @@ export default function QuadCameraStream({ vehicle }) {
                     transition: isDragging ? 'none' : 'transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)'
                   }}
                 >
-                  <img
-                    src={camImagesHD[modalActiveCam.mount_position] || camImagesHD.FRONT}
-                    alt={modalActiveCam.camera_id}
-                    className="rounded shadow"
-                    style={{
-                      maxWidth: '92%',
-                      maxHeight: '92%',
-                      objectFit: 'contain',
-                      pointerEvents: 'none'
-                    }}
-                  />
-
-                  {/* Dynamic AI Detection Annotations in Modal */}
-                  {modalActiveCam.mount_position === 'FRONT' && (
-                    <div
-                      className="position-absolute"
+                  {getStreamUrl(modalActiveCam) && !streamErrors[modalActiveCam.camera_id] ? (
+                    <img
+                      src={`${getStreamUrl(modalActiveCam)}&_t=${streamKey}`}
+                      alt={modalActiveCam.camera_id}
+                      className="rounded shadow"
                       style={{
-                        top: '38%',
-                        left: '28%',
-                        width: '44%',
-                        height: '38%',
-                        border: '2.5px solid #ef4444',
-                        borderRadius: '3px',
-                        zIndex: 3,
-                        pointerEvents: 'none',
-                        animation: 'pulseGlow 2s infinite ease-in-out'
-                      }}
-                    >
-                      <div
-                        className="position-absolute bg-danger text-white font-mono fw-bold px-2 py-0.5"
-                        style={{
-                          top: '-22px',
-                          left: '-1px',
-                          fontSize: '11px',
-                          whiteSpace: 'nowrap'
-                        }}
-                      >
-                        STOLEN VEHICLE: GJ01AB1234 (Confidence: 99.4%)
-                      </div>
-                    </div>
-                  )}
-
-                  {modalActiveCam.mount_position === 'REAR' && (
-                    <div
-                      className="position-absolute"
-                      style={{
-                        top: '32%',
-                        left: '42%',
-                        width: '32%',
-                        height: '34%',
-                        border: '2px solid #10b981',
-                        borderRadius: '3px',
-                        zIndex: 3,
+                        maxWidth: '92%',
+                        maxHeight: '92%',
+                        objectFit: 'contain',
                         pointerEvents: 'none'
                       }}
-                    >
-                      <div
-                        className="position-absolute bg-success text-white font-mono px-2 py-0.5"
-                        style={{
-                          top: '-20px',
-                          left: '-1px',
-                          fontSize: '10px'
-                        }}
-                      >
-                        PLATE DETECTED: GJ01EF8899 (Confidence: 98.7%)
+                      onError={() => handleStreamError(modalActiveCam.camera_id)}
+                    />
+                  ) : (
+                    <div className="text-center p-4">
+                      <div className="rounded-circle p-3 mb-2 text-sky-400 d-inline-flex align-items-center justify-content-center" style={{ background: 'rgba(2, 132, 199, 0.2)' }}>
+                        <IconVideo size={36} />
                       </div>
+                      <div className="fw-bold font-mono text-white h5 mb-1">{modalActiveCam.camera_name || `${modalActiveCam.mount_position} CAMERA`}</div>
+                      <div className="font-mono text-slate-400 small mb-2">{modalActiveCam.rtsp_url}</div>
+                      {getStreamUrl(modalActiveCam) && (
+                        <button
+                          type="button"
+                          onClick={(e) => handleRetryStream(modalActiveCam.camera_id, e)}
+                          className="btn btn-primary btn-sm font-mono fw-bold px-3"
+                        >
+                          ↻ Reconnect Stream
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -596,10 +629,10 @@ export default function QuadCameraStream({ vehicle }) {
                 >
                   <div className="d-flex align-items-center gap-2">
                     <span className="text-light">
-                      AI Pipeline: <strong className="text-info">{modalActiveCam.ai_mode || 'YOLOv8 Edge Realtime'}</strong>
+                      Feed: <strong className="text-info">{modalActiveCam.camera_name || modalActiveCam.mount_position}</strong>
                     </span>
                     <span>•</span>
-                    <span>RTSP Stream: <code className="text-warning">rtsp://192.168.1.100:8554/{modalActiveCam.camera_id.toLowerCase()}</code></span>
+                    <span>Gateway: <code className="text-warning">{getStreamUrl(modalActiveCam) || modalActiveCam.rtsp_url}</code></span>
                   </div>
                   <div className="d-flex align-items-center gap-2 text-end">
                     <span className="text-light">
@@ -615,7 +648,7 @@ export default function QuadCameraStream({ vehicle }) {
                 <div className="d-flex d-lg-none gap-1">
                   {cameras.map((c, idx) => (
                     <button
-                      key={c.camera_id}
+                      key={c.camera_id || idx}
                       type="button"
                       onClick={() => {
                         setPreviewCamIndex(idx);
@@ -639,6 +672,16 @@ export default function QuadCameraStream({ vehicle }) {
                 </div>
 
                 <div className="d-flex align-items-center gap-2">
+                  {getStreamUrl(modalActiveCam) && (
+                    <a
+                      href={getStreamUrl(modalActiveCam)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="btn btn-outline-success btn-sm px-3 no-underline d-inline-flex align-items-center gap-1"
+                    >
+                      Open Live (Port 7000) ↗
+                    </a>
+                  )}
                   <button
                     type="button"
                     className="btn btn-outline-light btn-sm px-3"
@@ -655,4 +698,3 @@ export default function QuadCameraStream({ vehicle }) {
     </div>
   );
 }
-
