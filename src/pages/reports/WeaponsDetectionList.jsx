@@ -14,6 +14,11 @@ import {
 import Pagination from '../../components/common/Pagination';
 import ExportExcelButton from '../../components/common/ExportExcelButton';
 import { exportToExcel } from '../../utils/excelExport';
+import {
+    getWeaponThreatsApi,
+    updateWeaponThreatStatusApi,
+    createWeaponThreatApi
+} from '../../services/api';
 
 /**
  * =========================================================================
@@ -293,7 +298,14 @@ export default function WeaponsDetectionList() {
             // Backend API call template:
             // const res = await axios.get('/api/reports/weapons-detection');
             // setIncidents(res.data);
-            setIncidents(WEAPON_DETECTION_EVENTS);
+            const res = await getWeaponThreatsApi({ limit: 100 });
+            if (res && res.data && Array.isArray(res.data) && res.data.length > 0) {
+                setIncidents(res.data);
+            } else if (Array.isArray(res) && res.length > 0) {
+                setIncidents(res);
+            } else {
+                setIncidents(WEAPON_DETECTION_EVENTS);
+            }
         } catch (err) {
             console.error('API Error:', err);
             setApiError('Failed to fetch weapon detection logs from server');
@@ -425,7 +437,16 @@ export default function WeaponsDetectionList() {
     const paginatedIncidents = filteredIncidents.slice(startIndex, startIndex + pageSize);
 
     // Toggle Response Status (DISPATCHED -> INVESTIGATING -> NEUTRALIZED -> DISPATCHED)
-    const handleToggleStatus = (eventId) => {
+    const handleToggleStatus = async (eventId) => {
+        const item = incidents.find(i => i.event_id === eventId);
+        let nextStatus = 'INVESTIGATING';
+        if (item?.incident_status === 'INVESTIGATING') nextStatus = 'NEUTRALIZED';
+        else if (item?.incident_status === 'NEUTRALIZED') nextStatus = 'DISPATCHED';
+        try {
+            await updateWeaponThreatStatusApi(eventId, nextStatus);
+        } catch (e) {
+            console.error('Update status API error:', e);
+        }
         setIncidents(prev =>
             prev.map(item => {
                 if (item.event_id === eventId) {

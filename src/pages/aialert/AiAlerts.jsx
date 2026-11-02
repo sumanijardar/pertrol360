@@ -198,6 +198,36 @@ export default function AiAlerts() {
         fetchAlerts(currentPage, pageSize);
     }, [currentPage, pageSize, statusFilter, typeFilter]);
 
+    // Real-time automatic background polling every 3.5 seconds without full page refresh
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (currentPage === 1 && !isModalOpen) {
+                getAiAlertsApi({
+                    page: 1,
+                    limit: pageSize,
+                    status: statusFilter,
+                    alerttype: typeFilter,
+                    search: searchQuery
+                })
+                    .then((res) => {
+                        if (res?.success && Array.isArray(res.data)) {
+                            setAlerts(res.data);
+                            if (res.pagination) {
+                                setPagination(res.pagination);
+                                setOverallMetrics((prev) => ({
+                                    ...prev,
+                                    total: res.pagination.total || prev.total
+                                }));
+                            }
+                        }
+                    })
+                    .catch(() => {});
+            }
+        }, 3500);
+
+        return () => clearInterval(interval);
+    }, [currentPage, pageSize, statusFilter, typeFilter, searchQuery, isModalOpen]);
+
     // Handle Search Input with debounce (skips redundant initial mount run)
     useEffect(() => {
         if (isInitialSearchMount.current) {
@@ -329,6 +359,10 @@ export default function AiAlerts() {
                         <h1 className="text-base font-bold text-foreground mb-0 tracking-tight">AI Threat & Telemetry Alerts Ingestion</h1>
                         <span className="bg-muted text-muted-foreground border border-border px-2 py-0.5 rounded-full font-mono text-[10.5px] font-medium ms-1">
                             {totalCount} TOTAL DETECTIONS
+                        </span>
+                        <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full font-mono text-[10px] font-semibold inline-flex items-center gap-1 ms-1.5 shadow-2xs">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            LIVE SYNC
                         </span>
                     </div>
                     <p className="text-muted-foreground text-xs mb-0 mt-0.5">
@@ -635,7 +669,8 @@ export default function AiAlerts() {
 
                                             {/* Status */}
                                             <td className="py-2.5 px-3">
-                                                {isClosed ? (
+                                                <div className="flex flex-col gap-1">
+                                                    {isClosed ? (
                                                     <span
                                                         className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 font-semibold text-[10.5px] inline-flex items-center gap-1"
                                                     >
@@ -652,6 +687,12 @@ export default function AiAlerts() {
                                                         OPEN
                                                     </span>
                                                 )}
+                                                {item.gov_sync_status === 'SYNCED' && (
+                                                    <span className="px-1.5 py-0.5 rounded font-mono text-[9.5px] bg-blue-50 text-blue-700 border border-blue-200 inline-flex items-center gap-1 w-fit" title={`Gov Receipt ID: ${item.gov_item_id || 'N/A'}`}>
+                                                        🌐 GOV SYNCED
+                                                    </span>
+                                                )}
+                                                </div>
                                             </td>
 
                                             {/* Patrol Vehicle & Cam */}

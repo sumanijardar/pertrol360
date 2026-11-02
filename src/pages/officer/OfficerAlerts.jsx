@@ -50,7 +50,16 @@ export default function OfficerAlerts() {
 
   useEffect(() => {
     loadAlerts(true);
-  }, [scope, status, page]);
+
+    // Auto-poll in background every 3.5 seconds so incoming camera alerts reflect in real-time
+    const timer = setInterval(() => {
+      if (page === 1 && !resolveModalAlert && !noteModalAlert) {
+        loadAlerts(false);
+      }
+    }, 3500);
+
+    return () => clearInterval(timer);
+  }, [scope, status, page, resolveModalAlert, noteModalAlert]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();

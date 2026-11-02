@@ -557,5 +557,105 @@ export async function reportOfficerIncidentApi(incidentData) {
   return response.data;
 }
 
+/**
+ * ============================================================================
+ * WANTED SUSPECTS (FRS) DEDICATED SECTION APIS
+ * ============================================================================
+ */
+export async function getWantedSuspectsApi(params = {}) {
+  const response = await api.get('/api/reports/wanted-suspects', { params });
+  return response.data;
+}
+
+export async function getWantedSuspectDetailApi(id) {
+  const response = await api.get(`/api/reports/wanted-suspects/${encodeURIComponent(id)}`);
+  return response.data;
+}
+
+export async function createWantedSuspectApi(data) {
+  const response = await api.post('/api/reports/wanted-suspects', data);
+  return response.data;
+}
+
+export async function updateWantedSuspectApi(id, data) {
+  const response = await api.put(`/api/reports/wanted-suspects/${encodeURIComponent(id)}`, data);
+  return response.data;
+}
+
+export async function deleteWantedSuspectApi(id) {
+  const response = await api.delete(`/api/reports/wanted-suspects/${encodeURIComponent(id)}`);
+  return response.data;
+}
+
+/**
+ * ============================================================================
+ * WEAPONS THREATS DEDICATED SECTION APIS
+ * ============================================================================
+ */
+export async function getWeaponThreatsApi(params = {}) {
+  const response = await api.get('/api/reports/weapons-threats', { params });
+  return response.data;
+}
+
+export async function getWeaponThreatDetailApi(id) {
+  const response = await api.get(`/api/reports/weapons-threats/${encodeURIComponent(id)}`);
+  return response.data;
+}
+
+export async function createWeaponThreatApi(data) {
+  const response = await api.post('/api/reports/weapons-threats', data);
+  return response.data;
+}
+
+export async function updateWeaponThreatStatusApi(id, status = null) {
+  const response = await api.put(`/api/reports/weapons-threats/${encodeURIComponent(id)}/status`, { status });
+  return response.data;
+}
+
+export async function updateWeaponThreatApi(id, data) {
+  const response = await api.put(`/api/reports/weapons-threats/${encodeURIComponent(id)}`, data);
+  return response.data;
+}
+
+export async function deleteWeaponThreatApi(id) {
+  const response = await api.delete(`/api/reports/weapons-threats/${encodeURIComponent(id)}`);
+  return response.data;
+}
+
+export async function getWeaponThreatStatsApi() {
+  const response = await api.get('/api/reports/weapons-threats/stats');
+  return response.data;
+}
+
+
+// ============================================================================
+// GOVERNMENT WEBHOOK DISPATCH & SYNC APIS (api-patrol.urosgeotechlab.com)
+// ============================================================================
+
+export async function getGovSyncStatusApi() {
+  const response = await api.get('/api/gov-sync/status');
+  return response.data;
+}
+
+export async function getGovSyncQueueApi(params = {}) {
+  const response = await api.get('/api/gov-sync/queue', { params });
+  return response.data;
+}
+
+export async function dispatchGovAlertApi(id) {
+  const response = await api.post(`/api/gov-sync/dispatch/${encodeURIComponent(id)}`);
+  return response.data;
+}
+
+export async function dispatchGovBatchApi(limit = 20) {
+  const response = await api.post('/api/gov-sync/dispatch-batch', { limit });
+  return response.data;
+}
+
+export async function testGovConnectionApi(data = {}) {
+  const response = await api.post('/api/gov-sync/test-connection', data);
+  return response.data;
+}
+
 export default api;
 

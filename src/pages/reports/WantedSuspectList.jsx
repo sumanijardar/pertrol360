@@ -14,6 +14,11 @@ import {
 import Pagination from '../../components/common/Pagination';
 import ExportExcelButton from '../../components/common/ExportExcelButton';
 import { exportToExcel } from '../../utils/excelExport';
+import {
+    getWantedSuspectsApi,
+    updateWantedSuspectApi,
+    createWantedSuspectApi
+} from '../../services/api';
 
 /**
  * =========================================================================
@@ -350,7 +355,14 @@ export default function WantedSuspectList() {
             // Backend API call template:
             // const res = await axios.get('/api/reports/wanted-suspects');
             // setSuspects(res.data);
-            setSuspects(WANTED_SUSPECTS);
+            const res = await getWantedSuspectsApi({ limit: 100 });
+            if (res && res.data && Array.isArray(res.data) && res.data.length > 0) {
+                setSuspects(res.data);
+            } else if (Array.isArray(res) && res.length > 0) {
+                setSuspects(res);
+            } else {
+                setSuspects(WANTED_SUSPECTS);
+            }
         } catch (err) {
             console.error('API Error:', err);
             setApiError('Failed to fetch wanted suspects list from server');
@@ -497,7 +509,14 @@ export default function WantedSuspectList() {
     const paginatedSuspects = filteredSuspects.slice(startIndex, startIndex + pageSize);
 
     // Toggle Apprehended / Wanted Status
-    const handleToggleStatus = (suspectId) => {
+    const handleToggleStatus = async (suspectId) => {
+        const target = suspects.find(s => s.suspect_id === suspectId);
+        const nextStatus = target?.status === 'WANTED' ? 'APPREHENDED' : 'WANTED';
+        try {
+            await updateWantedSuspectApi(suspectId, { status: nextStatus });
+        } catch (e) {
+            console.error('Update status API error:', e);
+        }
         setSuspects(prev =>
             prev.map(s => (s.suspect_id === suspectId ? {
                 ...s,

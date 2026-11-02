@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { toast, Swal } from '../../components/common/Toast';
 import { WANTED_SUSPECTS } from '../../data/mockData';
+import { getWantedSuspectDetailApi, updateWantedSuspectApi } from '../../services/api';
 import {
     IconShieldAlert,
     IconSearch,
@@ -22,13 +23,27 @@ export default function SuspectDetail() {
     const [isBroadcasting, setIsBroadcasting] = useState(false);
 
     useEffect(() => {
-        const found = WANTED_SUSPECTS.find(
-            s => s.suspect_id.toLowerCase() === (suspectId || '').toLowerCase()
-        );
-        if (found) {
-            setSuspect(found);
-            setStatus(found.status);
-        }
+        let isMounted = true;
+        (async () => {
+            try {
+                const res = await getWantedSuspectDetailApi(suspectId);
+                const data = res?.data || res;
+                if (data && isMounted) {
+                    setSuspect(data);
+                    setStatus(data.status || 'WANTED');
+                    return;
+                }
+            } catch (err) { }
+            const found = WANTED_SUSPECTS.find(
+                s => s.suspect_id.toLowerCase() === (suspectId || '').toLowerCase()
+            );
+            if (found && isMounted) {
+                setSuspect(found);
+                setStatus(found.status);
+            }
+        })();
+        return () => { isMounted = false; };
+
     }, [suspectId]);
 
     if (!suspect) {

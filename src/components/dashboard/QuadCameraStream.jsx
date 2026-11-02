@@ -231,14 +231,37 @@ export default function QuadCameraStream({ vehicle }) {
       >
         {/* Real Live MJPEG Stream or Tactical HUD Fallback */}
         {streamUrl && !hasError ? (
-          <img
-            src={withTimestamp(streamUrl, streamKey)}
-            alt={cam.camera_name || cam.camera_id}
-            className="w-100 h-100"
-            style={{ objectFit: 'cover' }}
-            onLoad={() => handleStreamLoad(cam.camera_id)}
-            onError={() => handleStreamError(cam.camera_id)}
-          />
+          <>
+            <img
+              src={withTimestamp(streamUrl, streamKey)}
+              alt={cam.camera_name || cam.camera_id}
+              className="w-100 h-100"
+              style={{
+                objectFit: 'cover',
+                opacity: streamLoading[cam.camera_id] !== false ? 0.25 : 1,
+                transition: 'opacity 0.35s ease'
+              }}
+              onLoad={() => handleStreamLoad(cam.camera_id)}
+              onError={() => handleStreamError(cam.camera_id)}
+            />
+            {streamLoading[cam.camera_id] !== false && (
+              <div
+                className="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center p-2 text-center"
+                style={{ backgroundColor: 'rgba(5, 11, 20, 0.88)', zIndex: 3 }}
+              >
+                <div className="spinner-border text-info mb-2" style={{ width: '26px', height: '26px', borderWidth: '2px' }} role="status" />
+                <span className="font-mono text-sky-400 fw-bold" style={{ fontSize: '10.5px', letterSpacing: '0.5px' }}>
+                  INITIALIZING LIVE STREAM...
+                </span>
+                <span className="font-mono text-slate-400 mt-1" style={{ fontSize: '9px' }}>
+                  DVR RTSP Handshake • Channel {cam.channel || (idx + 1)}
+                </span>
+                <span className="font-mono text-slate-500 mt-0.5" style={{ fontSize: '8px' }}>
+                  Awaiting initial I-Frame (5-10s)
+                </span>
+              </div>
+            )}
+          </>
         ) : (
           <div className="w-100 h-100 d-flex flex-column align-items-center justify-content-center p-2 text-center" style={{ backgroundColor: '#070d18' }}>
             <svg width="100%" height="100%" viewBox="0 0 400 200" className="w-100 h-100 select-none position-absolute top-0 start-0 opacity-20 pointer-events-none">
