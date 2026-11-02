@@ -16,8 +16,24 @@ import { exportToExcel } from '../../utils/excelExport';
 import {
     getWeaponThreatsApi,
     updateWeaponThreatStatusApi,
-    createWeaponThreatApi
+    createWeaponThreatApi,
+    API_BASE_URL
 } from '../../services/api';
+
+export const resolveAlertImageUrl = (item) => {
+    if (!item) return null;
+    if (item.File_loc && (item.File_loc.startsWith('data:image') || item.File_loc.startsWith('http'))) {
+        return item.File_loc;
+    }
+    if (item.File_loc && item.File_loc.length > 50 && !item.File_loc.startsWith('/')) {
+        return `data:image/jpeg;base64,${item.File_loc}`;
+    }
+    const alertId = item.id || item.alert_id;
+    if (alertId) {
+        return `${API_BASE_URL}/api/ai-alerts/${alertId}/image`;
+    }
+    return null;
+};
 
 /**
  * =========================================================================
@@ -46,6 +62,56 @@ export const WEAPON_COLUMNS = [
                 {row.event_id}
             </span>
         )
+    },
+    {
+        key: 'snapshot_thumbnail',
+        label: 'Snapshot',
+        width: '70px',
+        align: 'center',
+        render: (row, _idx, _rowIndex, actions) => {
+            const imgUrl = resolveAlertImageUrl(row);
+            return (
+                <div
+                    onClick={() => actions?.onEnlarge ? actions.onEnlarge(imgUrl, row) : (actions?.onView && actions.onView(row))}
+                    className="position-relative rounded overflow-hidden shadow-xs border mx-auto"
+                    style={{
+                        width: '46px',
+                        height: '46px',
+                        backgroundColor: '#0f172a',
+                        cursor: 'pointer',
+                        transition: 'transform 0.15s ease, box-shadow 0.15s ease'
+                    }}
+                    title="Click to enlarge snapshot & inspect AI threat dossier"
+                >
+                    {imgUrl ? (
+                        <img
+                            src={imgUrl}
+                            alt={row.weapon_type || 'Threat Snapshot'}
+                            className="w-100 h-100"
+                            style={{ objectFit: 'cover' }}
+                            onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                                if (e.currentTarget.nextSibling) {
+                                    e.currentTarget.nextSibling.style.display = 'flex';
+                                }
+                            }}
+                        />
+                    ) : null}
+                    <div
+                        className={`w-100 h-100 align-items-center justify-content-center text-muted ${imgUrl ? 'd-none' : 'd-flex'}`}
+                        style={{ backgroundColor: '#1e293b' }}
+                    >
+                        <span style={{ fontSize: '18px' }}>🎯</span>
+                    </div>
+                    <div
+                        className="position-absolute bottom-0 end-0 bg-dark bg-opacity-75 text-white px-1 rounded-top-start"
+                        style={{ fontSize: '8px', lineHeight: '12px' }}
+                    >
+                        🔍
+                    </div>
+                </div>
+            );
+        }
     },
     {
         key: 'weapon_type',
@@ -283,6 +349,22 @@ export default function WeaponsDetectionList() {
     // Modal State for AI Snapshot Dossier
     const [selectedIncident, setSelectedIncident] = useState(null);
     const [isSnapshotModalOpen, setIsSnapshotModalOpen] = useState(false);
+    const [enlargedImage, setEnlargedImage] = useState(null);
+
+    // Escape listener for both modals
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') {
+                if (enlargedImage) {
+                    setEnlargedImage(null);
+                } else if (isSnapshotModalOpen) {
+                    setIsSnapshotModalOpen(false);
+                }
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [enlargedImage, isSnapshotModalOpen]);
 
     // Hidden File Input Ref for Excel/CSV Import
     const fileInputRef = useRef(null);
@@ -466,9 +548,14 @@ export default function WeaponsDetectionList() {
     const firearmAlerts = incidents.filter(i => i.weapon_category === 'FIREARM').length;
     const neutralizedCount = incidents.filter(i => i.incident_status === 'NEUTRALIZED').length;
 
+    const handleEnlargeSnapshot = (url, incident) => {
+        setEnlargedImage({ url, incident });
+    };
+
     // Actions bundle for table rendering
     const tableActions = {
         onView: handleViewSnapshot,
+        onEnlarge: handleEnlargeSnapshot,
         onToggleStatus: handleToggleStatus
     };
 
@@ -881,17 +968,16 @@ export default function WeaponsDetectionList() {
                                     </div>
                                 </div>
 
-                                {/* Simulated AI Computer Vision Bounding Box Viewport */}
+                                {/* Real AI Computer Vision Bounding Box Viewport with Real Image */}
                                 <div
-                                    className="rounded-3 mb-3 p-3 position-relative overflow-hidden shadow-sm"
-                                    style={{
-                                        backgroundColor: '#020617',
-                                        border: '1px solid #1e293b',
-                                        minHeight: '210px'
-                                    }}
+                                    className="rounded-3 mb-3 position-relative overflow-hidden shadow-sm bg-black border border-dark"
+                                    style={{ minHeight: '260px', maxHeight: '440px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                 >
                                     {/* Viewport Top Overlay */}
-                                    <div className="d-flex justify-content-between align-items-center text-white font-mono small mb-3">
+                                    <div
+                                        className="position-absolute top-0 start-0 end-0 p-2.5 d-flex justify-content-between align-items-center text-white font-mono small"
+                                        style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%)', zIndex: 2 }}
+                                    >
                                         <span className="d-inline-flex align-items-center gap-1.5 text-danger fw-bold">
                                             <span className="rounded-circle bg-danger" style={{ width: '8px', height: '8px', display: 'inline-block' }}></span>
                                             AI TARGET LOCK: [{selectedIncident.camera_channel}]
@@ -901,33 +987,70 @@ export default function WeaponsDetectionList() {
                                         </span>
                                     </div>
 
-                                    {/* Simulated Bounding Box Overlay */}
-                                    <div className="d-flex justify-content-center align-items-center py-4 my-1">
-                                        <div
-                                            className="p-3 rounded-2 text-center position-relative"
-                                            style={{
-                                                border: '2px solid #ef4444',
-                                                backgroundColor: 'rgba(239, 68, 68, 0.12)',
-                                                minWidth: '280px',
-                                                boxShadow: '0 0 15px rgba(239, 68, 68, 0.35)'
+                                    {/* Real Captured Threat Image with click to enlarge */}
+                                    <div
+                                        className="w-100 h-100 position-relative d-flex align-items-center justify-content-center"
+                                        style={{ cursor: 'zoom-in' }}
+                                        onClick={() => setEnlargedImage({
+                                            url: resolveAlertImageUrl(selectedIncident),
+                                            incident: selectedIncident
+                                        })}
+                                        title="Click to view full-resolution surveillance snapshot"
+                                    >
+                                        <img
+                                            src={resolveAlertImageUrl(selectedIncident)}
+                                            alt={selectedIncident.weapon_type}
+                                            className="img-fluid"
+                                            style={{ maxHeight: '380px', width: 'auto', objectFit: 'contain' }}
+                                            onError={(e) => {
+                                                e.currentTarget.style.display = 'none';
+                                                if (e.currentTarget.nextSibling) {
+                                                    e.currentTarget.nextSibling.style.display = 'flex';
+                                                }
                                             }}
+                                        />
+
+                                        {/* Fallback box if frame could not be loaded */}
+                                        <div
+                                            className="d-none flex-column align-items-center justify-content-center py-5 text-muted"
                                         >
-                                            <div className="position-absolute top-0 start-0 translate-middle badge bg-danger text-white font-mono" style={{ fontSize: '10px' }}>
-                                                {selectedIncident.weapon_type} [{selectedIncident.confidence_score}%]
+                                            <div
+                                                className="p-3 rounded-2 text-center position-relative"
+                                                style={{
+                                                    border: '2px solid #ef4444',
+                                                    backgroundColor: 'rgba(239, 68, 68, 0.12)',
+                                                    minWidth: '280px',
+                                                    boxShadow: '0 0 15px rgba(239, 68, 68, 0.35)'
+                                                }}
+                                            >
+                                                <div className="position-absolute top-0 start-0 translate-middle badge bg-danger text-white font-mono" style={{ fontSize: '10px' }}>
+                                                    {selectedIncident.weapon_type} [{selectedIncident.confidence_score}%]
+                                                </div>
+                                                <IconCrosshair size={36} className="text-danger my-2" />
+                                                <div className="text-white small fw-bold font-mono">
+                                                    TACTICAL THREAT RECOGNITION
+                                                </div>
+                                                <div className="text-warning small font-mono mt-0.5">
+                                                    Model: {selectedIncident.ai_model}
+                                                </div>
                                             </div>
-                                            <IconCrosshair size={36} className="text-danger my-2" />
-                                            <div className="text-white small fw-bold font-mono">
-                                                TACTICAL THREAT RECOGNITION
-                                            </div>
-                                            <div className="text-warning small font-mono mt-0.5">
-                                                Model: {selectedIncident.ai_model}
-                                            </div>
+                                        </div>
+
+                                        {/* Floating Zoom Action Badge */}
+                                        <div
+                                            className="position-absolute badge bg-dark bg-opacity-75 text-white border border-secondary border-opacity-50 font-mono d-flex align-items-center gap-1 shadow-sm"
+                                            style={{ fontSize: '11px', padding: '5px 10px', zIndex: 3, top: '42px', right: '12px' }}
+                                        >
+                                            <span>🔍 Click to Enlarge</span>
                                         </div>
                                     </div>
 
                                     {/* Viewport Bottom Overlay */}
-                                    <div className="d-flex justify-content-between align-items-center text-muted font-mono small pt-2 border-top border-secondary border-opacity-25" style={{ fontSize: '11px' }}>
-                                        <span>Patrol Van: {selectedIncident.registration_number} ({selectedIncident.vehicle_id})</span>
+                                    <div
+                                        className="position-absolute bottom-0 start-0 end-0 p-2 d-flex justify-content-between align-items-center text-white font-mono small"
+                                        style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%)', zIndex: 2, fontSize: '11px' }}
+                                    >
+                                        <span>Patrol Van: <strong className="text-white">{selectedIncident.registration_number}</strong> ({selectedIncident.vehicle_id})</span>
                                         <span className="text-success">C4i Command Feed: Verified</span>
                                     </div>
                                 </div>
@@ -1010,6 +1133,61 @@ export default function WeaponsDetectionList() {
                 </div>
             )}
 
+
+            {/* Full-Screen Image Lightbox Modal */}
+            {enlargedImage && (
+                <div
+                    className="modal fade show d-block"
+                    tabIndex="-1"
+                    style={{ backgroundColor: 'rgba(0, 0, 0, 0.90)', zIndex: 1060 }}
+                    onClick={() => setEnlargedImage(null)}
+                >
+                    <div
+                        className="modal-dialog modal-dialog-centered modal-xl"
+                        onClick={(e) => e.stopPropagation()}
+                        style={{ maxWidth: '960px' }}
+                    >
+                        <div className="modal-content bg-dark border-secondary text-white shadow-lg rounded-3 overflow-hidden">
+                            <div className="modal-header border-secondary py-2.5 px-3 d-flex justify-content-between align-items-center bg-black bg-opacity-75">
+                                <div className="d-flex align-items-center gap-2">
+                                    <span className="badge bg-danger font-mono">
+                                        {enlargedImage.incident?.weapon_type || 'TACTICAL EVIDENCE'}
+                                    </span>
+                                    <span className="text-white small fw-bold font-mono">
+                                        {enlargedImage.incident?.event_id} • Unit: {enlargedImage.incident?.registration_number}
+                                    </span>
+                                </div>
+                                <button
+                                    type="button"
+                                    className="btn-close btn-close-white shadow-none"
+                                    onClick={() => setEnlargedImage(null)}
+                                    aria-label="Close"
+                                />
+                            </div>
+                            <div className="modal-body p-0 d-flex justify-content-center align-items-center bg-black" style={{ minHeight: '440px' }}>
+                                <img
+                                    src={enlargedImage.url}
+                                    alt="Enlarged Evidence Snapshot"
+                                    className="img-fluid"
+                                    style={{ maxHeight: '78vh', objectFit: 'contain' }}
+                                />
+                            </div>
+                            <div className="modal-footer border-secondary py-2 px-3 d-flex justify-content-between align-items-center bg-black bg-opacity-75 font-mono small">
+                                <span className="text-secondary" style={{ fontSize: '11px' }}>
+                                    ⏱ {enlargedImage.incident?.detected_timestamp} | 📍 {enlargedImage.incident?.location_name} ({enlargedImage.incident?.police_station})
+                                </span>
+                                <button
+                                    type="button"
+                                    className="btn btn-outline-light btn-sm py-1 px-3"
+                                    onClick={() => setEnlargedImage(null)}
+                                >
+                                    Close Preview (Esc)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
