@@ -1,8 +1,4 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import {
-  POLICE_VEHICLES
-} from '../data/mockData';
-
 import TimelineActivityChart from '../components/charts/TimelineActivityChart';
 import ThreatDonutChart from '../components/charts/ThreatDonutChart';
 import JetsonFleetTelemetryChart from '../components/charts/JetsonFleetTelemetryChart';
@@ -29,8 +25,8 @@ import {
 import { getDashboardStatsApi, getVehiclesApi } from '../services/api';
 
 export default function Dashboard({ stationFilter = 'ALL' }) {
-  const [vehicles, setVehicles] = useState(POLICE_VEHICLES);
-  const [selectedVehicleId, setSelectedVehicleId] = useState(POLICE_VEHICLES[0]?.vehicle_id || '');
+  const [vehicles, setVehicles] = useState([]);
+  const [selectedVehicleId, setSelectedVehicleId] = useState('');
   const [selectedIncident, setSelectedIncident] = useState(null);
   const [activeAlertNotification, setActiveAlertNotification] = useState(null);
 
@@ -106,7 +102,7 @@ export default function Dashboard({ stationFilter = 'ALL' }) {
     stationFilter === 'ALL' ? true : (v.police_station && v.police_station.toLowerCase().includes(stationFilter.toLowerCase()))
   );
 
-  const selectedVehicle = vehicles.find(v => v.vehicle_id === selectedVehicleId) || vehicles[0] || POLICE_VEHICLES[0];
+  const selectedVehicle = vehicles.find(v => v.vehicle_id === selectedVehicleId) || vehicles[0] || null;
 
   // Dispatch intercept action
   const handleDispatchIntercept = (item) => {
@@ -386,7 +382,7 @@ export default function Dashboard({ stationFilter = 'ALL' }) {
               style={{ fontSize: '11px', height: '24px' }}
               onClick={() => setSelectedIncident({
                 type: 'ANPR',
-                data: stats?.recent_alerts?.[0] || ANPR_DETECTION_EVENTS[0]
+                data: stats?.recent_alerts?.[0] || activeAlertNotification
               })}
             >
               Inspect Intercept

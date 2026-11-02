@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { toast, Swal } from '../../components/common/Toast';
-import { WANTED_SUSPECTS } from '../../data/mockData';
 import { getWantedSuspectDetailApi, updateWantedSuspectApi } from '../../services/api';
 import {
     IconShieldAlert,
@@ -34,13 +33,7 @@ export default function SuspectDetail() {
                     return;
                 }
             } catch (err) { }
-            const found = WANTED_SUSPECTS.find(
-                s => s.suspect_id.toLowerCase() === (suspectId || '').toLowerCase()
-            );
-            if (found && isMounted) {
-                setSuspect(found);
-                setStatus(found.status);
-            }
+
         })();
         return () => { isMounted = false; };
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Swal } from '../../components/common/Toast';
-import { getVehicleByIdApi } from '../../services/api';
+import { getVehicleByIdApi, getAiAlertsApi } from '../../services/api';
 import QuadCameraStream from '../../components/dashboard/QuadCameraStream';
 import {
   IconCar,
@@ -43,8 +43,51 @@ export default function VehicleDetail() {
     }
   };
 
+  const [vehicleAlerts, setVehicleAlerts] = useState([]);
+  const [isLoadingAlerts, setIsLoadingAlerts] = useState(false);
+
+  // Fetch real AI alerts logged for this vehicle from database
+  const fetchVehicleAlerts = async (targetId) => {
+    const vId = targetId || vehicleId;
+    if (!vId) return;
+    try {
+      const res = await getAiAlertsApi({ vehicle_id: vId, limit: 50 });
+      const rawList = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+      const mapped = rawList.map((a) => {
+        const typeStr = (a.alerttype || 'ALERT').toUpperCase();
+        const isCritical = typeStr.includes('STOLEN') || typeStr.includes('WEAPON') || typeStr.includes('CRITICAL');
+        const isWarn = typeStr.includes('CROWD') || typeStr.includes('FIRE') || typeStr.includes('SUSPICIOUS');
+        return {
+          id: a.id ? `EVT-${a.id}` : `EVT-${Math.random().toString(36).substr(2, 6)}`,
+          raw_id: a.id,
+          category: (typeStr.includes('STOLEN') || typeStr.includes('ANPR')) ? 'ANPR' : (typeStr.includes('WEAPON') ? 'WEAPON' : 'OTHER'),
+          type: typeStr.replace(/_/g, ' '),
+          badgeClass: isCritical ? 'bg-danger text-white' : (isWarn ? 'bg-warning text-dark' : 'bg-primary text-white'),
+          description: a.comment || (a.scanned_vehicle_numberplate ? `Plate: ${a.scanned_vehicle_numberplate}` : 'Tactical patrol observation'),
+          confidence: a.confidence ? parseFloat(a.confidence).toFixed(1) : '95.0',
+          camera_id: a.camera_id || a.camera_channel || 'CAM_01_FRONT',
+          timestamp: a.createtime || a.created_at || '-',
+          location: a.location || vehicle?.police_station || 'Patrol Sector',
+          fir_reference: a.scanned_vehicle_numberplate ? `Plate: ${a.scanned_vehicle_numberplate}` : (a.ATMCode ? `Ref: ${a.ATMCode}` : `Alert #${a.id}`),
+          severity: isCritical ? 'CRITICAL_RED' : 'STANDARD'
+        };
+      });
+      setVehicleAlerts(mapped);
+    } catch (err) {
+      console.warn('Could not load vehicle alerts:', err);
+      setVehicleAlerts([]);
+    }
+  };
+
   useEffect(() => {
     fetchVehicleDetails();
+    fetchVehicleAlerts(vehicleId);
+
+    // Silent background refresh for vehicle alerts every 4 seconds
+    const interval = setInterval(() => {
+      fetchVehicleAlerts(vehicleId);
+    }, 4000);
+    return () => clearInterval(interval);
   }, [vehicleId]);
 
   if (isLoading) {
@@ -85,37 +128,7 @@ export default function VehicleDetail() {
   const lng = vehicle.latest_lng || '-';
   const isActive = vehicle.is_active === 1 || vehicle.is_active === true;
 
-  // Static preview alerts for RTSP cameras
-  const sampleAlerts = [
-    {
-      id: 'EVT-ANPR-01',
-      category: 'ANPR',
-      type: 'ANPR WATCHLIST HIT',
-      badgeClass: 'bg-danger',
-      description: 'Vehicle Plate: GJ01AB1234 • Hotlist Stolen Vehicle Flag',
-      confidence: 99.4,
-      camera_id: 'CAM_01_FRONT',
-      timestamp: vehicle.last_telemetry_at || '2026-10-30 05:49:13',
-      location: vehicle.police_station || 'Highway Patrol Sector',
-      fir_reference: 'FIR #ST-2026-901',
-      severity: 'CRITICAL_RED'
-    },
-    {
-      id: 'EVT-THREAT-02',
-      category: 'WEAPON',
-      type: 'TACTICAL THREAT ALERT',
-      badgeClass: 'bg-danger',
-      description: 'Handgun identified by mobile patrol camera feed',
-      confidence: 94.8,
-      camera_id: 'CAM_03_LEFT',
-      timestamp: vehicle.last_telemetry_at || '2026-10-30 05:49:13',
-      location: vehicle.police_station || 'Sidewalk Surveillance',
-      fir_reference: 'Armed Threat Broadcast #994',
-      severity: 'CRITICAL_RED'
-    }
-  ];
-
-  const displayAlerts = sampleAlerts.filter((item) => {
+  const displayAlerts = vehicleAlerts.filter((item) => {
     if (activeAlertTab === 'ALL') return true;
     return item.category === activeAlertTab;
   });
@@ -348,7 +361,7 @@ export default function VehicleDetail() {
                   onClick={() => setActiveAlertTab('ALL')}
                   style={{ fontSize: '10.5px' }}
                 >
-                  All ({sampleAlerts.length})
+                  All ({vehicleAlerts.length})
                 </button>
                 <button
                   type="button"
@@ -440,9 +453,9 @@ export default function VehicleDetail() {
               ) : (
                 <div className="text-center py-5 text-muted my-auto">
                   <IconCheckCircle size={36} color="#10b981" />
-                  <h6 className="fw-bold text-dark mt-2 mb-1">No Alerts for this Category</h6>
+                  <h6 className="fw-bold text-dark mt-2 mb-1">No Alerts Logged for this Vehicle</h6>
                   <p className="small text-muted mb-0">
-                    Patrol van {vehicle.registration_number} has not logged any incidents under this filter.
+                    No AI alerts or threats have been detected for {vehicle.registration_number || vehicle.vehicle_id}.
                   </p>
                 </div>
               )}

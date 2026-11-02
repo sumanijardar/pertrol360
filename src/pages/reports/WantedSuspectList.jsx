@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast, Swal } from '../../components/common/Toast';
-import { WANTED_SUSPECTS } from '../../data/mockData';
 import {
     IconShieldAlert,
     IconSearch,
@@ -324,7 +323,7 @@ export const SUSPECT_COLUMNS = [
 ];
 
 export default function WantedSuspectList() {
-    const [suspects, setSuspects] = useState(WANTED_SUSPECTS);
+    const [suspects, setSuspects] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [apiError, setApiError] = useState(null);
 
@@ -356,13 +355,8 @@ export default function WantedSuspectList() {
             // const res = await axios.get('/api/reports/wanted-suspects');
             // setSuspects(res.data);
             const res = await getWantedSuspectsApi({ limit: 100 });
-            if (res && res.data && Array.isArray(res.data) && res.data.length > 0) {
-                setSuspects(res.data);
-            } else if (Array.isArray(res) && res.length > 0) {
-                setSuspects(res);
-            } else {
-                setSuspects(WANTED_SUSPECTS);
-            }
+            const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+            setSuspects(list);
         } catch (err) {
             console.error('API Error:', err);
             setApiError('Failed to fetch wanted suspects list from server');

@@ -1,11 +1,42 @@
 import React, { useState } from 'react';
-import { ANPR_DETECTION_EVENTS } from '../../data/mockData';
+import { getAnprEventsApi, getAiAlertsApi } from '../../services/api';
 import { IconShieldAlert, IconSearch } from '../../components/common/Icons';
 import Pagination from '../../components/common/Pagination';
 import ExportExcelButton from '../../components/common/ExportExcelButton';
 
 export default function AnprWatchlist() {
-  const [events, setEvents] = useState(ANPR_DETECTION_EVENTS);
+  const [events, setEvents] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchAnprEvents = async () => {
+    setIsLoading(true);
+    try {
+      const res = await getAnprEventsApi({ limit: 100, stolen_match: 1 });
+      const raw = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+      const mapped = raw.map(e => ({
+        event_id: e.event_id || `EVT-${e.id}`,
+        detected_plate_number: e.detected_plate_number || e.scanned_vehicle_numberplate || '-',
+        vehicle_id: e.vehicle_id || 'PATROL_VAN_01',
+        location_name: e.location_name || e.location || (e.latitude ? `${e.latitude}, ${e.longitude}` : 'Gujarat Jurisdiction'),
+        fir_reference: e.stolen_fir || e.fir_reference || (e.is_stolen_match ? 'NCRB-HOTLIST-STOLEN' : 'MONITORED_VEHICLE'),
+        ocr_confidence: e.ocr_confidence ? (parseFloat(e.ocr_confidence) > 1 ? parseFloat(e.ocr_confidence) / 100 : parseFloat(e.ocr_confidence)) : 0.98,
+        stolen_status: e.is_stolen_match || e.stolen_status ? 'HOTLIST HIT' : 'CLEARED',
+        detected_timestamp: e.created_at || e.detected_timestamp || '-'
+      }));
+      setEvents(mapped);
+    } catch (err) {
+      console.warn('Failed to load ANPR events:', err);
+      setEvents([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchAnprEvents();
+    const interval = setInterval(fetchAnprEvents, 5000);
+    return () => clearInterval(interval);
+  }, []);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);

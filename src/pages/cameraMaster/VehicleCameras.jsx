@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { toast, Swal } from '../../components/common/Toast';
-import { VEHICLE_CAMERA_MAPPINGS, POLICE_VEHICLES } from '../../data/mockData';
+import { getCamerasApi, getVehiclesApi } from '../../services/api';
 import {
   IconVideo,
   IconSearch,
@@ -270,7 +270,8 @@ export const CAMERA_COLUMNS = [
 ];
 
 export default function VehicleCameras() {
-  const [mappings, setMappings] = useState(VEHICLE_CAMERA_MAPPINGS);
+  const [mappings, setMappings] = useState([]);
+  const [availableVehicles, setAvailableVehicles] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState(null);
 
@@ -316,20 +317,31 @@ export default function VehicleCameras() {
     setIsLoading(true);
     setApiError(null);
     try {
-      // Backend API call template:
-      // const res = await axios.get('/api/vehicle-cameras');
-      // setMappings(res.data);
-      setMappings(VEHICLE_CAMERA_MAPPINGS);
+      const res = await getCamerasApi();
+      const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+      setMappings(list);
     } catch (err) {
       console.error('API Error:', err);
       setApiError('Failed to fetch camera mappings from server');
+      setMappings([]);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const fetchAvailableVehicles = async () => {
+    try {
+      const res = await getVehiclesApi({ page: 1, limit: 100 });
+      const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+      setAvailableVehicles(list);
+    } catch (err) {
+      setAvailableVehicles([]);
+    }
+  };
+
   useEffect(() => {
     fetchCameraMappingsApi();
+    fetchAvailableVehicles();
   }, []);
 
   // Reset to page 1 on filter changes
@@ -369,7 +381,7 @@ export default function VehicleCameras() {
   // Open Form for Add
   const handleOpenAddModal = () => {
     setEditingMapping(null);
-    const defaultVehicle = POLICE_VEHICLES[0] || {};
+    const defaultVehicle = availableVehicles[0] || {};
     setFormData({
       ...initialFormState,
       mapping_id: `VCM-0${mappings.length + 1}`,
@@ -619,7 +631,7 @@ export default function VehicleCameras() {
                 style={{ width: 'auto', minWidth: '140px' }}
               >
                 <option value="ALL">All Vehicles</option>
-                {POLICE_VEHICLES.map(v => (
+                {availableVehicles.map(v => (
                   <option key={v.vehicle_id} value={v.vehicle_id}>
                     {v.vehicle_id} ({v.registration_number})
                   </option>
@@ -796,7 +808,7 @@ export default function VehicleCameras() {
                           value={formData.vehicle_id}
                           onChange={(e) => {
                             const selectedId = e.target.value;
-                            const foundVehicle = POLICE_VEHICLES.find(v => v.vehicle_id === selectedId);
+                            const foundVehicle = availableVehicles.find(v => v.vehicle_id === selectedId);
                             setFormData({
                               ...formData,
                               vehicle_id: selectedId,
@@ -807,7 +819,7 @@ export default function VehicleCameras() {
                           }}
                           style={{ borderColor: '#cbd5e1', fontSize: '12.5px' }}
                         >
-                          {POLICE_VEHICLES.map(v => (
+                          {availableVehicles.map(v => (
                             <option key={v.vehicle_id} value={v.vehicle_id}>
                               {v.vehicle_id} - {v.registration_number} ({v.vehicle_model})
                             </option>

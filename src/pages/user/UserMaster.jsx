@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { toast, Swal } from '../../components/common/Toast';
-import { POLICE_OFFICERS, POLICE_VEHICLES } from '../../data/mockData';
 import {
     getUsersApi,
     createUserApi,
@@ -277,7 +276,7 @@ export const POLICE_COLUMNS = [
 ];
 
 export default function PoliceMaster() {
-    const [officers, setOfficers] = useState(POLICE_OFFICERS);
+    const [officers, setOfficers] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [apiError, setApiError] = useState(null);
 
@@ -380,11 +379,11 @@ export default function PoliceMaster() {
             if (res && res.success && Array.isArray(list) && list.length > 0) {
                 setAvailableVehicles(list);
             } else {
-                setAvailableVehicles(POLICE_VEHICLES);
+                setAvailableVehicles([]);
             }
         } catch (err) {
             console.warn('[UserMaster] fetchAvailableVehicles fallback:', err.message);
-            setAvailableVehicles(POLICE_VEHICLES);
+            setAvailableVehicles([]);
         }
     };
 
@@ -1175,7 +1174,7 @@ export default function PoliceMaster() {
                                                     value={formData.assigned_vehicle_plate}
                                                     onChange={(e) => {
                                                         const selectedPlate = e.target.value;
-                                                        const vehicleOptions = availableVehicles.length > 0 ? availableVehicles : POLICE_VEHICLES;
+                                                        const vehicleOptions = availableVehicles;
                                                         const foundVehicle = vehicleOptions.find(
                                                             v => v.registration_number === selectedPlate
                                                         );
@@ -1188,7 +1187,7 @@ export default function PoliceMaster() {
                                                     style={{ borderColor: '#cbd5e1', fontSize: '12.5px' }}
                                                 >
                                                     <option value="Unassigned">Unassigned (HQ / Station Duty)</option>
-                                                    {(availableVehicles.length > 0 ? availableVehicles : POLICE_VEHICLES).map((v, i) => (
+                                                    {availableVehicles.map((v, i) => (
                                                         <option key={v.vehicle_id || v.id || i} value={v.registration_number}>
                                                             {v.vehicle_id} - {v.registration_number} {v.vehicle_model ? `(${v.vehicle_model})` : ''}
                                                         </option>

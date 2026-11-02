@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { toast, Swal } from '../../components/common/Toast';
-import { POLICE_VEHICLES } from '../../data/mockData';
 import {
   getVehiclesApi,
   createVehicleApi,
@@ -252,7 +251,7 @@ export const VEHICLE_COLUMNS = [
 ];
 
 export default function VahicalList() {
-  const [vehicles, setVehicles] = useState(POLICE_VEHICLES);
+  const [vehicles, setVehicles] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLiveApi, setIsLiveApi] = useState(false);
@@ -324,12 +323,12 @@ export default function VahicalList() {
         setVehicles(mappedVehicles);
         setIsLiveApi(true);
       } else {
-        setVehicles(POLICE_VEHICLES);
+        setVehicles([]);
         setIsLiveApi(false);
       }
     } catch (err) {
       console.warn('[VahicalList] API fetch error, falling back:', err.message);
-      setVehicles(POLICE_VEHICLES);
+      setVehicles([]);
       setIsLiveApi(false);
       setApiError(err.message);
     } finally {

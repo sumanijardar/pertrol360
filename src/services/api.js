@@ -657,5 +657,19 @@ export async function testGovConnectionApi(data = {}) {
   return response.data;
 }
 
-export default api;
 
+// ============================================================================
+// ANPR EVENTS API
+// ============================================================================
+
+export async function getAnprEventsApi(params = {}) {
+  try {
+    const response = await api.get('/api/events/anpr', { params });
+    return response.data;
+  } catch (err) {
+    const fallbackRes = await api.get('/api/ai-alerts', { params: { alerttype: 'STOLEN_VEHICLE_MATCH', limit: 50 } });
+    return fallbackRes.data;
+  }
+}
+
+export default api;

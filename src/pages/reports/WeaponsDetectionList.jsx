@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { toast, Swal } from '../../components/common/Toast';
-import { WEAPON_DETECTION_EVENTS } from '../../data/mockData';
 import {
     IconCrosshair,
     IconSearch,
@@ -266,7 +265,7 @@ export const WEAPON_COLUMNS = [
 ];
 
 export default function WeaponsDetectionList() {
-    const [incidents, setIncidents] = useState(WEAPON_DETECTION_EVENTS);
+    const [incidents, setIncidents] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [apiError, setApiError] = useState(null);
 
@@ -299,13 +298,8 @@ export default function WeaponsDetectionList() {
             // const res = await axios.get('/api/reports/weapons-detection');
             // setIncidents(res.data);
             const res = await getWeaponThreatsApi({ limit: 100 });
-            if (res && res.data && Array.isArray(res.data) && res.data.length > 0) {
-                setIncidents(res.data);
-            } else if (Array.isArray(res) && res.length > 0) {
-                setIncidents(res);
-            } else {
-                setIncidents(WEAPON_DETECTION_EVENTS);
-            }
+            const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+            setIncidents(list);
         } catch (err) {
             console.error('API Error:', err);
             setApiError('Failed to fetch weapon detection logs from server');
