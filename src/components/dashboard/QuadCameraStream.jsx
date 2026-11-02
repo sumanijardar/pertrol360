@@ -26,20 +26,20 @@ export default function QuadCameraStream({ vehicle }) {
   const [streamLoading, setStreamLoading] = useState({});
   const [streamKey, setStreamKey] = useState(Date.now());
 
-  if (!vehicle) return null;
+  const currentVehicle = vehicle || {};
 
   // Default fallback if no cameras exist in vehicle
   const DEFAULT_CAMERAS = [
-    { camera_id: `${vehicle.vehicle_id || 'VEH'}_CAM_01`, camera_name: 'Front ANPR Cam', mount_position: 'FRONT', resolution: '1920x1080', fps: 25, is_streaming: true, rtsp_url: 'rtsp://192.168.1.101:554/stream1' },
-    { camera_id: `${vehicle.vehicle_id || 'VEH'}_CAM_02`, camera_name: 'Rear Traffic Cam', mount_position: 'REAR', resolution: '1920x1080', fps: 25, is_streaming: true, rtsp_url: 'rtsp://192.168.1.102:554/stream1' },
-    { camera_id: `${vehicle.vehicle_id || 'VEH'}_CAM_03`, camera_name: 'Left Flank Cam', mount_position: 'LEFT', resolution: '1920x1080', fps: 25, is_streaming: true, rtsp_url: 'rtsp://192.168.1.103:554/stream1' },
-    { camera_id: `${vehicle.vehicle_id || 'VEH'}_CAM_04`, camera_name: 'Right Flank Cam', mount_position: 'RIGHT', resolution: '1920x1080', fps: 25, is_streaming: true, rtsp_url: 'rtsp://192.168.1.104:554/stream1' }
+    { camera_id: `${currentVehicle.vehicle_id || 'VEH'}_CAM_01`, camera_name: 'Front ANPR Cam', mount_position: 'FRONT', resolution: '1920x1080', fps: 25, is_streaming: true, rtsp_url: 'rtsp://192.168.1.101:554/stream1' },
+    { camera_id: `${currentVehicle.vehicle_id || 'VEH'}_CAM_02`, camera_name: 'Rear Traffic Cam', mount_position: 'REAR', resolution: '1920x1080', fps: 25, is_streaming: true, rtsp_url: 'rtsp://192.168.1.102:554/stream1' },
+    { camera_id: `${currentVehicle.vehicle_id || 'VEH'}_CAM_03`, camera_name: 'Left Flank Cam', mount_position: 'LEFT', resolution: '1920x1080', fps: 25, is_streaming: true, rtsp_url: 'rtsp://192.168.1.103:554/stream1' },
+    { camera_id: `${currentVehicle.vehicle_id || 'VEH'}_CAM_04`, camera_name: 'Right Flank Cam', mount_position: 'RIGHT', resolution: '1920x1080', fps: 25, is_streaming: true, rtsp_url: 'rtsp://192.168.1.104:554/stream1' }
   ];
 
   // Dynamically populate cameras from vehicle
-  const cameras = (Array.isArray(vehicle.cameras) && vehicle.cameras.length > 0)
-    ? vehicle.cameras
-    : (Array.isArray(vehicle.cameras) ? [] : DEFAULT_CAMERAS);
+  const cameras = (Array.isArray(currentVehicle.cameras) && currentVehicle.cameras.length > 0)
+    ? currentVehicle.cameras
+    : (Array.isArray(currentVehicle.cameras) ? [] : DEFAULT_CAMERAS);
 
   const cameraCount = cameras.length;
   const activeCam = cameras[activeCamIndex] || cameras[0] || null;
@@ -188,6 +188,16 @@ export default function QuadCameraStream({ vehicle }) {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isModalOpen]);
+
+  // Safely render fallback after all React hooks have unconditionally run
+  if (!vehicle) {
+    return (
+      <div className="card shadow-sm border-0 bg-dark text-white p-4 text-center my-auto rounded-3">
+        <IconVideo size={32} className="mx-auto mb-2 text-secondary opacity-50" />
+        <div className="small text-muted">Select a patrol vehicle unit to initialize 360° camera matrix stream.</div>
+      </div>
+    );
+  }
 
   // Determine height based on camera count and layout
   const getFeedMaxHeight = (count, isGrid) => {
