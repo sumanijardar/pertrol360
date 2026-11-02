@@ -114,6 +114,12 @@ export default function QuadCameraStream({ vehicle }) {
   const handleStreamError = (camId) => {
     setStreamLoading((prev) => ({ ...prev, [camId]: false }));
     setStreamErrors((prev) => ({ ...prev, [camId]: true }));
+    // Auto-reconnect stream within 2.5 seconds to recover from gateway session reset
+    setTimeout(() => {
+      setStreamErrors((prev) => ({ ...prev, [camId]: false }));
+      setStreamLoading((prev) => ({ ...prev, [camId]: true }));
+      setStreamKey(Date.now());
+    }, 2500);
   };
 
   const handleRetryStream = (camId, e) => {
@@ -177,6 +183,14 @@ export default function QuadCameraStream({ vehicle }) {
   const handleMouseUp = () => {
     setIsDragging(false);
   };
+
+  // Auto-refresh camera feed every 115 seconds to ensure continuous 24/7 streaming without manual page refresh
+  useEffect(() => {
+    const streamKeepAliveTimer = setInterval(() => {
+      setStreamKey(Date.now());
+    }, 115000);
+    return () => clearInterval(streamKeepAliveTimer);
+  }, []);
 
   // Keyboard shortcut: Escape to close modal
   useEffect(() => {
