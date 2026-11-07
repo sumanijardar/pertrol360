@@ -5,6 +5,7 @@ import {
     createUserApi,
     updateUserApi,
     deleteUserApi,
+    uploadFaceEncodingApi,
     getVehiclesApi,
     API_BASE_URL
 } from '../../services/api';
@@ -15,7 +16,9 @@ import {
     IconCheckCircle,
     IconCar,
     IconActivity,
-    IconAlertTriangle
+    IconAlertTriangle,
+    IconCamera,
+    IconCheck
 } from '../../components/common/Icons';
 import Pagination from '../../components/common/Pagination';
 import ExportExcelButton from '../../components/common/ExportExcelButton';
@@ -141,6 +144,51 @@ export const POLICE_COLUMNS = [
         )
     },
     {
+        key: 'face_encoding',
+        label: 'Face ID',
+        align: 'center',
+        width: '125px',
+        render: (row, _idx, _rowIndex, actions) => (
+            <button
+                type="button"
+                className="btn btn-link p-0 text-decoration-none border-0 shadow-none"
+                onClick={() => actions.onOpenFaceModal(row)}
+                title={row.has_face_encoding ? 'Face ID enrolled (click to update photo)' : 'Face ID pending (click to upload photo)'}
+                style={{ cursor: 'pointer' }}
+            >
+                {row.has_face_encoding ? (
+                    <span
+                        className="badge rounded-pill d-inline-flex align-items-center gap-1 shadow-sm"
+                        style={{
+                            backgroundColor: '#059669',
+                            color: '#ffffff',
+                            fontSize: '11px',
+                            fontWeight: 600,
+                            padding: '4px 9px'
+                        }}
+                    >
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        Enrolled
+                    </span>
+                ) : (
+                    <span
+                        className="badge rounded-pill d-inline-flex align-items-center gap-1 border border-warning-subtle shadow-sm"
+                        style={{
+                            backgroundColor: '#fef3c7',
+                            color: '#b45309',
+                            fontSize: '11px',
+                            fontWeight: 600,
+                            padding: '4px 9px'
+                        }}
+                    >
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        Pending
+                    </span>
+                )}
+            </button>
+        )
+    },
+    {
         key: 'is_active',
         label: 'Status',
         width: '120px',
@@ -189,10 +237,35 @@ export const POLICE_COLUMNS = [
     {
         key: 'actions',
         label: 'Actions',
-        width: '120px',
+        width: '135px',
         align: 'center',
         render: (row, _idx, _rowIndex, actions) => (
-            <div className="d-inline-flex align-items-center justify-content-center gap-2">
+            <div className="d-inline-flex align-items-center justify-content-center gap-1.5">
+                {/* Upload Face Photo Button */}
+                <button
+                    type="button"
+                    className="btn btn-sm p-0 shadow-sm"
+                    title={row.has_face_encoding ? 'Update Face Photo' : 'Enroll Face ID Photo'}
+                    onClick={() => actions.onOpenFaceModal(row)}
+                    style={{
+                        width: '28px',
+                        height: '28px',
+                        borderRadius: '6px',
+                        backgroundColor: '#7c3aed',
+                        color: '#ffffff',
+                        border: 'none',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'transform 0.15s ease'
+                    }}
+                >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+                        <circle cx="12" cy="13" r="3"/>
+                    </svg>
+                </button>
+
                 {/* View Profile Button */}
                 <button
                     type="button"
@@ -296,6 +369,15 @@ export default function PoliceMaster() {
     const [editingOfficer, setEditingOfficer] = useState(null);
     const [selectedOfficer, setSelectedOfficer] = useState(null);
 
+    // 2-Step Registration & Face ID Biometrics States
+    const [regStep, setRegStep] = useState(1);
+    const [isFaceModalOpen, setIsFaceModalOpen] = useState(false);
+    const [activeOfficerForFace, setActiveOfficerForFace] = useState(null);
+    const [faceFile, setFaceFile] = useState(null);
+    const [facePreview, setFacePreview] = useState(null);
+    const [isGeneratingFace, setIsGeneratingFace] = useState(false);
+    const [faceUploadSuccess, setFaceUploadSuccess] = useState(false);
+
     // Form State
     const initialFormState = {
         officer_id: '',
@@ -347,7 +429,9 @@ export default function PoliceMaster() {
                     blood_group: u.blood_group || '-',
                     emergency_contact: u.emergency_contact || '-',
                     joined_date: u.created_at ? u.created_at.split(' ')[0] : '-',
-                    is_active: u.is_active === undefined ? true : (u.is_active === 1 || u.is_active === true || u.is_active === '1')
+                    is_active: u.is_active === undefined ? true : (u.is_active === 1 || u.is_active === true || u.is_active === '1'),
+                    has_face_encoding: u.has_face_encoding === 1 || u.has_face_encoding === true,
+                    photo_url: u.photo_url || null
                 }));
                 setOfficers(mapped);
                 setIsLiveApi(true);
@@ -462,6 +546,11 @@ export default function PoliceMaster() {
     // Open Form for Add
     const handleOpenAddModal = () => {
         setEditingOfficer(null);
+        setRegStep(1);
+        setActiveOfficerForFace(null);
+        setFaceFile(null);
+        setFacePreview(null);
+        setFaceUploadSuccess(false);
         setFormData({
             ...initialFormState,
             officer_id: `OFFICER_00${officers.length + 1}`,
@@ -471,6 +560,221 @@ export default function PoliceMaster() {
             role: 'user'
         });
         setIsFormModalOpen(true);
+    };
+
+    // Open Dedicated Face ID Enrollment Modal for any officer
+    const handleOpenFaceModal = (officer) => {
+        setActiveOfficerForFace(officer);
+        setFaceFile(null);
+        setFacePreview(officer.photo_url ? (officer.photo_url.startsWith('http') ? officer.photo_url : `${API_BASE_URL}${officer.photo_url}`) : null);
+        setFaceUploadSuccess(false);
+        setIsFaceModalOpen(true);
+    };
+
+    // Handle Image file selection
+    const handleFaceFileChange = (e) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setFaceFile(file);
+            setFacePreview(URL.createObjectURL(file));
+            setFaceUploadSuccess(false);
+        }
+    };
+
+    // Generate Face Encoding via AI Microservice
+    const handleGenerateFaceEncoding = async () => {
+        if (!faceFile) {
+            Swal.fire('Photo Required', 'Please choose or drag-and-drop a face image file first.', 'warning');
+            return;
+        }
+
+        const targetOfficer = activeOfficerForFace;
+        if (!targetOfficer?.id) {
+            Swal.fire('Error', 'Target Officer User ID is missing.', 'error');
+            return;
+        }
+
+        setIsGeneratingFace(true);
+        try {
+            const res = await uploadFaceEncodingApi(targetOfficer.id, faceFile);
+            setFaceUploadSuccess(true);
+            const savedPhoto = res?.data?.photo_url || res?.photo_url;
+
+            setOfficers(prev =>
+                prev.map(o => (o.id === targetOfficer.id || o.officer_id === targetOfficer.officer_id)
+                    ? { ...o, has_face_encoding: true, photo_url: savedPhoto || o.photo_url }
+                    : o
+                )
+            );
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Face ID Enrolled!',
+                text: `Face embedding generated successfully for ${targetOfficer.officer_name} (User ID #${targetOfficer.id}).`,
+                timer: 2500,
+                showConfirmButton: false
+            });
+        } catch (err) {
+            const errMsg = err.response?.data?.message || err.response?.data?.error || err.message || 'Face recognition service error';
+            Swal.fire({
+                icon: 'error',
+                title: 'Face Generation Failed',
+                text: errMsg
+            });
+        } finally {
+            setIsGeneratingFace(false);
+        }
+    };
+
+    // Reusable Face ID Biometric Enrollment Body
+    const renderFaceEnrollmentBody = (officer, isModalStep = false) => {
+        return (
+            <div>
+                {isModalStep && (
+                    <div className="d-flex align-items-center justify-content-between p-2.5 px-3 mb-3 rounded-2 border" style={{ backgroundColor: '#f0fdf4', borderColor: '#bbf7d0' }}>
+                        <div className="d-flex align-items-center gap-2">
+                            <span className="badge rounded-circle bg-success text-white d-flex align-items-center justify-content-center" style={{ width: '22px', height: '22px', fontSize: '11px' }}>✓</span>
+                            <span className="small fw-bold text-success">Step 1: Officer Record Saved</span>
+                        </div>
+                        <div className="text-muted small">➔</div>
+                        <div className="d-flex align-items-center gap-2">
+                            <span className="badge rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style={{ width: '22px', height: '22px', fontSize: '11px' }}>2</span>
+                            <span className="small fw-bold text-primary">Step 2: Upload Face Photo & Generate Encoding</span>
+                        </div>
+                    </div>
+                )}
+
+                {/* Officer Summary Card */}
+                <div className="p-3 mb-3 rounded-3 border" style={{ backgroundColor: '#f8fafc' }}>
+                    <div className="row align-items-center g-2">
+                        <div className="col-auto">
+                            <div className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold shadow-sm" style={{ width: '42px', height: '42px', fontSize: '16px' }}>
+                                {officer?.officer_name?.charAt(0) || 'O'}
+                            </div>
+                        </div>
+                        <div className="col">
+                            <div className="fw-bold text-dark fs-6">{officer?.officer_name}</div>
+                            <div className="small text-muted d-flex align-items-center flex-wrap gap-2 gap-md-3">
+                                <span>Employee / User ID: <strong className="font-mono text-primary">#{officer?.id}</strong></span>
+                                <span>Badge: <strong className="font-mono">{officer?.badge_number}</strong></span>
+                                <span>Station: <strong>{officer?.police_station}</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Upload & Preview Dropzone */}
+                <div
+                    className="border border-2 border-dashed rounded-3 p-4 text-center position-relative mb-3"
+                    style={{
+                        borderColor: facePreview ? '#0d6efd' : '#cbd5e1',
+                        backgroundColor: '#f8fafc'
+                    }}
+                >
+                    {facePreview ? (
+                        <div className="d-flex flex-column align-items-center">
+                            <div className="position-relative d-inline-block shadow-sm rounded-3 overflow-hidden mb-2" style={{ width: '200px', height: '230px', border: '3px solid #0d6efd' }}>
+                                <img src={facePreview} alt="Officer Face" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                {/* Face scanning target box overlay */}
+                                <div
+                                    className="position-absolute"
+                                    style={{
+                                        top: '14%',
+                                        left: '18%',
+                                        right: '18%',
+                                        bottom: '22%',
+                                        border: '2px solid #22c55e',
+                                        borderRadius: '8px',
+                                        pointerEvents: 'none',
+                                        boxShadow: '0 0 12px rgba(34, 197, 94, 0.6)'
+                                    }}
+                                >
+                                    <span className="badge bg-success position-absolute" style={{ top: '-10px', left: '8px', fontSize: '9px', letterSpacing: '0.04em' }}>
+                                        AI FACE TARGET
+                                    </span>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="btn btn-outline-secondary btn-sm shadow-none" style={{ cursor: 'pointer' }}>
+                                    <IconCamera size={14} className="me-1" /> Change Image
+                                    <input type="file" accept="image/jpeg,image/png,image/jpg" className="d-none" onChange={handleFaceFileChange} />
+                                </label>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="py-2">
+                            <div className="d-flex align-items-center justify-content-center mx-auto rounded-circle mb-3 text-primary" style={{ width: '60px', height: '60px', backgroundColor: '#eff6ff' }}>
+                                <IconCamera size={28} />
+                            </div>
+                            <h6 className="fw-bold text-dark mb-1">Select or Drag & Drop Officer Portrait Photo</h6>
+                            <p className="text-muted small mb-3" style={{ maxWidth: '440px', margin: '0 auto' }}>
+                                Please upload a clear frontal face image (.jpg, .jpeg, .png). Our Python AI microservice will automatically extract facial landmarks and generate the 512-D neural face encoding.
+                            </p>
+                            <label className="btn btn-primary btn-sm px-4 fw-bold shadow-sm" style={{ cursor: 'pointer' }}>
+                                <IconCamera size={15} className="me-1.5" /> Choose Photo File
+                                <input type="file" accept="image/jpeg,image/png,image/jpg" className="d-none" onChange={handleFaceFileChange} />
+                            </label>
+                        </div>
+                    )}
+                </div>
+
+                {/* Success Card */}
+                {faceUploadSuccess && (
+                    <div className="alert alert-success d-flex align-items-center gap-2 py-2.5 px-3 mb-0 border-success-subtle shadow-sm">
+                        <IconCheckCircle size={20} className="text-success flex-shrink-0" />
+                        <div className="small">
+                            <strong>Face Embedding Generated Successfully!</strong> Python AI service processed the face image and saved the biometric encoding into the database for User #{officer?.id}.
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    // Reusable Face ID Biometric Enrollment Footer
+    const renderFaceEnrollmentFooter = (onClose) => {
+        return (
+            <div className="modal-footer py-2.5 px-4 border-top d-flex justify-content-between align-items-center" style={{ backgroundColor: '#f8fafc' }}>
+                <button
+                    type="button"
+                    className="btn btn-outline-secondary btn-sm px-3 shadow-none"
+                    onClick={onClose}
+                >
+                    {faceUploadSuccess ? 'Close' : 'Skip Face ID for Now'}
+                </button>
+
+                <div className="d-flex align-items-center gap-2">
+                    {faceUploadSuccess ? (
+                        <button
+                            type="button"
+                            className="btn btn-success btn-sm px-4 fw-bold shadow-sm d-inline-flex align-items-center gap-1.5"
+                            onClick={() => { onClose(); fetchOfficersApi(); }}
+                        >
+                            <IconCheck size={16} /> Complete & Finish
+                        </button>
+                    ) : (
+                        <button
+                            type="button"
+                            className="btn btn-primary btn-sm px-4 fw-bold shadow-sm d-inline-flex align-items-center gap-1.5"
+                            onClick={handleGenerateFaceEncoding}
+                            disabled={!faceFile || isGeneratingFace}
+                        >
+                            {isGeneratingFace ? (
+                                <>
+                                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    <span>Generating Face Encoding...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <IconCamera size={16} />
+                                    <span>Upload & Generate Face Encoding</span>
+                                </>
+                            )}
+                        </button>
+                    )}
+                </div>
+            </div>
+        );
     };
 
     // Open Form for Edit
@@ -641,14 +945,17 @@ export default function PoliceMaster() {
                 };
 
                 setOfficers(prev => [newOfficer, ...prev]);
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Registered!',
-                    text: `New Officer ${newOfficer.officer_name} registered successfully.`,
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-                setIsFormModalOpen(false);
+
+                // Smoothly advance to Step 2: Face ID & Biometrics Registration
+                setActiveOfficerForFace(newOfficer);
+                setRegStep(2);
+                setFaceFile(null);
+                setFacePreview(null);
+                setFaceUploadSuccess(false);
+
+                toast.success(`Officer record created (User ID #${newOfficer.id}). Now proceed to Face Biometrics.`);
+                setIsLoading(false);
+                return;
             }
         } catch (err) {
             let errorText = err.response?.data?.error || err.message || 'Operation failed';
@@ -677,7 +984,8 @@ export default function PoliceMaster() {
         onView: handleViewOfficer,
         onEdit: handleOpenEditModal,
         onDelete: handleDeleteOfficer,
-        onToggleStatus: handleToggleStatus
+        onToggleStatus: handleToggleStatus,
+        onOpenFaceModal: handleOpenFaceModal
     };
 
     return (
@@ -1022,17 +1330,25 @@ export default function PoliceMaster() {
                                 <div className="d-flex align-items-center gap-2.5">
                                     <div
                                         className="d-flex align-items-center justify-content-center rounded-3 shadow-sm text-white"
-                                        style={{ width: '38px', height: '38px', backgroundColor: '#0d6efd' }}
+                                        style={{ width: '38px', height: '38px', backgroundColor: (!editingOfficer && regStep === 2) ? '#7c3aed' : '#0d6efd' }}
                                     >
-                                        <IconUsers size={20} />
+                                        {(!editingOfficer && regStep === 2) ? <IconCamera size={20} /> : <IconUsers size={20} />}
                                     </div>
                                     <div>
                                         <div className="d-flex align-items-center gap-2">
                                             <h5 className="modal-title h6 fw-bold mb-0 text-dark">
-                                                {editingOfficer ? 'Edit Police Officer Record' : 'Register New Police Officer'}
+                                                {editingOfficer
+                                                    ? 'Edit Police Officer Record'
+                                                    : regStep === 2
+                                                        ? 'Step 2: Face ID & Biometrics Registration'
+                                                        : 'Register New Police Officer (Step 1 of 2)'}
                                             </h5>
                                             <span className="badge bg-primary-subtle text-primary border border-primary-subtle fw-bold font-mono" style={{ fontSize: '11px' }}>
-                                                {editingOfficer ? editingOfficer.badge_number : 'NEW OFFICER'}
+                                                {editingOfficer
+                                                    ? editingOfficer.badge_number
+                                                    : regStep === 2
+                                                        ? `USER #${activeOfficerForFace?.id}`
+                                                        : 'STEP 1 OF 2'}
                                             </span>
                                         </div>
                                     </div>
@@ -1045,8 +1361,16 @@ export default function PoliceMaster() {
                                 ></button>
                             </div>
 
-                            {/* Modal Form Body */}
-                            <form onSubmit={handleSubmitForm}>
+                            {/* Modal Body / Step Switch */}
+                            {!editingOfficer && regStep === 2 ? (
+                                <>
+                                    <div className="modal-body p-4" style={{ maxHeight: '72vh', overflowY: 'auto' }}>
+                                        {renderFaceEnrollmentBody(activeOfficerForFace, true)}
+                                    </div>
+                                    {renderFaceEnrollmentFooter(() => setIsFormModalOpen(false))}
+                                </>
+                            ) : (
+                                <form onSubmit={handleSubmitForm}>
                                 <div className="modal-body p-4" style={{ maxHeight: '72vh', overflowY: 'auto' }}>
 
                                     {/* Section 1: Officer Identity & Badge */}
@@ -1372,12 +1696,58 @@ export default function PoliceMaster() {
                                             className="btn btn-primary btn-sm px-4 fw-bold shadow-sm d-inline-flex align-items-center gap-1.5"
                                         >
                                             <IconCheckCircle size={15} />
-                                            <span>{editingOfficer ? 'Update Record' : 'Save Officer Record'}</span>
+                                            <span>{editingOfficer ? 'Update Record' : 'Save & Proceed to Face ID (Step 1 of 2) ➔'}</span>
                                         </button>
                                     </div>
                                 </div>
                             </form>
+                            )}
 
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ========================================================== */}
+            {/* 4.1 DIRECT FACE ID ENROLLMENT MODAL (FOR ANY OFFICER)      */}
+            {/* ========================================================== */}
+            {isFaceModalOpen && activeOfficerForFace && (
+                <div
+                    className="modal show d-block"
+                    tabIndex="-1"
+                    style={{ backgroundColor: 'rgba(15, 23, 42, 0.72)', backdropFilter: 'blur(5px)', zIndex: 1056 }}
+                    onClick={() => setIsFaceModalOpen(false)}
+                >
+                    <div className="modal-dialog modal-dialog-centered modal-md" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-content shadow-lg border-0" style={{ borderRadius: '12px', overflow: 'hidden' }}>
+                            <div className="modal-header py-3 px-4 border-bottom" style={{ backgroundColor: '#f8fafc' }}>
+                                <div className="d-flex align-items-center gap-2.5">
+                                    <div
+                                        className="d-flex align-items-center justify-content-center rounded-3 shadow-sm text-white"
+                                        style={{ width: '38px', height: '38px', backgroundColor: '#7c3aed' }}
+                                    >
+                                        <IconCamera size={20} />
+                                    </div>
+                                    <div>
+                                        <h5 className="modal-title h6 fw-bold mb-0 text-dark">
+                                            Face ID Biometric Enrollment
+                                        </h5>
+                                        <span className="small text-muted font-mono" style={{ fontSize: '11px' }}>
+                                            USER ID: #{activeOfficerForFace.id} • BADGE: {activeOfficerForFace.badge_number}
+                                        </span>
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    className="btn-close shadow-none"
+                                    onClick={() => setIsFaceModalOpen(false)}
+                                    aria-label="Close"
+                                ></button>
+                            </div>
+                            <div className="modal-body p-4" style={{ maxHeight: '72vh', overflowY: 'auto' }}>
+                                {renderFaceEnrollmentBody(activeOfficerForFace, false)}
+                            </div>
+                            {renderFaceEnrollmentFooter(() => setIsFaceModalOpen(false))}
                         </div>
                     </div>
                 </div>
@@ -1437,12 +1807,21 @@ export default function PoliceMaster() {
                                 >
                                     <div className="d-flex align-items-center justify-content-between flex-wrap gap-3">
                                         <div className="d-flex align-items-center gap-3">
-                                            <div
-                                                className="rounded-circle d-flex align-items-center justify-content-center bg-primary text-white fw-bold shadow-sm"
-                                                style={{ width: '52px', height: '52px', fontSize: '20px' }}
-                                            >
-                                                {selectedOfficer.officer_name.charAt(0)}
-                                            </div>
+                                            {selectedOfficer.photo_url ? (
+                                                <img
+                                                    src={selectedOfficer.photo_url.startsWith('http') ? selectedOfficer.photo_url : `${API_BASE_URL}${selectedOfficer.photo_url}`}
+                                                    alt={selectedOfficer.officer_name}
+                                                    className="rounded-circle shadow-sm border border-2 border-white"
+                                                    style={{ width: '54px', height: '54px', objectFit: 'cover' }}
+                                                />
+                                            ) : (
+                                                <div
+                                                    className="rounded-circle d-flex align-items-center justify-content-center bg-primary text-white fw-bold shadow-sm"
+                                                    style={{ width: '52px', height: '52px', fontSize: '20px' }}
+                                                >
+                                                    {selectedOfficer.officer_name.charAt(0)}
+                                                </div>
+                                            )}
                                             <div>
                                                 <div className="fw-bold text-white fs-5 mb-0.5">{selectedOfficer.officer_name}</div>
                                                 <div className="d-flex align-items-center gap-2">
@@ -1452,14 +1831,35 @@ export default function PoliceMaster() {
                                                     <span className="badge bg-light text-dark fw-semibold" style={{ fontSize: '11px' }}>
                                                         {selectedOfficer.rank}
                                                     </span>
+                                                    {selectedOfficer.has_face_encoding ? (
+                                                        <span className="badge bg-success text-white fw-bold" style={{ fontSize: '11px' }}>
+                                                            ✓ Face ID Enrolled
+                                                        </span>
+                                                    ) : (
+                                                        <span className="badge bg-warning-subtle text-dark border border-warning fw-bold" style={{ fontSize: '11px' }}>
+                                                            ⏳ Face ID Pending
+                                                        </span>
+                                                    )}
                                                 </div>
-                                                <div className="small mt-1" style={{ color: '#52525b', fontSize: '12px', fontWeight: 500 }}>
+                                                <div className="small mt-1" style={{ color: '#94a3b8', fontSize: '12px', fontWeight: 500 }}>
                                                     📍 {selectedOfficer.police_station}
                                                 </div>
                                             </div>
                                         </div>
 
                                         <div className="d-flex align-items-center gap-2">
+                                            <button
+                                                type="button"
+                                                className="btn btn-sm btn-light text-dark fw-bold shadow-sm d-inline-flex align-items-center gap-1.5"
+                                                style={{ fontSize: '11.5px', padding: '5px 12px' }}
+                                                onClick={() => {
+                                                    setIsViewModalOpen(false);
+                                                    handleOpenFaceModal(selectedOfficer);
+                                                }}
+                                            >
+                                                <IconCamera size={14} className="text-primary" />
+                                                <span>{selectedOfficer.has_face_encoding ? 'Update Face Photo' : 'Upload Face ID'}</span>
+                                            </button>
                                             {selectedOfficer.is_active ? (
                                                 <span
                                                     className="badge rounded-pill shadow-sm d-inline-flex align-items-center gap-1.5"

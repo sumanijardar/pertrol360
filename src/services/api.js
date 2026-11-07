@@ -270,6 +270,29 @@ export async function deleteUserApi(id) {
   return response.data;
 }
 
+/**
+ * Upload officer face photo and generate face encoding in users table via Python API
+ * @param {string|number} id - Officer User ID
+ * @param {File|Blob|FormData} fileOrFormData
+ */
+export async function uploadFaceEncodingApi(id, fileOrFormData) {
+  let formData;
+  if (fileOrFormData instanceof FormData) {
+    formData = fileOrFormData;
+  } else {
+    formData = new FormData();
+    formData.append('image', fileOrFormData);
+    formData.append('emp_id', String(id));
+  }
+
+  const response = await api.post(`/api/users/${id}/face-encoding`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  });
+  return response.data;
+}
+
 
 
 /* ==========================================================================
